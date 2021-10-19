@@ -33,6 +33,7 @@
     "eslint": "^7.32.0",
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-vue": "^7.18.0",
+    "exports-loader": "^3.0.0",
     "node-sass": "^4.12.0",
     "sass-loader": "^8.0.2",
     "vue-eslint-parser": "^7.11.0"

@@ -5,7 +5,7 @@ import { Store } from './index';
 export default class FetchHelper {
   #defaultUrl = new URL(process.env.VUE_APP_API_URL)
 
-  #defaultPath = ''
+  #defaultPath = process.env.VUE_APP_API_PATH || ''
 
   #path = ''
 
@@ -19,10 +19,11 @@ export default class FetchHelper {
     if (url && _.isString(url)) {
       if (url && url !== this.#defaultUrl.origin) {
         try {
+          console.log('here');
           this.#defaultUrl = new URL(url);
         } catch (e) {
           // if (e.message !== "Failed to construct 'URL': Invalid URL") throw e;
-          this.#defaultPath = _.startsWith('/') ? url : `/${url}`;
+          this.#defaultPath = _.startsWith('/') ? `${this.#defaultPath}${url}` : `${this.#defaultPath}/${url}`;
         }
       }
     }
@@ -87,6 +88,7 @@ export default class FetchHelper {
     // TODO: For next iteration need to create full response method with error handler
     try {
       const response = await fetch(this.url, this.options);
+      if (response.status === 204) return null;
       try {
         if (response.ok) return await response.json();
 
@@ -104,7 +106,8 @@ export default class FetchHelper {
       }
 
       Store.dispatch('toast', { error: { ...e } });
-      return null;
+
+      throw new Error('API error response');
     }
   }
 }

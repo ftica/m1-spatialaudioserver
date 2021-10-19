@@ -1,6 +1,6 @@
-# m1-spatialaudioplayer-app
+# m1-spatialaudioserver
 
-Frontend & Backend for serving custom streaming spatial audio players
+Frontend & Backend for serving custom streaming spatial audio players with included web playback example
 
 ### Setup
 
@@ -15,15 +15,8 @@ Use nvm to setup node `14.16.0`:
 -   `cd vue-front` && `npm i && npm run build`
 
 #### Run locally
-
 ```sh
-docker run -it \
-  -p 1935:1935 \
-  -p 8080:80 \
-  --mount type=bind,source="$(pwd)/koa-server/public",target=/share/sound \
-  --mount type=bind,source="$(pwd)/vue-front/dist",target=/www \
-  --name m1-transcode \
-  --rm m1-transcode
+make local
 ```
 
 More information and command examples you can check in docker containers [documentation](./containers/README.md)

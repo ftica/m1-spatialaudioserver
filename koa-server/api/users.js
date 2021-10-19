@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { UserModel } from './services/model';
+import { UserModel } from './models';
 
 export default {
   /**
@@ -8,14 +8,14 @@ export default {
    */
   protectored: true,
   /**
-   * [list description]
+   * Scaning and returns a list of users
    * @param  {Object}  ctx  the default koa context whose encapsulates
    *                          node's request and response objects into a single object
    */
   async list(ctx) {
     const model = new UserModel();
 
-    const items = await ctx.redis.lrange('users:all', 0, 100);
+    const items = await ctx.redis.lrange('users:all', 0, -1);
     const users = await Promise.all(_.map(items, async (item) => {
       const values = await ctx.redis.hmget(item, model.keys);
 
@@ -24,12 +24,16 @@ export default {
 
     ctx.body = users;
   },
+  /**
+   * Creating a new user
+   * @param  {Object}  ctx  the default koa context whose encapsulates
+   *                          node's request and response objects into a single object
+   */
   async create(ctx) {
     const { body } = ctx.request;
 
-    const { user } = new UserModel(body);
-
-    // TODO: add validation
+    const { user, validation } = new UserModel(body);
+    await ctx.validate(validation);
 
     await ctx.redis.multi()
       .hset(`user:${user.id}`, user)
@@ -45,11 +49,12 @@ export default {
    * @param  {Object}  ctx  the default koa context whose encapsulates
    *                          node's request and response objects into a single object
    */
-  async del(ctx) {
+  async remove(ctx) {
     const { id } = ctx.params;
     const key = `user:${id}`;
     const user = await ctx.redis.hgetall(key);
     if (_.isEmpty(user)) ctx.throw(404);
+    if (user.id === ctx.session.user.id) ctx.throw(403, 'You cannot delete yourself');
 
     await Promise.all([
       ctx.redis.del(key),
