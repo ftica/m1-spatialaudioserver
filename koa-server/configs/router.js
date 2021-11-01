@@ -11,35 +11,42 @@ const router = new Router({ prefix: '/v1' });
 
 // Authorization route
 router
-  .post('/auth', auth.login)
-  .del('/auth/logout', auth.validate, auth.logout);
+  .use('/auth', auth.routes(), auth.allowedMethods())
+  .use('/playlists', playlists.routes(), playlists.allowedMethods())
+  .use('/profile', profile.routes(), profile.allowedMethods())
+  .use('/tracks', tracks.routes(), tracks.allowedMethods())
+  .use('/upload', upload.routes(), upload.allowedMethods())
+  .use('/users', users.routes(), users.allowedMethods());
+
+// .post('/auth', auth.login)
+// .del('/auth/logout', auth.validate, auth.logout);
 
 // User profile route
-router
-  .get('/profile', profile.get);
+// router
+//   .get('/profile', profile.get);
 // .put('/profile', auth.validate, profile.update);
 
 // Playlist route
-router
-  .get('/playlists', playlists.list)
-  .post('/playlists', auth.validate, playlists.create)
-  .put('/playlists/:id', auth.validate, playlists.update)
-  .del('/playlists/:id', auth.validate, playlists.remove);
+// router
+//   .get('/playlists', playlists.list)
+//   .post('/playlists', auth.validate, playlists.create)
+//   .put('/playlists/:id', auth.validate, playlists.update)
+//   .del('/playlists/:id', auth.validate, playlists.remove);
 
 // Tracks route
-router
-  .get('/tracks/:id', tracks.get)
-  .get('/tracks', tracks.list)
-  .put('/tracks/:id', auth.validate, tracks.update)
-  .del('/tracks/:id', auth.validate, tracks.remove);
+// router
+//   .get('/tracks/:id', tracks.get)
+//   .get('/tracks', tracks.list)
+//   .put('/tracks/:id', auth.validate, tracks.update)
+//   .del('/tracks/:id', auth.validate, tracks.remove);
 
 // Uploader
-router.post('/upload', auth.validate, upload.save);
+// router.post('/upload', auth.validate, upload.save);
 
 // User route
-router
-  .get('/users', auth.validate, users.list)
-  .post('/users', auth.validate, users.create)
-  .del('/users/:id', auth.validate, users.remove);
+// router
+//   .get('/users', auth.validate, users.list)
+//   .post('/users', auth.validate, users.create)
+//   .del('/users/:id', auth.validate, users.remove);
 
 export default router;
