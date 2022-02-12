@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { server, config } from './configs';
+import { server, config } from './src/configs';
 
 (async () => {
   server.listen(config.port, () => {
