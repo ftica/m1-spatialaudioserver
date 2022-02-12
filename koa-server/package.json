@@ -14,6 +14,7 @@
   "dependencies": {
     "@koa/multer": "^3.0.0",
     "@koa/router": "^10.0.0",
+    "@prisma/client": "^3.9.2",
     "got": "^11.8.2",
     "ioredis": "^4.27.6",
     "jsonwebtoken": "^8.5.1",
@@ -41,6 +42,7 @@
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "esm": "^3.2.25",
+    "prisma": "^3.9.2",
     "sequelize-cli": "^6.2.0"
   }
 }
