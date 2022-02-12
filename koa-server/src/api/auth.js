@@ -18,8 +18,8 @@ async function login(ctx) {
   const {
     body: {
       login,
-      password,
-    },
+      password
+    }
   } = ctx.request;
 
   const id = await ctx.redis.hget('users:lookup:all', login);
@@ -34,14 +34,14 @@ async function login(ctx) {
 
   ctx.status = 201;
   ctx.body = {
-    user: ctx.session.user,
+    user: ctx.session.user
   };
 }
 
 function getLoginHandler() {
   const validInput = {
     email: 'required|email',
-    password: 'required|minLength:8',
+    password: 'required|minLength:8'
   };
 
   return async (ctx) => {
@@ -51,7 +51,7 @@ function getLoginHandler() {
       password
     } = ctx.request.body;
 
-    await
+    return { email, password };
   };
 }
 
@@ -73,7 +73,7 @@ async function logout(ctx) {
 function getRegisterHandler() {
   const validInput = {
     email: 'required|email',
-    password: 'required|minLength:8',
+    password: 'required|minLength:8'
   };
 
   return async (ctx) => {
@@ -84,12 +84,10 @@ function getRegisterHandler() {
 
 function getChangeRoleHandler() {
   const validInput = {
-    role: `required|in:${ROLE_ADMIN},${ROLE_USER}`,
+    role: `required|in:${ROLE_ADMIN},${ROLE_USER}`
   };
 
-  return async (ctx) => {
-    await ctx.validate(validInput);
-  };
+  return async (ctx) => await ctx.validate(validInput);
 }
 
 // async function validate(ctx, next) {

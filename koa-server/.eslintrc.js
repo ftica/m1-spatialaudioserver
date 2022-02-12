@@ -1,18 +1,17 @@
 module.exports = {
-  parser: '@babel/eslint-parser',
   env: {
     es2021: true,
-    node: true,
+    node: true
   },
   extends: [
-    'airbnb-base',
+    'standard'
   ],
   parserOptions: {
-    requireConfigFile: false,
     ecmaVersion: 12,
-    sourceType: 'module',
+    sourceType: 'module'
   },
   rules: {
-    'import/no-unresolved': ['error', { ignore: ['fs/promises'] }],
-  },
-};
+    'space-before-function-paren': 0,
+    semi: ['error', 'always']
+  }
+}
