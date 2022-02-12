@@ -28,10 +28,7 @@
     "luxon": "^2.0.2",
     "multer": "^1.4.2",
     "node-input-validator": "^4.4.1",
-    "pg": "^8.7.1",
-    "pg-hstore": "^2.3.4",
     "pm2": "^5.1.0",
-    "sequelize": "^6.7.0",
     "uuid": "^8.3.2",
     "validator": "^13.6.0"
   },
@@ -42,7 +39,6 @@
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "esm": "^3.2.25",
-    "prisma": "^3.9.2",
-    "sequelize-cli": "^6.2.0"
+    "prisma": "^3.9.2"
   }
 }

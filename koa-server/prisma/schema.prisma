@@ -9,3 +9,63 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id        Int                    @id @default(autoincrement())
+  username  String                 @unique
+  role      Role                   @default(USER)
+  playlists Playlist[]
+  favorites Favorite[]
+  shared    PlaylistAcessControl[]
+
+  @@map("user")
+}
+
+model Track {
+  id         Int      @id @default(autoincrement())
+  name       String
+  playlist   Playlist @relation(references: [id], onDelete: Cascade, fields: [playlistId], map: "track_playlist_fkey")
+  playlistId Int      @map("playlist")
+  position   Int      @default(0)
+
+  @@unique([playlistId, position])
+  @@map("track")
+}
+
+model Playlist {
+  id        Int                    @id @default(autoincrement())
+  name      String
+  public    Boolean                @default(false)
+  owner     User                   @relation(references: [id], onDelete: Cascade, fields: [ownerId], map: "playlist_owner_fkey")
+  ownerId   Int                    @map("owner")
+  tracks    Track[]
+  favorites Favorite[]
+  users     PlaylistAcessControl[]
+
+  @@map("playlist")
+}
+
+model Favorite {
+  user       User     @relation(references: [id], onDelete: Cascade, fields: [userId], map: "favorite_user_fkey")
+  playlist   Playlist @relation(references: [id], onDelete: Cascade, fields: [playlistId], map: "favorite_playlist_fkey")
+  userId     Int      @map("user")
+  playlistId Int      @map("playlist")
+
+  @@id([userId, playlistId])
+  @@map("favorite")
+}
+
+model PlaylistAcessControl {
+  user       User     @relation(references: [id], onDelete: Cascade, fields: [userId], map: "playlist_access_control_user_fkey")
+  playlist   Playlist @relation(references: [id], onDelete: Cascade, fields: [playlistId], map: "playlist_access_control_playlist_fkey")
+  userId     Int      @map("user")
+  playlistId Int      @map("playlist")
+
+  @@id([userId, playlistId])
+  @@map("playlist_access_control")
+}
