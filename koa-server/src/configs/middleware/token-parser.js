@@ -1,7 +1,7 @@
 import { verify } from '../auth/token';
 
 export default () => async (ctx, next) => {
-  ctx.token = {};
+  delete ctx.token;
 
   if (ctx.headers.authorization != null) {
     const rawToken = ctx.headers.authorization.replace('Bearer ', '');

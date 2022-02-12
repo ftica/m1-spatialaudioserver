@@ -2,12 +2,14 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider             = "postgresql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "foreignKeys"
 }
 
 enum Role {
@@ -16,8 +18,9 @@ enum Role {
 }
 
 model User {
-  id        Int                    @id @default(autoincrement())
+  id        String                 @db.Uuid @id @default(uuid())
   username  String                 @unique
+  password  String                 @db.VarChar(255)
   role      Role                   @default(USER)
   playlists Playlist[]
   favorites Favorite[]
@@ -27,10 +30,10 @@ model User {
 }
 
 model Track {
-  id         Int      @id @default(autoincrement())
+  id         String   @db.Uuid @id @default(uuid())
   name       String
   playlist   Playlist @relation(references: [id], onDelete: Cascade, fields: [playlistId], map: "track_playlist_fkey")
-  playlistId Int      @map("playlist")
+  playlistId String   @db.Uuid @map("playlist")
   position   Int      @default(0)
 
   @@unique([playlistId, position])
@@ -38,11 +41,11 @@ model Track {
 }
 
 model Playlist {
-  id        Int                    @id @default(autoincrement())
+  id        String                 @db.Uuid @id @default(uuid())
   name      String
   public    Boolean                @default(false)
   owner     User                   @relation(references: [id], onDelete: Cascade, fields: [ownerId], map: "playlist_owner_fkey")
-  ownerId   Int                    @map("owner")
+  ownerId   String                 @db.Uuid @map("owner")
   tracks    Track[]
   favorites Favorite[]
   users     PlaylistAcessControl[]
@@ -53,8 +56,8 @@ model Playlist {
 model Favorite {
   user       User     @relation(references: [id], onDelete: Cascade, fields: [userId], map: "favorite_user_fkey")
   playlist   Playlist @relation(references: [id], onDelete: Cascade, fields: [playlistId], map: "favorite_playlist_fkey")
-  userId     Int      @map("user")
-  playlistId Int      @map("playlist")
+  userId     String   @db.Uuid @map("user")
+  playlistId String   @db.Uuid @map("playlist")
 
   @@id([userId, playlistId])
   @@map("favorite")
@@ -63,8 +66,8 @@ model Favorite {
 model PlaylistAcessControl {
   user       User     @relation(references: [id], onDelete: Cascade, fields: [userId], map: "playlist_access_control_user_fkey")
   playlist   Playlist @relation(references: [id], onDelete: Cascade, fields: [playlistId], map: "playlist_access_control_playlist_fkey")
-  userId     Int      @map("user")
-  playlistId Int      @map("playlist")
+  userId     String   @db.Uuid @map("user")
+  playlistId String   @db.Uuid @map("playlist")
 
   @@id([userId, playlistId])
   @@map("playlist_access_control")

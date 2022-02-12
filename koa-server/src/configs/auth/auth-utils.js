@@ -58,11 +58,11 @@ const getDigest = async (input) => {
 
 const verifyPassword = async (input, savedPassword) => {
   if (
-    !savedPassword.salt
-    || !savedPassword.hash
-    || !savedPassword.iterations
-    || !savedPassword.hashLength
-    || !savedPassword.algorithm
+    !savedPassword.salt ||
+    !savedPassword.hash ||
+    !savedPassword.iterations ||
+    !savedPassword.hashLength ||
+    !savedPassword.algorithm
   ) {
     return false;
   }
