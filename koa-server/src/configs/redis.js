@@ -53,7 +53,7 @@ export default (options) => {
         nickname: 'm1',
         email: 'support@mach1.tech',
         role: 'admin',
-        password: 'goodpassbro',
+        password: 'goodpassbro'
       });
       await client.multi()
         .hset(`user:${model.user.id}`, model.user)

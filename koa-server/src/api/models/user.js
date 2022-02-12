@@ -5,16 +5,16 @@ import { encryptSync } from '../services/encryption';
 import Model from './model';
 
 export default class UserModel extends Model {
-  #item = {}
+  #item = {};
 
   #validation = {
     nickname: 'required|minLength:3',
     email: 'required|email',
     role: 'required|in:admin,user',
-    password: 'required|minLength:8',
-  }
+    password: 'required|minLength:8'
+  };
 
-  #errors = []
+  #errors = [];
 
   constructor(item, { validation = true } = {}) {
     super(item);

@@ -7,10 +7,10 @@ const authorize = (tokenTestFn) => async (ctx, next) => {
 };
 
 const hasAnyRole = (...roles) => authorize(
-  (token) => token.roles.some((role) => roles.includes(role)),
+  (token) => token.roles.some((role) => roles.includes(role))
 );
 
 export {
   authorize,
-  hasAnyRole,
+  hasAnyRole
 };

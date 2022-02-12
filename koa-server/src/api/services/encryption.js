@@ -14,7 +14,7 @@ export default {
     const value = (await pbkdf2(string, salt, iteration, iteration, 'sha512')).toString('base64');
 
     return hash === value;
-  },
+  }
 };
 
 export const encryptSync = (string, iteration = 64) => {

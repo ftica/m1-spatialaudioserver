@@ -4,6 +4,12 @@ import { v4 as uuid } from 'uuid';
 import Model from './model';
 
 export default class TrackModel extends Model {
+  redisStoreKey = 'tracks:all';
+  shape = {
+    playlists: Array,
+    prepared: Boolean
+  };
+
   constructor(item) {
     super(item);
 
@@ -17,13 +23,6 @@ export default class TrackModel extends Model {
 
     // NOTE: boolean value for checking cashed dash files on Nginx
     this.setModelKey(item, 'prepared', false);
-  }
-
-  redisStoreKey = 'tracks:all'
-
-  shape = {
-    playlists: Array,
-    prepared: Boolean,
   }
 
   get track() {

@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-import { readdir, rm } from 'fs/promises';
+import { rm } from 'fs/promises';
 
 import _ from 'lodash';
 import got from 'got';
@@ -83,7 +83,7 @@ async function update(ctx) {
   if (_.isNull(item)) ctx.throw(404);
   const payload = {
     name: _.get(body, 'name', item.name),
-    updated: DateTime.now(),
+    updated: DateTime.now()
   };
 
   await ctx.redis.hset(`track:${id}`, payload);
@@ -112,7 +112,7 @@ async function remove(ctx) {
         const items = _.compact(
           _.isString(value)
             ? _.pull(value.split(','), id)
-            : [],
+            : []
         );
         WTransaction.hset(`playlist:${playlist}`, 'tracks', items.toString());
       });
@@ -133,7 +133,7 @@ async function remove(ctx) {
   await Promise.all([
     rm(new URL(`../public/preload/${id}`, import.meta.url), options),
     rm(new URL(`../public/${track}`, import.meta.url), options),
-    transaction,
+    transaction
   ]);
 
   ctx.status = 204;

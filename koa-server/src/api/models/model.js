@@ -15,11 +15,11 @@ function proceed(Basic, value) {
 }
 
 export default class Model {
-  #keys = []
+  #keys = [];
 
-  #item = {}
+  #item = {};
 
-  #validation = {}
+  #validation = {};
 
   constructor(item) {
     const timestamp = DateTime.now();
@@ -35,13 +35,15 @@ export default class Model {
     return { ...this.#item };
   }
 
+  get validation() {
+    return this.#validation;
+  }
+
   set validation(validation) {
     this.#validation = validation;
   }
 
-  get validation() {
-    return this.#validation;
-  }
+  static sanitizeId = (...args) => _.map(args, (id) => _.words(id, /[^:]+/g)[1]);
 
   setModelKey(source, path, defaultValue) {
     this.#keys = _.union(this.keys, [path]);
@@ -82,6 +84,4 @@ export default class Model {
       return [];
     }
   }
-
-  static sanitizeId = (...args) => _.map(args, (id) => _.words(id, /[^:]+/g)[1]);
 }

@@ -6,7 +6,6 @@ import bodyparser from 'koa-bodyparser';
 import logger from 'koa-logger';
 import serve from 'koa-static';
 // import session from 'koa-session';
-
 import validator from 'node-input-validator';
 
 import cors from './cors';
@@ -24,7 +23,7 @@ export default function middleware(application) {
     // session(application),
     bodyparser(),
     validator.koa(),
-    serve(dirServe),
+    serve(dirServe)
   ];
 
   return compose(dependencies);

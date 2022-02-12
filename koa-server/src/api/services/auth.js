@@ -3,7 +3,7 @@ import AuthUser from '../../database/models/auth-user';
 
 const createToken = async (db, user) => db.AccessToken.create({
   expires: new Date(Date.now() + (60 * 60)),
-  authUser: user.id,
+  authUser: user.id
 }, { include: AuthUser });
 
 const login = async (db, email, password) => {
@@ -19,11 +19,11 @@ const login = async (db, email, password) => {
 
 const register = async (db, {
   email,
-  password,
+  password
 }) => await new AuthUser({
   email,
   password,
-  roles: [ROLE_USER],
+  roles: [ROLE_USER]
 }).save();
 
 const changeRole = async (db, id, newRole) => {
@@ -32,5 +32,5 @@ const changeRole = async (db, id, newRole) => {
 
 export {
   login,
-  register,
+  register
 };

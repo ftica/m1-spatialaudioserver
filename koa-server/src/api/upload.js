@@ -38,9 +38,9 @@ async function save(ctx, next) {
         ctx.redis.multi()
           .hset(`track:${track.id}`, track)
           .rpush('tracks:all', `track:${track.id}`)
-          .exec(),
+          .exec()
       ]);
-    },
+    }
   ));
   ctx.status = 201;
   ctx.body = tracks;

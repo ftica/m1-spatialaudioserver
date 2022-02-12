@@ -78,7 +78,7 @@ async function remove(ctx) {
 
   await Promise.all([
     ctx.redis.del(key),
-    ctx.redis.lrem('playlist:all', 0, key),
+    ctx.redis.lrem('playlist:all', 0, key)
   ]);
 
   ctx.status = 204;

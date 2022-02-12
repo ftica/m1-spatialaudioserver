@@ -5,14 +5,15 @@ import Model from './model';
 import { redis } from '../../configs';
 
 export default class PlaylistModel extends Model {
-  #playlists = []
+  #playlists = [];
 
-  #tracksId = []
-
-  set #items(items) {
-    this.#playlists = items;
-    this.#tracksId = _.reduce(items, (result, { tracks }) => _.uniq([...result, ...tracks]), []);
-  }
+  #tracksId = [];
+  redisStoreKey = 'playlist:all';
+  shape = {
+    tracks: Array,
+    permissions: Array,
+    visibility: Boolean
+  };
 
   constructor(item) {
     super(item);
@@ -24,12 +25,9 @@ export default class PlaylistModel extends Model {
     this.setModelKey(item, 'visibility', false);
   }
 
-  redisStoreKey = 'playlist:all'
-
-  shape = {
-    tracks: Array,
-    permissions: Array,
-    visibility: Boolean,
+  set #items(items) {
+    this.#playlists = items;
+    this.#tracksId = _.reduce(items, (result, { tracks }) => _.uniq([...result, ...tracks]), []);
   }
 
   get playlist() {
@@ -38,6 +36,30 @@ export default class PlaylistModel extends Model {
 
   get availableTracksId() {
     return _.map(this.#tracksId, (id) => `track:${id}`);
+  }
+
+  static initStoreTransaction(source, target) {
+    const { tracks, permissions } = target;
+    const { id } = source;
+    const tracksToRemove = _.difference(source.tracks, tracks);
+    const permissionsToRemove = _.difference(source.visibility, permissions);
+
+    const transaction = redis.multi();
+
+    if (!_.isEmpty(tracks)) {
+      _.each(tracks, (track) => transaction.sadd(`track:${track}:playlists`, id));
+    }
+    if (!_.isEmpty(tracksToRemove)) {
+      _.each(tracksToRemove, (track) => transaction.srem(`track:${track}:playlists`, id));
+    }
+
+    if (!_.isEmpty(permissions)) {
+      _.each(permissions, (user) => transaction.sadd(`user:${user}:playlists`, id));
+    }
+    if (!_.isEmpty(permissionsToRemove)) {
+      _.each(permissionsToRemove, (user) => transaction.srem(`user:${user}:playlists`, id));
+    }
+    return transaction;
   }
 
   isTrackIncludes(payload) {
@@ -65,7 +87,7 @@ export default class PlaylistModel extends Model {
         break;
       case 'user':
         this.#items = [
-          ...visible, ..._.filter(playlists, ({ permissions }) => permissions.includes(user.id)),
+          ...visible, ..._.filter(playlists, ({ permissions }) => permissions.includes(user.id))
         ];
         break;
       default:
@@ -74,29 +96,5 @@ export default class PlaylistModel extends Model {
     }
 
     return this.#playlists;
-  }
-
-  static initStoreTransaction(source, target) {
-    const { tracks, permissions } = target;
-    const { id } = source;
-    const tracksToRemove = _.difference(source.tracks, tracks);
-    const permissionsToRemove = _.difference(source.visibility, permissions);
-
-    const transaction = redis.multi();
-
-    if (!_.isEmpty(tracks)) {
-      _.each(tracks, (track) => transaction.sadd(`track:${track}:playlists`, id));
-    }
-    if (!_.isEmpty(tracksToRemove)) {
-      _.each(tracksToRemove, (track) => transaction.srem(`track:${track}:playlists`, id));
-    }
-
-    if (!_.isEmpty(permissions)) {
-      _.each(permissions, (user) => transaction.sadd(`user:${user}:playlists`, id));
-    }
-    if (!_.isEmpty(permissionsToRemove)) {
-      _.each(permissionsToRemove, (user) => transaction.srem(`user:${user}:playlists`, id));
-    }
-    return transaction;
   }
 }

@@ -6,7 +6,7 @@ export default (options) => {
 
   const defaultOptions = {
     allowMethods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowHeaders: ['Content-Type', 'Set-Cookie', 'Cookie'],
+    allowHeaders: ['Content-Type', 'Set-Cookie', 'Cookie']
   };
 
   return async (ctx, next) => {

@@ -18,7 +18,7 @@ server.use(router.routes());
 server.use(router.allowedMethods());
 
 const config = {
-  port: process.env.PORT,
+  port: process.env.PORT
 };
 
 export { server, config, redis };

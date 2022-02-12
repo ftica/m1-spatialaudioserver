@@ -38,7 +38,7 @@ async function create(ctx) {
 
   const {
     user,
-    validation,
+    validation
   } = new UserModel(body);
   await ctx.validate(validation);
 
@@ -71,7 +71,7 @@ async function remove(ctx) {
     ctx.redis.del(key),
     ctx.redis.hdel('users:lookup:all', user.email),
     ctx.redis.hdel('users:lookup:all', user.nickname),
-    ctx.redis.lrem('users:all', 0, key),
+    ctx.redis.lrem('users:all', 0, key)
   ]);
 
   ctx.status = 204;

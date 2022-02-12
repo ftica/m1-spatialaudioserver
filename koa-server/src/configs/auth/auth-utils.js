@@ -9,7 +9,7 @@ const DEFAULT_CONFIG = {
   iterations: 10000,
   hashLength: 32,
   saltBytes: 16,
-  encoding: 'base64',
+  encoding: 'base64'
 };
 
 const config = {
@@ -17,7 +17,7 @@ const config = {
   iterations: process.env.PASS_HASH_ITERATIONS || DEFAULT_CONFIG.iterations,
   hashLength: process.env.PASS_HASH_LENGTH || DEFAULT_CONFIG.hashLength,
   saltBytes: process.env.PASS_SALT_BYTES || DEFAULT_CONFIG.saltBytes,
-  encoding: DEFAULT_CONFIG.encoding,
+  encoding: DEFAULT_CONFIG.encoding
 };
 
 const toPasswordString = (algorithm, iterations, length, hash, salt) => `${algorithm}:${iterations}:${length}:${hash}:${salt}`;
@@ -33,7 +33,7 @@ const fromPasswordString = (pass) => {
     iterations: parts[1],
     length: parts[2],
     hash: parts[3],
-    salt: parts[4],
+    salt: parts[4]
   };
 };
 
@@ -44,7 +44,7 @@ const getDigest = async (input) => {
     salt,
     config.iterations,
     config.hashLength,
-    config.algorithm,
+    config.algorithm
   )).toString(config.encoding);
 
   return toPasswordString(
@@ -52,7 +52,7 @@ const getDigest = async (input) => {
     config.iterations,
     config.hashLength,
     hash,
-    salt,
+    salt
   );
 };
 
@@ -72,7 +72,7 @@ const verifyPassword = async (input, savedPassword) => {
     savedPassword.salt,
     savedPassword.iterations,
     savedPassword.hashLength,
-    savedPassword.algorithm,
+    savedPassword.algorithm
   )).toString(config.encoding);
 
   return newHash === savedPassword.hash;
@@ -87,5 +87,5 @@ export {
   getDigest,
   verifyPassword,
   ROLE_USER,
-  ROLE_ADMIN,
+  ROLE_ADMIN
 };
