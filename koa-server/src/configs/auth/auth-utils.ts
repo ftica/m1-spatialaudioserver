@@ -1,10 +1,19 @@
-import crypto from 'crypto';
+import * as crypto from 'crypto';
+import { Encoding } from 'crypto';
 import { promisify } from 'util';
 
 const randomBytes = promisify(crypto.randomBytes);
 const pbkdf2 = promisify(crypto.pbkdf2);
 
-const DEFAULT_CONFIG = {
+type ConfigType = {
+  algorithm: string,
+  iterations: number,
+  hashLength: number,
+  saltBytes: number,
+  encoding: Encoding
+};
+
+const DEFAULT_CONFIG: ConfigType = {
   algorithm: 'sha256',
   iterations: 10000,
   hashLength: 32,
@@ -12,16 +21,17 @@ const DEFAULT_CONFIG = {
   encoding: 'base64'
 };
 
-const config = {
+const config: ConfigType = {
   algorithm: process.env.PASS_HASH_ALGORITHM || DEFAULT_CONFIG.algorithm,
-  iterations: process.env.PASS_HASH_ITERATIONS || DEFAULT_CONFIG.iterations,
-  hashLength: process.env.PASS_HASH_LENGTH || DEFAULT_CONFIG.hashLength,
-  saltBytes: process.env.PASS_SALT_BYTES || DEFAULT_CONFIG.saltBytes,
+  iterations: parseInt(process.env.PASS_HASH_ITERATIONS) || DEFAULT_CONFIG.iterations,
+  hashLength: parseInt(process.env.PASS_HASH_LENGTH) || DEFAULT_CONFIG.hashLength,
+  saltBytes: parseInt(process.env.PASS_SALT_BYTES) || DEFAULT_CONFIG.saltBytes,
   encoding: DEFAULT_CONFIG.encoding
 };
 
-const toPasswordString = (algorithm, iterations, length, hash, salt) => `${algorithm}:${iterations}:${length}:${hash}:${salt}`;
-const fromPasswordString = (pass) => {
+const toPasswordString = (algorithm: string, iterations: number, length: number, hash: string, salt: string) =>
+  `${algorithm}:${iterations}:${length}:${hash}:${salt}`;
+const fromPasswordString = (pass: string) => {
   const parts = pass.split(':');
 
   if (parts.length !== 5) {
@@ -78,8 +88,8 @@ const verifyPassword = async (input, savedPassword) => {
   return newHash === savedPassword.hash;
 };
 
-const ROLE_USER = 'user';
-const ROLE_ADMIN = 'admin';
+const ROLE_USER = 'USER';
+const ROLE_ADMIN = 'ADMIN';
 
 export {
   toPasswordString,

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
 
-import { encryptSync } from '../services/encryption';
+import { encryptSync } from '../services/encryption-service';
 import Model from './model';
 
 export default class UserModel extends Model {

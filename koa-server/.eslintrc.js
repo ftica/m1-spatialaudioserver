@@ -6,10 +6,14 @@ module.exports = {
   extends: [
     'standard'
   ],
+  parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 12,
     sourceType: 'module'
   },
+  plugins: [
+    '@typescript-eslint'
+  ],
   rules: {
     'space-before-function-paren': 0,
     semi: ['error', 'always']

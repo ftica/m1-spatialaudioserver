@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import { Store } from '../store';
+import { Store } from '@/store';
 import SpatialAudioPlayer from '../views/SpatialAudioPlayer.vue';
 
 const routes = [
@@ -35,7 +35,7 @@ const router = createRouter({
 // eslint-disable-next-line consistent-return
 router.beforeEach(async (to) => {
   try {
-    await Store.dispatch('auth/restore');
+    // await Store.dispatch('auth/restore');
 
     if (to.meta.requiresAdmin) {
       if (!Store.getters['auth/userId']) {
