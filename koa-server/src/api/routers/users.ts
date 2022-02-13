@@ -3,7 +3,7 @@ import Router from '@koa/router';
 // import { UserModel } from './models';
 import { Context, DefaultState } from 'koa';
 // import { User } from '@prisma/client';
-import { UserOut, UserService } from './services/user-service';
+import { UserOut, UserService } from '../services/user-service';
 
 // /**
 //  * All methods from resource will be called only if `authenticator` method success

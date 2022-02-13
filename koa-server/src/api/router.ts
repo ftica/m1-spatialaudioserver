@@ -1,11 +1,11 @@
 import Router from '@koa/router';
 
-import auth from '../api/auth';
-import playlists from '../api/playlists';
-import profile from '../api/profile';
-import tracks from '../api/tracks';
-import upload from '../api/upload';
-import users from '../api/users';
+import auth from './routers/auth';
+import playlists from './routers/playlists';
+import profile from './routers/profile';
+import tracks from './routers/tracks';
+import upload from './routers/upload';
+import users from './routers/users';
 import { Context, DefaultState } from 'koa';
 
 export default new Router<DefaultState, Context>({ prefix: '/v1' })

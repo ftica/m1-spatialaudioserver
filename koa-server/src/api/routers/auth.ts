@@ -2,8 +2,8 @@ import Router from '@koa/router';
 // import * as Router from '@koa/router';
 // import service from './services/encryption';
 // import * as Router from 'koa-router';
-import { AuthService, UserLoginInput, UserRegisterInput } from './services/auth-service';
-import { ROLE_ADMIN, ROLE_USER } from '../configs/auth/auth-utils';
+import { AuthService, UserLoginInput, UserRegisterInput } from '../services/auth-service';
+import { ROLE_ADMIN, ROLE_USER } from '../../auth/auth-utils';
 import { Context, DefaultState } from 'koa';
 
 /**

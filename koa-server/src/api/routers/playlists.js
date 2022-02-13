@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import Router from '@koa/router';
-import { PlaylistModel } from './models';
-import authenticated from '../configs/middleware/authentication';
-import { hasAnyRole } from '../configs/middleware/authorization';
-import { ROLE_ADMIN, ROLE_USER } from '../configs/auth/auth-utils';
+import { PlaylistModel } from '../models';
+import authenticated from '../../koa/middleware/authentication';
+import { hasAnyRole } from '../../koa/middleware/authorization';
+import { ROLE_ADMIN, ROLE_USER } from '../../auth/auth-utils';
 
 // /**
 //  * List of methods that will be called only if `authenticator` method success

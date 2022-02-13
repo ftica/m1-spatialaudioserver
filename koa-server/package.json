@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "clean": "rimraf build/",
-    "copy-keys": "copyfiles -f ./src/configs/auth/dev.key ./src/configs/auth/dev.key.pub build/configs/auth",
+    "copy-keys": "copyfiles -f ./src/auth/dev.key ./src/auth/dev.key.pub build/auth",
     "lint": "eslint --ext .js --ext .json . test/*",
     "dev": "pm2-dev src/index.js --node-args=\\\"-r esm\\\"",
     "local": "npm run clean && tsc && npm run copy-keys && pm2-dev ecosystem.config.js",

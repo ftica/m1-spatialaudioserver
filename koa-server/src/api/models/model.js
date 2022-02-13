@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { DateTime } from 'luxon';
 
-import { redis } from '../../configs';
+import { redis } from '../../koa';
 
 function proceed(Basic, value) {
   switch (Basic.name) {

@@ -1,4 +1,4 @@
-import { verify } from '../auth/token';
+import { verify } from '../../auth/token';
 
 export default () => async (ctx, next) => {
   delete ctx.token;

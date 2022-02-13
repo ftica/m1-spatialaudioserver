@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { v4 as uuid, validate } from 'uuid';
 
 import Model from './model';
-import { redis } from '../../configs';
+import { redis } from '../../koa';
 
 export default class PlaylistModel extends Model {
   #playlists = [];

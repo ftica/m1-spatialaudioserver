@@ -5,10 +5,10 @@ import _ from 'lodash';
 import multer from '@koa/multer';
 
 import Router from '@koa/router';
-import { TrackModel } from './models';
-import authenticated from '../configs/middleware/authentication';
-import { hasAnyRole } from '../configs/middleware/authorization';
-import { ROLE_ADMIN } from '../configs/auth/auth-utils';
+import { TrackModel } from '../models';
+import authenticated from '../../koa/middleware/authentication';
+import { hasAnyRole } from '../../koa/middleware/authorization';
+import { ROLE_ADMIN } from '../../auth/auth-utils';
 
 const uploader = multer()
   .any();

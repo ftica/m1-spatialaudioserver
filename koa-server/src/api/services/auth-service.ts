@@ -1,4 +1,4 @@
-import { verifyPassword, getDigest, fromPasswordString } from '../../configs/auth/auth-utils';
+import { verifyPassword, getDigest, fromPasswordString } from '../../auth/auth-utils';
 import { AccessToken, PrismaClient, Role, User } from '@prisma/client';
 
 const getValidUntil = () => new Date(Date.now() + (60 * 60));
