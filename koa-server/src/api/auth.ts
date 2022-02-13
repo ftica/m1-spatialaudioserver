@@ -2,7 +2,7 @@ import Router from '@koa/router';
 // import * as Router from '@koa/router';
 // import service from './services/encryption';
 // import * as Router from 'koa-router';
-import { AuthService, UserRegisterInput } from './services/auth-service';
+import { AuthService, UserLoginInput, UserRegisterInput } from './services/auth-service';
 import { ROLE_ADMIN, ROLE_USER } from '../configs/auth/auth-utils';
 import { Context, DefaultState } from 'koa';
 
@@ -90,6 +90,27 @@ function getRegisterHandler() {
   };
 }
 
+function getLoginHandler() {
+  const validInput = {
+    username: 'required',
+    password: 'required'
+  };
+
+  return async (ctx) => {
+    await ctx.validate(validInput);
+
+    const input: UserLoginInput = {
+      username: ctx.request.body.username,
+      password: ctx.request.body.password
+    };
+
+    const accessToken = await AuthService.login(ctx.prisma, input);
+
+    ctx.status = 200;
+    ctx.body = accessToken;
+  };
+}
+
 function getChangeRoleHandler() {
   const validInput = {
     role: `required|in:${ROLE_ADMIN},${ROLE_USER}`
@@ -108,7 +129,9 @@ function getChangeRoleHandler() {
 //   }
 // }
 
-export default new Router<DefaultState, Context>().post('/register', getRegisterHandler());
+export default new Router<DefaultState, Context>()
+  .post('/register', getRegisterHandler())
+  .post('/login', getLoginHandler());
 // .post('/login', login)
 // .put('/:id', authenticated(), hasAnyRole(ROLE_ADMIN), getChangeRoleHandler())
 // .del('/logout', authenticated(), logout);

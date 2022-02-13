@@ -33,7 +33,7 @@ model User {
 model AccessToken {
   id         String   @db.Uuid @id @default(uuid())
   validUntil DateTime @map("valid_until")
-  userId     String   @db.Uuid @map("playlist")
+  userId     String   @db.Uuid @map("user")
   user       User     @relation(references: [id], onDelete: Cascade, fields: [userId], map: "access_token_user_fkey")
 
   @@map("access_token")

@@ -6,11 +6,9 @@ import profile from '../api/profile';
 import tracks from '../api/tracks';
 import upload from '../api/upload';
 import users from '../api/users';
+import { Context, DefaultState } from 'koa';
 
-const router = new Router({ prefix: '/v1' });
-
-// Authorization route
-router
+export default new Router<DefaultState, Context>({ prefix: '/v1' })
   .use('/auth', auth.routes(), auth.allowedMethods())
   .use('/playlists', playlists.routes(), playlists.allowedMethods())
   .use('/profile', profile.routes(), profile.allowedMethods())
@@ -48,5 +46,3 @@ router
 //   .get('/users', auth.validate, users.list)
 //   .post('/users', auth.validate, users.create)
 //   .del('/users/:id', auth.validate, users.remove);
-
-export default router;

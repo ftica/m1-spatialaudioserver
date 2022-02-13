@@ -31,7 +31,16 @@ const config: ConfigType = {
 
 const toPasswordString = (algorithm: string, iterations: number, length: number, hash: string, salt: string) =>
   `${algorithm}:${iterations}:${length}:${hash}:${salt}`;
-const fromPasswordString = (pass: string) => {
+
+type PasswordObject = {
+  algorithm: string,
+  iterations: number,
+  length: number,
+  hash: string,
+  salt: string
+};
+
+const fromPasswordString = (pass: string): PasswordObject => {
   const parts = pass.split(':');
 
   if (parts.length !== 5) {
@@ -40,14 +49,14 @@ const fromPasswordString = (pass: string) => {
 
   return {
     algorithm: parts[0],
-    iterations: parts[1],
-    length: parts[2],
+    iterations: parseInt(parts[1]),
+    length: parseInt(parts[2]),
     hash: parts[3],
     salt: parts[4]
   };
 };
 
-const getDigest = async (input) => {
+const getDigest = async (input: string) => {
   const salt = (await randomBytes(config.saltBytes)).toString(config.encoding);
   const hash = (await pbkdf2(
     input,
@@ -66,24 +75,29 @@ const getDigest = async (input) => {
   );
 };
 
-const verifyPassword = async (input, savedPassword) => {
-  if (
-    !savedPassword.salt ||
-    !savedPassword.hash ||
-    !savedPassword.iterations ||
-    !savedPassword.hashLength ||
-    !savedPassword.algorithm
-  ) {
-    return false;
-  }
+const verifyPassword = async (input: string, savedPassword: PasswordObject): Promise<boolean> => {
+  console.log(input);
+  console.log(savedPassword);
+
+  // if (
+  //   !savedPassword.salt ||
+  //   !savedPassword.hash ||
+  //   !savedPassword.iterations ||
+  //   !savedPassword.hashLength ||
+  //   !savedPassword.algorithm
+  // ) {
+  //   return false;
+  // }
 
   const newHash = (await pbkdf2(
     input,
     savedPassword.salt,
     savedPassword.iterations,
-    savedPassword.hashLength,
+    savedPassword.length,
     savedPassword.algorithm
   )).toString(config.encoding);
+
+  console.log(newHash);
 
   return newHash === savedPassword.hash;
 };
