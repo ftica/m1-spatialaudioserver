@@ -13,4 +13,6 @@ server.use(middleware(server));
 server.use(router.routes());
 server.use(router.allowedMethods());
 
+router.get('/', ctx => ctx.body = router.stack.map(route => route.path));
+
 export default server;

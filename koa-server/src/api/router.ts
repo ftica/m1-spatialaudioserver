@@ -8,7 +8,7 @@ import upload from './routers/upload';
 import users from './routers/users';
 import { Context, DefaultState } from 'koa';
 
-export default new Router<DefaultState, Context>({ prefix: '/v1' })
+export default new Router<DefaultState, Context>({ prefix: '/api/v1' })
   .use('/auth', auth.routes(), auth.allowedMethods())
   .use('/playlists', playlists.routes(), playlists.allowedMethods())
   .use('/profile', profile.routes(), profile.allowedMethods())
