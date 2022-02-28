@@ -1,24 +1,20 @@
-// export const getAll = (prisma: PrismaClient)
+import { User } from "@prisma/client";
+import Service from "./service";
 
-import { Prisma, PrismaClient, Role } from '@prisma/client';
+class UserService extends Service<User> {
+    
+    async getByUsername(table, username: string): Promise<User> {
+        return await table.findUnique({ where: username });
+    }
 
-const DEFAULT_USER_SELECT: Prisma.UserFindManyArgs = {
-  select: {
-    id: true,
-    username: true,
-    password: false,
-    role: true
-  }
-};
+    override async update(table, username: string, data): Promise<User> {
+        return await table.update({ where: { username }, data })
+    }
 
-export type UserOut = {
-  id: string,
-  username: string,
-  role: Role
-};
+    override async delete(table, username: string): Promise<User> {
+        return await table.delete({ where: { username } });
+    }
 
-const list = async (prisma: PrismaClient): Promise<UserOut[]> => await prisma.user.findMany(DEFAULT_USER_SELECT);
+}
 
-export const UserService = {
-  list
-};
+export default new UserService();

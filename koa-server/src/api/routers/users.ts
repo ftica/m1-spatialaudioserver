@@ -1,93 +1,61 @@
-// import _ from 'lodash';
 import Router from '@koa/router';
-// import { UserModel } from './models';
 import { Context, DefaultState } from 'koa';
-// import { User } from '@prisma/client';
-import { UserOut, UserService } from '../services/user-service';
+import { User } from '@prisma/client';
+import userService from '../services/user-service';
 
-// /**
-//  * All methods from resource will be called only if `authenticator` method success
-//  * @type {Boolean}
-//  */
-// protectored: true,
-/**
- * Scaning and returns a list of users
- * @param  {Object}  ctx  the default koa context whose encapsulates
- *                          node's request and response objects into a single object
- */
-// async function list(ctx) {
-//   const model = new UserModel();
-//
-//   const items = await ctx.redis.lrange('users:all', 0, -1);
-//   const users = await Promise.all(_.map(items, async (item) => {
-//     const values = await ctx.redis.hmget(item, model.keys);
-//
-//     return _.zipObject(model.keys, values);
-//   }));
-//
-//   ctx.body = users;
-// }
-//
-// /**
-//  * Creating a new user
-//  * @param  {Object}  ctx  the default koa context whose encapsulates
-//  *                          node's request and response objects into a single object
-//  */
-// async function create(ctx) {
-//   const { body } = ctx.request;
-//
-//   const {
-//     user,
-//     validation
-//   } = new UserModel(body);
-//   await ctx.validate(validation);
-//
-//   await ctx.redis.multi()
-//     .hset(`user:${user.id}`, user)
-//     .hset('users:lookup:all', {
-//       [user.email]: user.id,
-//       [user.nickname]: user.id
-//     })
-//     .rpush('users:all', `user:${user.id}`)
-//     .exec();
-//
-//   ctx.status = 201;
-//   ctx.body = user;
-// }
-//
-// /**
-//  * Finds and removes a user from the database by id, if there is no user, returns a 404 error code
-//  * @param  {Object}  ctx  the default koa context whose encapsulates
-//  *                          node's request and response objects into a single object
-//  */
-// async function remove(ctx) {
-//   const { id } = ctx.params;
-//   const key = `user:${id}`;
-//   const user = await ctx.redis.hgetall(key);
-//   if (_.isEmpty(user)) ctx.throw(404);
-//   if (user.id === ctx.session.user.id) ctx.throw(403, 'You cannot delete yourself');
-//
-//   await Promise.all([
-//     ctx.redis.del(key),
-//     ctx.redis.hdel('users:lookup:all', user.email),
-//     ctx.redis.hdel('users:lookup:all', user.nickname),
-//     ctx.redis.lrem('users:all', 0, key)
-//   ]);
-//
-//   ctx.status = 204;
-// }
+const getAll = async ctx => {
+  const users: User[] = await userService.getAll(ctx.prisma.user);
+  ctx.body = users;
+};
 
-function getListUsersHandler() {
-  return async (ctx) => {
-    const users: UserOut[] = await UserService.list(ctx.prisma);
+const getByUsername = async ctx => {
+  const username: string = ctx.params.username;
+  const user: User = await userService.getByUsername(ctx.prisma.user, username);
+  ctx.body = user;
+}
 
-    ctx.status = 200;
-    ctx.body = users;
-  };
+const update = async ctx => {
+  const username: string = ctx.params.username;
+  const data: User = ctx.request.body;
+  const user: User = await userService.update(ctx.prisma.user, username, data);
+  ctx.body = user;
+}
+
+const del = async ctx => {
+  const username: string = ctx.params.username;
+  const user: User = await userService.delete(ctx.prisma.user, username);
+  ctx.body = user;
+}
+
+const create = async ctx => {
+  const data: User = ctx.request.body;
+
+  // const errors: string[] = validate(data);
+  // if(errors) {
+  //   ctx.status = 400;
+  //   ctx.body = { errors }
+  // }
+
+  const user: User = await userService.create(ctx.prisma.user, data);
+  ctx.body = user;
+}
+
+const profile = async ctx => {
+  
+}
+
+const setActive = async ctx => {
+  const id: string = ctx.params.id;
+  const active: boolean = ctx.request.body.active;
+
+  const user: User = await userService.update(ctx.prisma.user, id, { active });
+  ctx.body = user;
 }
 
 export default new Router<DefaultState, Context>()
-  .get('/', getListUsersHandler());
-// .get('/', authenticated(), hasAnyRole(ROLE_ADMIN), list)
-// .post('/', authenticated(), hasAnyRole(ROLE_ADMIN), create)
-// .del('/:id', authenticated(), hasAnyRole(ROLE_ADMIN), remove);
+  .get('/', getAll)
+  .get('/profile', profile)
+  .get('/:username', getByUsername)
+  .post('/', create)
+  .del('/:username', del)
+  .patch('/:username/active', setActive);
