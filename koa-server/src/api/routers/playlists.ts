@@ -2,12 +2,19 @@ import Router from '@koa/router';
 import { Context, DefaultState } from 'koa';
 import { Playlist, Role } from '@prisma/client';
 import playlistService from '../services/playlist-service';
-import { Authenticated, Authorized } from '../decorators';
+import { Security } from '../decorators';
+import Authenticated = Security.Authenticated;
+import Authorized = Security.Authorized;
 
 class PlaylistResource {
     @Authenticated
     private async all(ctx: Context, next?: () => any): Promise<any> {
 
+    }
+
+    @Authorized(Role.ADMIN, Role.USER)
+    private async one(ctx: Context): Promise<any> {
+        
     }
 }
 

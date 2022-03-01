@@ -1,27 +1,57 @@
 import { Context } from 'koa';
-import { Role } from '@prisma/client';
 
-type AsyncHandler = (ctx: Context, next?: () => any) => Promise<any>;
+export namespace Security {
+  type AsyncHandler = (ctx: Context, next?: () => any) => Promise<any>;
 
-export function Authenticated(handler: Function) {
-  const authenticatedHandler = async (ctx: Context, next?: () => any) => {
-    if (!ctx.token)
-      ctx.throw(400, 'Failed to authenticate user');
+  const getAuthenticatedHandler = (original: AsyncHandler): AsyncHandler =>
+    async (ctx: Context, next?: () => any) => {
+      if (!ctx.token)
+        ctx.throw(400, 'Failed to authenticate user');
 
-    return await handler(ctx, next);
+      return await original(ctx, next);
+    };
+
+  const getAuthorizedHandler = (original: AsyncHandler, roles: string[]): AsyncHandler =>
+    async (ctx: Context, next?: () => any) => {
+      if (!ctx.token.roles)
+        ctx.throw(400, 'Failed to authorize user');
+
+      if (!ctx.token.roles.some(roles.includes))
+        ctx.throw(403, 'Unauthorized');
+
+      return await original(ctx, next);
+    };
+
+  const getValidBodyHandler = (original: AsyncHandler, valid: any): AsyncHandler =>
+    async (ctx: Context, next?: () => any) => {
+      if (!ctx.validate)
+        ctx.throw(500, 'Validator not present');
+
+      await ctx.validate(valid);
+
+      return await original(ctx, next);
+    };
+
+  export const Authenticated: MethodDecorator = (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
+    const original: AsyncHandler = descriptor.value!;
+
+    descriptor.value = getAuthenticatedHandler(original);
   };
 
-  return authenticatedHandler;
-}
+  export function Authorized(...roles: string[]): MethodDecorator {
+    return (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
+      const original: AsyncHandler = descriptor.value!;
+      const authenticated: AsyncHandler = getAuthenticatedHandler(original);
 
-export function Authorized(allowedRoles: Role[], handler: AsyncHandler): AsyncHandler {
-  const authorizedHandler: AsyncHandler = async (ctx: Context, next?: () => any) => {
-    if (!ctx.token.roles ||
-      !allowedRoles.some(allowed => (ctx.token.roles as string[]).includes(allowed)))
-      return await ctx.throw(403, 'Unauthorized');
+      descriptor.value = getAuthorizedHandler(authenticated, roles);
+    }
+  }
 
-    return await handler(ctx, next);
-  };
+  export function ValidBody(valid: any): MethodDecorator {
+    return (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
+      const original: AsyncHandler = descriptor.value!;
 
-  return Authenticated(authorizedHandler);
+      descriptor.value = getValidBodyHandler(original, valid);
+    }
+  }
 }

@@ -2,9 +2,15 @@ import Router from '@koa/router';
 // import * as Router from '@koa/router';
 // import service from './services/encryption';
 // import * as Router from 'koa-router';
-import { AuthService, UserLoginInput, UserRegisterInput } from '../services/auth-service';
 import { ROLE_ADMIN, ROLE_USER } from '../../auth/auth-utils';
 import { Context, DefaultState } from 'koa';
+import { AuthService } from '../services/auth-service';
+
+import UserRegisterInput = AuthService.UserRegisterInput;
+import UserLoginInput = AuthService.UserLoginInput;
+import { User } from '@prisma/client';
+import { Security } from '../decorators';
+import ValidBody = Security.ValidBody;
 
 /**
  * Authenticating user by login (it can be nickname for email) and password;
@@ -77,12 +83,8 @@ function getRegisterHandler() {
   return async (ctx) => {
     await ctx.validate(validInput);
 
-    const input: UserRegisterInput = {
-      username: ctx.request.body.username,
-      password: ctx.request.body.password
-    };
-
-    const user = await AuthService.register(ctx.prisma, input);
+    const input: UserRegisterInput = ctx.request.body;
+    const user: User = await AuthService.register(ctx.prisma, input);
 
     ctx.status = 200;
 
@@ -117,6 +119,18 @@ function getChangeRoleHandler() {
   };
 
   return async (ctx) => await ctx.validate(validInput);
+}
+
+class AuthController {
+  constructor() {}
+
+  @ValidBody({
+    username: 'required',
+    password: 'required'
+  })
+  public async login(ctx: Context) {
+    const input: UserLoginInput = ctx.request.body;
+  }
 }
 
 // async function validate(ctx, next) {
