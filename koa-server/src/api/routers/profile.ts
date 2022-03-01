@@ -1,9 +1,9 @@
 import Router from '@koa/router';
 import authenticated from '../../koa/middleware/authentication';
 import { hasAnyRole } from '../../koa/middleware/authorization';
-import { ROLE_ADMIN, ROLE_USER } from '../../auth/auth-utils';
 import { CustomContext } from '../../koa/types';
 import { DefaultState } from 'koa';
+import { Role } from '@prisma/client';
 
 /**
  * Checking and returning current user session: if exist return 200 else empty body and 204.
@@ -29,4 +29,4 @@ const get = async (ctx: CustomContext) => {
 };
 
 export default new Router<DefaultState, CustomContext>()
-  .get('/', authenticated(), hasAnyRole(ROLE_USER, ROLE_ADMIN), get);
+  .get('/', authenticated(), hasAnyRole(Role.USER, Role.ADMIN), get);

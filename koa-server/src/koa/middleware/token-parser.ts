@@ -1,12 +1,9 @@
 import { Next } from 'koa';
 import { CustomContext } from '../types';
-import getJwtService, { JwtService, JwtToken } from '../../api/services/jwt';
-// import { Jwt } from 'jsonwebtoken';
+import jwtService, { JwtToken } from '../../api/services/jwt-service';
 
 export default () => async (ctx: CustomContext, next: Next) => {
   delete ctx.token;
-
-  const jwtService: JwtService = await getJwtService();
 
   if (ctx.headers.authorization != null) {
     const rawToken = ctx.headers.authorization.replace('Bearer ', '');

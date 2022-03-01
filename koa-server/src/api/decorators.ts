@@ -6,27 +6,31 @@ export namespace Security {
 
   const getAuthenticatedHandler = (original: AsyncHandler): AsyncHandler =>
     async (ctx: CustomContext, next?: Next) => {
-      if (!ctx.token)
+      if (!ctx.token) {
         ctx.throw(400, 'Failed to authenticate user');
+      }
 
       return await original(ctx, next);
     };
 
   const getAuthorizedHandler = (original: AsyncHandler, roles: string[]): AsyncHandler =>
     async (ctx: CustomContext, next?: Next) => {
-      if (!ctx.token.roles)
+      if (!ctx.token.role) {
         ctx.throw(400, 'Failed to authorize user');
+      }
 
-      if (!ctx.token.roles.some(roles.includes))
+      if (!ctx.token.role.some(roles.includes)) {
         ctx.throw(403, 'Unauthorized');
+      }
 
       return await original(ctx, next);
     };
 
   const getValidBodyHandler = (original: AsyncHandler, valid: any): AsyncHandler =>
     async (ctx: CustomContext, next?: Next) => {
-      if (!ctx.validate)
+      if (!ctx.validate) {
         ctx.throw(500, 'Validator not present');
+      }
 
       await ctx.validate(valid);
 
@@ -45,7 +49,7 @@ export namespace Security {
       const authenticated: AsyncHandler = getAuthenticatedHandler(original);
 
       descriptor.value = getAuthorizedHandler(authenticated, roles);
-    }
+    };
   }
 
   export function ValidBody(valid: any): MethodDecorator {
@@ -53,6 +57,6 @@ export namespace Security {
       const original: AsyncHandler = descriptor.value!;
 
       descriptor.value = getValidBodyHandler(original, valid);
-    }
+    };
   }
 }

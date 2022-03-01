@@ -1,20 +1,9 @@
 import Router from '@koa/router';
-// import * as Router from '@koa/router';
-// import service from './services/encryption';
-// import * as Router from 'koa-router';
-// import { AuthService, UserLoginInput, UserRegisterInput } from '../services/auth-service';
-// import { ROLE_ADMIN, ROLE_USER } from '../../auth/auth-utils';
-// import { DefaultState } from 'koa';
 import { CustomContext } from '../../koa/types';
-// import { ROLE_ADMIN, ROLE_USER } from '../../auth/auth-utils';
 import { DefaultState } from 'koa';
-// import { AuthService } from '../services/auth-service';
-
-// import UserRegisterInput = AuthService.UserRegisterInput;
-// import UserLoginInput = AuthService.UserLoginInput;
 import { User } from '@prisma/client';
-import { Security } from '../decorators';
-import ValidBody = Security.ValidBody;
+
+import authService, { UserLoginInput, UserRegisterInput } from '../services/auth-service';
 
 /**
  * Authenticating user by login (it can be nickname for email) and password;
@@ -84,11 +73,11 @@ function getRegisterHandler() {
     password: 'required|minLength:8'
   };
 
-  return async (ctx) => {
+  return async (ctx: CustomContext) => {
     await ctx.validate(validInput);
 
     const input: UserRegisterInput = ctx.request.body;
-    const user: User = await AuthService.register(ctx.prisma, input);
+    const user: User = await authService.register(ctx.prisma, input);
 
     ctx.status = 200;
 
@@ -102,7 +91,7 @@ function getLoginHandler() {
     password: 'required'
   };
 
-  return async (ctx) => {
+  return async (ctx: CustomContext) => {
     await ctx.validate(validInput);
 
     const input: UserLoginInput = {
@@ -110,7 +99,7 @@ function getLoginHandler() {
       password: ctx.request.body.password
     };
 
-    const accessToken = await AuthService.login(ctx.prisma, input);
+    const accessToken = await authService.login(ctx.prisma, input);
 
     ctx.status = 200;
     ctx.body = accessToken;
@@ -125,17 +114,17 @@ function getLoginHandler() {
 //   return async (ctx) => await ctx.validate(validInput);
 // }
 
-class AuthController {
-  constructor() {}
+// class AuthController {
+//   constructor() {}
 
-  @ValidBody({
-    username: 'required',
-    password: 'required'
-  })
-  public async login(ctx: CustomContext) {
-    const input: UserLoginInput = ctx.request.body;
-  }
-}
+//   @ValidBody({
+//     username: 'required',
+//     password: 'required'
+//   })
+//   public async login(ctx: CustomContext) {
+//     const input: UserLoginInput = ctx.request.body;
+//   }
+// }
 
 // async function validate(ctx, next) {
 //   const { user } = ctx.session;
