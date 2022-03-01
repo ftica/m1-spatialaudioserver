@@ -4,7 +4,7 @@ import auth from './routers/auth';
 import playlists from './routers/playlists';
 import profile from './routers/profile';
 import tracks from './routers/tracks';
-import upload from './routers/upload';
+// import upload from './routers/upload';
 import users from './routers/users';
 import { DefaultState } from 'koa';
 import { CustomContext } from '../koa/types';
@@ -14,7 +14,7 @@ export default new Router<DefaultState, CustomContext>({ prefix: '/api/v1' })
   .use('/playlists', playlists.routes(), playlists.allowedMethods())
   .use('/profile', profile.routes(), profile.allowedMethods())
   .use('/tracks', tracks.routes(), tracks.allowedMethods())
-  .use('/upload', upload.routes(), upload.allowedMethods())
+  // .use('/upload', upload.routes(), upload.allowedMethods())
   .use('/users', users.routes(), users.allowedMethods());
 
 // .post('/auth', auth.login)
