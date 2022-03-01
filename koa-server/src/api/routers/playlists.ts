@@ -3,13 +3,13 @@ import { DefaultState } from 'koa';
 import { Playlist } from '@prisma/client';
 import { CustomContext } from '../../koa/types';
 import Endpoint from './endpoint';
-import playlistService from '../services/playlist-service';
+import playlistService, { PlaylistService } from '../services/playlist-service';
 
-class Playlists extends Endpoint<Playlist> {
+class Playlists extends Endpoint<Playlist, PlaylistService> {
   async setTracks(ctx: CustomContext) {
     const id: string = ctx.params.id;
     const tracks: string[] = ctx.request.body;
-    const playlist: Playlist = await playlistService.update(ctx.prisma, id, { tracks: tracks.map(track => { return { id: track }; }) }, { tracks: true });
+    const playlist: Playlist = await this.service.update(ctx.prisma, id, { tracks: tracks.map(track => { return { id: track }; }) }, { tracks: true });
     if (playlist === null) {
       ctx.status = 404;
     } else {
@@ -20,7 +20,7 @@ class Playlists extends Endpoint<Playlist> {
   async setFavorite(ctx: CustomContext) {
     const id: string = ctx.params.id;
     const favorite: boolean = ctx.request.body.favorite;
-    const playlist: Playlist = await playlistService.update(ctx.prisma, id, { favorite });
+    const playlist: Playlist = await this.service.update(ctx.prisma, id, { favorite });
     ctx.body = playlist;
   }
 }

@@ -1,8 +1,8 @@
 import { Track } from '@prisma/client';
 import Service from './service';
 
-class TrackService extends Service<Track> { }
+export class TrackService extends Service<Track> { }
 
-const trackSrv = new TrackService('track');
+const trackService = new TrackService('track');
 
-export default trackSrv;
+export default trackService;

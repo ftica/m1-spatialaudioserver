@@ -4,12 +4,12 @@ import { User } from '@prisma/client';
 import { validate } from '../validation';
 import { CustomContext } from '../../koa/types';
 import Endpoint from './endpoint';
-import userService from '../services/user-service';
+import userService, { UserService } from '../services/user-service';
 
-class Users extends Endpoint<User> {
+class Users extends Endpoint<User, UserService> {
   async getByUsername(ctx: CustomContext) {
     const username: string = ctx.params.username;
-    const user = await userService.getByUsername(ctx.prisma, username);
+    const user = await this.service.getByUsername(ctx.prisma, username);
     if (user === null) {
       ctx.status = 404;
     } else {
@@ -20,7 +20,7 @@ class Users extends Endpoint<User> {
   async update(ctx: CustomContext) {
     const username: string = ctx.params.username;
     const data: User = ctx.request.body;
-    const user = await userService.update(ctx.prisma, username, data);
+    const user = await this.service.update(ctx.prisma, username, data);
     if (user == null) {
       ctx.status = 404;
     } else {
@@ -30,7 +30,7 @@ class Users extends Endpoint<User> {
 
   async del(ctx: CustomContext) {
     const username: string = ctx.params.username;
-    const user = await userService.delete(ctx.prisma, username);
+    const user = await this.service.delete(ctx.prisma, username);
     if (user == null) {
       ctx.status = 404;
     } else {
@@ -60,7 +60,7 @@ class Users extends Endpoint<User> {
       return;
     }
 
-    const user = await userService.create(ctx.prisma, data);
+    const user = await this.service.create(ctx.prisma, data);
 
     delete user.password;
 
@@ -75,7 +75,7 @@ class Users extends Endpoint<User> {
     const id: string = ctx.params.id;
     const active: boolean = ctx.request.body.active;
 
-    const user = await userService.update(ctx.prisma, id, { active });
+    const user = await this.service.update(ctx.prisma, id, { active });
     ctx.body = user;
   }
 }

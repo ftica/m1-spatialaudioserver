@@ -3,12 +3,11 @@ import { DefaultState } from 'koa';
 import { Track } from '@prisma/client';
 import { CustomContext } from '../../koa/types';
 import Endpoint from './endpoint';
-import trackSrv from '../services/track-service';
+import trackService, { TrackService } from '../services/track-service';
 
-export class Tracks extends Endpoint<Track> {
-}
+export class Tracks extends Endpoint<Track, TrackService> { }
 
-const tracks = new Tracks(trackSrv);
+const tracks = new Tracks(trackService);
 
 export default new Router<DefaultState, CustomContext>()
   .get('/', tracks.getAll.bind(tracks))
