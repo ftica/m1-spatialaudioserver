@@ -1,7 +1,7 @@
 import { CustomContext } from '../../koa/types';
 import Service from '../services/service';
 
-export default class Endpoint<Model, ModelService extends Service<Model>> {
+export default class ModelEndpoint<Model, ModelService extends Service<Model>> {
   protected readonly service: ModelService;
 
   constructor(service: ModelService) {

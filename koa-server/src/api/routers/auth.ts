@@ -6,12 +6,12 @@ import Router from '@koa/router';
 // import { ROLE_ADMIN, ROLE_USER } from '../../auth/auth-utils';
 // import { DefaultState } from 'koa';
 import { CustomContext } from '../../koa/types';
-import { ROLE_ADMIN, ROLE_USER } from '../../auth/auth-utils';
-import { Context, DefaultState } from 'koa';
-import { AuthService } from '../services/auth-service';
+// import { ROLE_ADMIN, ROLE_USER } from '../../auth/auth-utils';
+import { DefaultState } from 'koa';
+// import { AuthService } from '../services/auth-service';
 
-import UserRegisterInput = AuthService.UserRegisterInput;
-import UserLoginInput = AuthService.UserLoginInput;
+// import UserRegisterInput = AuthService.UserRegisterInput;
+// import UserLoginInput = AuthService.UserLoginInput;
 import { User } from '@prisma/client';
 import { Security } from '../decorators';
 import ValidBody = Security.ValidBody;
@@ -132,7 +132,7 @@ class AuthController {
     username: 'required',
     password: 'required'
   })
-  public async login(ctx: Context) {
+  public async login(ctx: CustomContext) {
     const input: UserLoginInput = ctx.request.body;
   }
 }

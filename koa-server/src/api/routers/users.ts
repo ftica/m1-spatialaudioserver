@@ -3,10 +3,10 @@ import { DefaultState } from 'koa';
 import { User } from '@prisma/client';
 import { validate } from '../validation';
 import { CustomContext } from '../../koa/types';
-import Endpoint from './endpoint';
+import ModelEndpoint from './model-endpoint';
 import userService, { UserService } from '../services/user-service';
 
-class Users extends Endpoint<User, UserService> {
+class Users extends ModelEndpoint<User, UserService> {
   async getByUsername(ctx: CustomContext) {
     const username: string = ctx.params.username;
     const user = await this.service.getByUsername(ctx.prisma, username);

@@ -6,5 +6,5 @@ export default () => async (ctx: CustomContext, next: Next) => {
     ctx.throw(400, 'Failed to authenticate user');
   }
 
-  return next();
+  await next();
 };
