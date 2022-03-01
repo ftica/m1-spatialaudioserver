@@ -1,17 +1,21 @@
 import Koa from 'koa';
 
+// import { koaSwagger } from 'koa2-swagger-ui';
+
 import middleware from './middleware';
 import router from '../api/router';
 
-const server: Koa = new Koa();
+const app = new Koa();
 
-server.keys = ['test'];
-server.proxy = true;
+app.keys = ['test'];
+app.proxy = true;
 
-server.use(middleware(server));
+app.use(middleware(app));
 
-server.use(router.routes());
-server.use(router.allowedMethods());
+// router.use(koaSwagger());
+
+app.use(router.routes());
+app.use(router.allowedMethods());
 
 if (process.env.NODE_ENV === 'development') {
   router.get('/', ctx => {
@@ -21,4 +25,4 @@ if (process.env.NODE_ENV === 'development') {
   });
 }
 
-export default server;
+export default app;

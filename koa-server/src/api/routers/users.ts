@@ -89,11 +89,11 @@ const create = async (ctx: CustomContext) => {
   ctx.body = user;
 };
 
-const profile = async ctx => {
+const profile = async (ctx: CustomContext) => {
   ctx.body = 'profile';
 };
 
-const setActive = async ctx => {
+const setActive = async (ctx: CustomContext) => {
   const id: string = ctx.params.id;
   const active: boolean = ctx.request.body.active;
 
@@ -101,7 +101,7 @@ const setActive = async ctx => {
   ctx.body = user;
 };
 
-const getCount = async ctx => {
+const getCount = async (ctx: CustomContext) => {
   console.log('num');
   const num = await userService.count(ctx.prisma.user);
   console.log(num);
