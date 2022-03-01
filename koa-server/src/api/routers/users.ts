@@ -1,10 +1,10 @@
 import Router from '@koa/router';
 import { DefaultState } from 'koa';
 import { User } from '@prisma/client';
-import userService from '../services/user-service';
 import { validate } from '../validation';
 import { CustomContext } from '../../koa/types';
 import Endpoint from './endpoint';
+import userService from '../services/user-service';
 
 class Users extends Endpoint<User> {
   async getByUsername(ctx: CustomContext) {
@@ -83,11 +83,11 @@ class Users extends Endpoint<User> {
 const users = new Users(userService);
 
 export default new Router<DefaultState, CustomContext>()
-  .get('/', users.getAll)
-  .get('/count', users.count)
-  .get('/profile', users.profile)
-  .get('/:username', users.getByUsername)
-  .post('/', users.create)
-  .put('/:username', users.update)
-  .del('/:username', users.del)
-  .patch('/:username/active', users.setActive);
+  .get('/', users.getAll.bind(users))
+  .get('/count', users.count.bind(users))
+  .get('/profile', users.profile.bind(users))
+  .get('/:username', users.getByUsername.bind(users))
+  .post('/', users.create.bind(users))
+  .put('/:username', users.update.bind(users))
+  .del('/:username', users.del.bind(users))
+  .patch('/:username/active', users.setActive.bind(users));

@@ -1,21 +1,20 @@
 import Router from '@koa/router';
 import { DefaultState } from 'koa';
 import { Track } from '@prisma/client';
-import trackService from '../services/track-service';
 import { CustomContext } from '../../koa/types';
 import Endpoint from './endpoint';
+import trackSrv from '../services/track-service';
 
 export class Tracks extends Endpoint<Track> {
-
 }
 
-const tracks = new Tracks(trackService);
+const tracks = new Tracks(trackSrv);
 
 export default new Router<DefaultState, CustomContext>()
-  .get('/', tracks.getAll)
-  .get('/:id', tracks.getById)
-  .put('/:id', tracks.update)
-  .del('/:id', tracks.del);
+  .get('/', tracks.getAll.bind(tracks))
+  .get('/:id', tracks.getById.bind(tracks))
+  .put('/:id', tracks.update.bind(tracks))
+  .del('/:id', tracks.del.bind(tracks));
 
 // // eslint-disable-next-line
 // import { rm } from 'fs/promises';

@@ -1,9 +1,9 @@
 import Router from '@koa/router';
 import { DefaultState } from 'koa';
 import { Playlist } from '@prisma/client';
-import playlistService from '../services/playlist-service';
 import { CustomContext } from '../../koa/types';
 import Endpoint from './endpoint';
+import playlistService from '../services/playlist-service';
 
 class Playlists extends Endpoint<Playlist> {
   async setTracks(ctx: CustomContext) {
@@ -40,13 +40,13 @@ const playlists = new Playlists(playlistService);
 // }
 
 export default new Router<DefaultState, CustomContext>()
-  .get('/', playlists.getAll)
-  .get('/:id', playlists.getById)
-  .post('/', playlists.create)
-  .put('/:id', playlists.update)
-  .del('/:id', playlists.del)
-  .patch('/:id/tracks', playlists.setTracks)
-  .patch('/:id/favorite', playlists.setFavorite);
+  .get('/', playlists.getAll.bind(playlists))
+  .get('/:id', playlists.getById.bind(playlists))
+  .post('/', playlists.create.bind(playlists))
+  .put('/:id', playlists.update.bind(playlists))
+  .del('/:id', playlists.del.bind(playlists))
+  .patch('/:id/tracks', playlists.setTracks.bind(playlists))
+  .patch('/:id/favorite', playlists.setFavorite.bind(playlists));
 
 //   .get('/:id/allowed-users', getAllowedUsers)
 //   .patch('/:id/allowed-users', setAllowedUsers)

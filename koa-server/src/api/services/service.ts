@@ -5,7 +5,6 @@ export default class Service<Model> {
 
   constructor(table: string) {
     this.table = table;
-    console.log('Service: ' + table);
   }
 
   async getById(prisma: PrismaClient, id: string, include: any = undefined): Promise<Model> {
