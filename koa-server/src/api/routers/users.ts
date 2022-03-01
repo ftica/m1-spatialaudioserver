@@ -3,7 +3,7 @@ import { DefaultState } from 'koa';
 import { User } from '@prisma/client';
 import userService from '../services/user-service';
 import { validate } from '../validation';
-import { CustomContext } from '../../koa/middleware';
+import { CustomContext } from '../../koa/types';
 
 const getAll = async (ctx: CustomContext) => {
   const users = await userService.getAll(ctx.prisma.user);

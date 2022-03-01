@@ -2,7 +2,7 @@ import Router from '@koa/router';
 import { DefaultState } from 'koa';
 import { Playlist } from '@prisma/client';
 import playlistService from '../services/playlist-service';
-import { CustomContext } from '../../koa/middleware';
+import { CustomContext } from '../../koa/types';
 
 const getAll = async (ctx: CustomContext) => {
   const playlists: Playlist[] = await playlistService.getAll(ctx.prisma.playlist);

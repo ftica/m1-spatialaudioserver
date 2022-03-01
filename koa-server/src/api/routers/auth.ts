@@ -5,7 +5,7 @@ import Router from '@koa/router';
 import { AuthService, UserLoginInput, UserRegisterInput } from '../services/auth-service';
 // import { ROLE_ADMIN, ROLE_USER } from '../../auth/auth-utils';
 import { DefaultState } from 'koa';
-import { CustomContext } from '../../koa/middleware';
+import { CustomContext } from '../../koa/types';
 
 /**
  * Authenticating user by login (it can be nickname for email) and password;

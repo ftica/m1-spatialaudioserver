@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import { CustomContext } from '.';
+import { CustomContext } from '../types';
 
 const authorize = (tokenTestFn) => async (ctx: CustomContext, next: Next) => {
   if (!tokenTestFn(ctx.token)) {

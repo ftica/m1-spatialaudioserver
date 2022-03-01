@@ -2,7 +2,7 @@ import Router from '@koa/router';
 import { DefaultState } from 'koa';
 import { Track } from '@prisma/client';
 import trackService from '../services/track-service';
-import { CustomContext } from '../../koa/middleware';
+import { CustomContext } from '../../koa/types';
 
 const getAll = async (ctx: CustomContext) => {
   const tracks: Track[] = await trackService.getAll(ctx.prisma.track);

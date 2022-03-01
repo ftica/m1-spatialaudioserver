@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import { CustomContext } from '.';
+import { CustomContext } from '../types';
 import { verify } from '../../auth/token';
 
 export default () => async (ctx: CustomContext, next: Next) => {
