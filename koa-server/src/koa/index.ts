@@ -1,7 +1,5 @@
 import Koa from 'koa';
 
-// import { koaSwagger } from 'koa2-swagger-ui';
-
 import middleware from './middleware';
 import router from '../api/router';
 
@@ -11,8 +9,6 @@ app.keys = ['test'];
 app.proxy = true;
 
 app.use(middleware(app));
-
-// router.use(koaSwagger());
 
 app.use(router.routes());
 app.use(router.allowedMethods());
