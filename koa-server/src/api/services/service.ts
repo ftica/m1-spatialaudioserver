@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 
 export default class Service<Model> {
-  protected table: string;
+  public table: string;
 
   constructor(table: string) {
     this.table = table;
