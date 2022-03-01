@@ -1,5 +1,5 @@
 import { AccessToken, PrismaClient, Role, User } from '@prisma/client';
-import { RequestToken, UserLoginInput, UserRegisterInput } from './types';
+import { TokenData, UserLoginInput, UserRegisterInput } from './types';
 import getEncryptionService, { EncryptionService } from '../encryption';
 import getJwtService, { JwtService } from '../jwt';
 
@@ -36,7 +36,7 @@ export default class AuthService {
     };
   }
 
-  private async createToken(prisma: PrismaClient, user: User): Promise<RequestToken> {
+  private async createToken(prisma: PrismaClient, user: User): Promise<TokenData> {
     return await prisma.accessToken
       .create({
         data: { validUntil: this.validUntil, userId: user.id },
@@ -54,7 +54,7 @@ export default class AuthService {
       return null;
     }
 
-    const token: RequestToken = await this.createToken(prisma, user);
+    const token: TokenData = await this.createToken(prisma, user);
 
     return await this.jwtService.sign(token);
   }

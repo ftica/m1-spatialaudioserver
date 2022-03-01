@@ -1,6 +1,7 @@
 import { Next } from 'koa';
 import { CustomContext } from '../types';
-import getJwtService, { JwtService } from '../../api/services/jwt';
+import getJwtService, { JwtService, JwtToken } from '../../api/services/jwt';
+import { Jwt } from 'jsonwebtoken';
 
 export default () => async (ctx: CustomContext, next: Next) => {
   delete ctx.token;
@@ -9,7 +10,10 @@ export default () => async (ctx: CustomContext, next: Next) => {
 
   if (ctx.headers.authorization != null) {
     const rawToken = ctx.headers.authorization.replace('Bearer ', '');
-    ctx.token = await jwtService.verify(rawToken);
+    const token: JwtToken = await jwtService.verify(rawToken);
+
+
+    // ctx.token = token;
   }
 
   return await next();

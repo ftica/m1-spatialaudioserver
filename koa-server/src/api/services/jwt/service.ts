@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import jwt, { Secret, SignOptions, VerifyOptions } from 'jsonwebtoken';
+import jwt, { DecodeOptions, Jwt, Secret, SignOptions, VerifyOptions } from 'jsonwebtoken';
 import { promisify } from 'util';
 import { Payload, JwtToken } from './types';
 
@@ -35,10 +35,12 @@ export default class JwtService {
   private static readonly verifyToken: (token: string, secret: Secret, options?: VerifyOptions) => Promise<JwtToken>
     = promisify(jwt.verify);
 
-  public readonly sign = async (payload: Payload): Promise<string> =>
-    await JwtService.signJwt(payload, this.secret, this.signOptions);
+  public async sign(payload: Payload): Promise<string> {
+    return await JwtService.signJwt(payload, this.secret, this.signOptions);
+  }
 
-  public readonly verify = async (token: string): Promise<JwtToken> =>
-    await JwtService.verifyToken(token, this.publicKey);
+  public async verify(token: string): Promise<JwtToken> {
+    return await JwtService.verifyToken(token, this.publicKey, { complete: false });
+  }
 
 }

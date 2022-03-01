@@ -1,10 +1,11 @@
-import { Context } from 'koa';
+import { Next } from 'koa';
+import { CustomContext } from '../koa/types';
 
 export namespace Security {
-  type AsyncHandler = (ctx: Context, next?: () => any) => Promise<any>;
+  type AsyncHandler = (ctx: CustomContext, next?: Next) => Promise<any>;
 
   const getAuthenticatedHandler = (original: AsyncHandler): AsyncHandler =>
-    async (ctx: Context, next?: () => any) => {
+    async (ctx: CustomContext, next?: Next) => {
       if (!ctx.token)
         ctx.throw(400, 'Failed to authenticate user');
 
@@ -12,7 +13,7 @@ export namespace Security {
     };
 
   const getAuthorizedHandler = (original: AsyncHandler, roles: string[]): AsyncHandler =>
-    async (ctx: Context, next?: () => any) => {
+    async (ctx: CustomContext, next?: Next) => {
       if (!ctx.token.roles)
         ctx.throw(400, 'Failed to authorize user');
 
@@ -23,7 +24,7 @@ export namespace Security {
     };
 
   const getValidBodyHandler = (original: AsyncHandler, valid: any): AsyncHandler =>
-    async (ctx: Context, next?: () => any) => {
+    async (ctx: CustomContext, next?: Next) => {
       if (!ctx.validate)
         ctx.throw(500, 'Validator not present');
 

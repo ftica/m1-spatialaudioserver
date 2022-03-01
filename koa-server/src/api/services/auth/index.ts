@@ -2,7 +2,7 @@ export type {
   UserLoginInput,
   UserRegisterInput,
   UserInfo,
-  RequestToken
+  TokenData
 } from './types';
 
 import AuthService from './service';
