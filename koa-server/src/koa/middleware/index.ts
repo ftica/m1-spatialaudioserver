@@ -14,7 +14,7 @@ import database from './database';
 
 const dir = join(__dirname, '../..', 'www');
 
-export default _app => compose([
+export default () => compose([
   logger(),
   // cors(),
   errors(),

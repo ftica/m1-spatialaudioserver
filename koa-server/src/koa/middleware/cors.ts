@@ -13,7 +13,10 @@ export default () => {
     const origin = ctx.get('Origin');
     ctx.vary('Origin');
 
-    if (!origin) return next();
+    if (!origin) {
+      await next();
+      return;
+    }
 
     ctx.set('Access-Control-Allow-Origin', origin);
     ctx.set('Access-Control-Allow-Credentials', 'true');

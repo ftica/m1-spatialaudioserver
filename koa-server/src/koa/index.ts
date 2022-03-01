@@ -8,7 +8,7 @@ const app = new Koa();
 app.keys = ['test'];
 app.proxy = true;
 
-app.use(middleware(app));
+app.use(middleware());
 
 app.use(router.routes());
 app.use(router.allowedMethods());

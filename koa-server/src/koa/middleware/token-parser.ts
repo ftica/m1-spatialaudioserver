@@ -10,5 +10,5 @@ export default () => async (ctx: CustomContext, next: Next) => {
     ctx.token = await verify(rawToken);
   }
 
-  return next();
+  await next();
 };

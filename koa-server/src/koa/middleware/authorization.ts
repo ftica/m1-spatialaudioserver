@@ -6,7 +6,7 @@ const authorize = (tokenTestFn) => async (ctx: CustomContext, next: Next) => {
     ctx.throw(403, 'Unauthorized!');
   }
 
-  return next();
+  await next();
 };
 
 const hasAnyRole = (...roles) => authorize(

@@ -6,5 +6,5 @@ const prisma = new PrismaClient();
 
 export default () => async (ctx: CustomContext, next: Next) => {
   ctx.prisma = prisma;
-  return next();
+  await next();
 };
