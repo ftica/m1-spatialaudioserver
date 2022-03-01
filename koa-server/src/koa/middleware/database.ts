@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { Next } from 'koa';
-import { CustomContext } from '.';
+import { CustomContext } from '../types';
 
 const prisma = new PrismaClient();
 

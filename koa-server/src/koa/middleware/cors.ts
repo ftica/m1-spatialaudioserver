@@ -1,7 +1,7 @@
 /* eslint-disable consistent-return */
 // import _ from 'lodash';
 import { Next } from 'koa';
-import { CustomContext } from '.';
+import { CustomContext } from '../types';
 
 export default () => {
   const defaultOptions = {

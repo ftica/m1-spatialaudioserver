@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import { CustomContext } from '.';
+import { CustomContext } from '../types';
 
 export default () => async (ctx: CustomContext, next: Next) => {
   try {

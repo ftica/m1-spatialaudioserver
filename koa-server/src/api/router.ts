@@ -7,7 +7,7 @@ import tracks from './routers/tracks';
 import upload from './routers/upload';
 import users from './routers/users';
 import { DefaultState } from 'koa';
-import { CustomContext } from '../koa/middleware';
+import { CustomContext } from '../koa/types';
 
 export default new Router<DefaultState, CustomContext>({ prefix: '/api/v1' })
   .use('/auth', auth.routes(), auth.allowedMethods())
