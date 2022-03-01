@@ -1,6 +1,6 @@
 import { AccessToken, PrismaClient, Role, User } from '@prisma/client';
 import encryptionService, { EncryptionService } from './encryption-service';
-import jwtService, { JwtService } from './jwt-service';
+import jwtService, { JwtService, Token } from './jwt-service';
 
 export type UserLoginInput = { username: string, password: string };
 export type UserRegisterInput = { username: string, password: string };
@@ -28,13 +28,14 @@ export class AuthService {
     };
   }
 
-  private async createToken(prisma: PrismaClient, user: User): Promise<TokenData> {
-    return await prisma.accessToken
-      .create({
-        data: { validUntil: this.validUntil, userId: user.id },
-        include: { user: { select: { username: true, role: true } } }
-      })
-      .then(AuthService.getRequestToken);
+  private async createToken(prisma: PrismaClient, user: User): Promise<Token> {
+    // return await prisma.accessToken
+    //   .create({
+    //     data: { validUntil: this.validUntil, userId: user.id },
+    //     include: { user: { select: { username: true, role: true } } }
+    //   })
+    //   .then(AuthService.getRequestToken);
+    return null;
   }
 
   public async login(prisma: PrismaClient, input: UserLoginInput): Promise<string> {
@@ -46,7 +47,7 @@ export class AuthService {
       return null;
     }
 
-    const token: TokenData = await this.createToken(prisma, user);
+    const token: Token = await this.createToken(prisma, user);
 
     return await this.jwtService.sign(token);
   }

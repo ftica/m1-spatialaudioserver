@@ -1,10 +1,12 @@
-// import { promises as fs } from 'fs';
-// import path from 'path';
-import jwt, { Secret, SignOptions, VerifyOptions } from 'jsonwebtoken';
+import { readFile } from 'fs/promises';
+import path from 'path';
+import { AccessToken, Role } from '@prisma/client';
+import jwt, { Secret, SignOptions, Jwt } from 'jsonwebtoken';
 import { promisify } from 'util';
 
-export type Payload = string | object | Buffer;
-export type JwtToken = string | Payload;
+// export type Header = { }
+export type Payload = { 'username': 'PUBLIC', 'roles': Role[] }
+export type Token = AccessToken & Payload & object & Jwt;
 
 export class JwtService {
   public constructor(
@@ -22,28 +24,30 @@ export class JwtService {
   private static readonly signJwt: (payload: Payload, secret: Secret, options?: SignOptions) => Promise<string>
     = promisify(jwt.sign);
 
-  private static readonly verifyToken: (token: string, secret: Secret, options?: VerifyOptions) => Promise<JwtToken>
-    = promisify(jwt.verify);
+  // private static readonly verifyToken: (token: string, secret: Secret, options?: VerifyOptions) => Promise<Token>
+  //   = promisify<Token>(jwt.verify);
 
   public async sign(payload: Payload): Promise<string> {
     return await JwtService.signJwt(payload, this.secret, this.signOptions);
   }
 
-  public async verify(token: string): Promise<JwtToken> {
-    return await JwtService.verifyToken(token, this.publicKey, { complete: false });
-  }
+  // public async verify(token: string): Promise<Token> {
+  //   return await JwtService.verifyToken(token, this.publicKey, { complete: false });
 }
 
-const privateKey: string = require('../../auth/dev.key');
-const publicKey: string = require('../../auth/dev.key');
+// const privateKey: string = await fs.readFile('../../auth/dev.key');
+// const publicKey: string = await fs.readFile('../../auth/dev.key.pub');
 
-console.log(privateKey);
-console.log(publicKey);
+// console.log(privateKey);
+// console.log(publicKey);
 
-// Promise.all([
-//   fs.readFile(path.resolve(__dirname, 'dev.key')),
-//   fs.readFile(path.resolve(__dirname, 'dev.key.pub'))
-// ]).then(([privateKey, publicKey]) => {
-// });
+let jwtService: JwtService = null;
 
-export default new JwtService(Buffer.from(privateKey), Buffer.from(publicKey));
+Promise.all([
+  readFile(path.resolve(__dirname, '../../auth/dev.key')),
+  readFile(path.resolve(__dirname, '../../auth/dev.key.pub'))
+]).then(([privateKey, publicKey]) => {
+  jwtService = new JwtService(privateKey, publicKey);
+});
+
+export default jwtService;

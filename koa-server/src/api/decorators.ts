@@ -1,3 +1,4 @@
+import { Role } from '@prisma/client';
 import { Next } from 'koa';
 import { CustomContext } from '../koa/types';
 
@@ -13,13 +14,13 @@ export namespace Security {
       return await original(ctx, next);
     };
 
-  const getAuthorizedHandler = (original: AsyncHandler, roles: string[]): AsyncHandler =>
+  const getAuthorizedHandler = (original: AsyncHandler, roles: Role[]): AsyncHandler =>
     async (ctx: CustomContext, next?: Next) => {
-      if (!ctx.token.role) {
+      if (!ctx.token.roles) {
         ctx.throw(400, 'Failed to authorize user');
       }
 
-      if (!ctx.token.role.some(roles.includes)) {
+      if (!roles.filter(r => ctx.token.roles.includes(r)).length) {
         ctx.throw(403, 'Unauthorized');
       }
 
@@ -43,7 +44,7 @@ export namespace Security {
     descriptor.value = getAuthenticatedHandler(original);
   };
 
-  export function Authorized(...roles: string[]): MethodDecorator {
+  export function Authorized(...roles: Role[]): MethodDecorator {
     return (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
       const original: AsyncHandler = descriptor.value!;
       const authenticated: AsyncHandler = getAuthenticatedHandler(original);
