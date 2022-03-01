@@ -3,16 +3,22 @@ import Koa from 'koa';
 import middleware from './middleware';
 import router from '../api/router';
 
-const server: Koa = new Koa();
+const app = new Koa();
 
-server.keys = ['test'];
-server.proxy = true;
+app.keys = ['test'];
+app.proxy = true;
 
-server.use(middleware(server));
+app.use(middleware(app));
 
-server.use(router.routes());
-server.use(router.allowedMethods());
+app.use(router.routes());
+app.use(router.allowedMethods());
 
-router.get('/', ctx => ctx.body = router.stack.map(route => `${route.methods} ${route.path}`));
+if (process.env.NODE_ENV === 'development') {
+  router.get('/', ctx => {
+    ctx.body = router.stack
+      .filter(route => route.opts.end)
+      .map(route => `${route.methods} ${route.path}`);
+  });
+}
 
-export default server;
+export default app;

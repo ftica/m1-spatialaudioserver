@@ -1,37 +1,19 @@
 import Router from '@koa/router';
-import { Context, DefaultState } from 'koa';
-import { Prisma, Track } from '@prisma/client';
-import trackService from '../services/track-service';
+import { DefaultState } from 'koa';
+import { Track } from '@prisma/client';
+import { CustomContext } from '../../koa/types';
+import Endpoint from './endpoint';
+import trackService, { TrackService } from '../services/track-service';
 
-const getAll = async ctx => {
-  const tracks: Track[] = await trackService.getAll(ctx.prisma.track);
-  ctx.body = tracks;
-};
+export class Tracks extends Endpoint<Track, TrackService> { }
 
-const getById = async ctx => {
-  const id: string = ctx.params.id;
-  const track: Track = await trackService.getById(ctx.prisma.track, id);
-  ctx.body = track;
-};
+const tracks = new Tracks(trackService);
 
-const update = async ctx => {
-  const id: string = ctx.params.id;
-  const data: Prisma.TrackUpdateArgs = ctx.request.body;
-  const track: Track = await trackService.update(ctx.prisma.track, id, data);
-  ctx.body = track;
-};
-
-const del = async ctx => {
-  const id: string = ctx.params.id;
-  const track: Track = await trackService.delete(ctx.prisma.track, id);
-  ctx.body = track;
-};
-
-export default new Router<DefaultState, Context>()
-  .get('/', getAll)
-  .get('/:id', getById)
-  .put('/:id', update)
-  .del('/:id', del);
+export default new Router<DefaultState, CustomContext>()
+  .get('/', tracks.getAll.bind(tracks))
+  .get('/:id', tracks.getById.bind(tracks))
+  .put('/:id', tracks.update.bind(tracks))
+  .del('/:id', tracks.del.bind(tracks));
 
 // // eslint-disable-next-line
 // import { rm } from 'fs/promises';

@@ -1,4 +1,7 @@
-const authorize = (tokenTestFn) => async (ctx, next) => {
+import { Next } from 'koa';
+import { CustomContext } from '../types';
+
+const authorize = (tokenTestFn) => async (ctx: CustomContext, next: Next) => {
   if (!tokenTestFn(ctx.token)) {
     ctx.throw(403, 'Unauthorized!');
   }

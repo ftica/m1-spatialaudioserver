@@ -2,6 +2,10 @@ import Router from '@koa/router';
 // import * as Router from '@koa/router';
 // import service from './services/encryption';
 // import * as Router from 'koa-router';
+// import { AuthService, UserLoginInput, UserRegisterInput } from '../services/auth-service';
+// import { ROLE_ADMIN, ROLE_USER } from '../../auth/auth-utils';
+// import { DefaultState } from 'koa';
+import { CustomContext } from '../../koa/types';
 import { ROLE_ADMIN, ROLE_USER } from '../../auth/auth-utils';
 import { Context, DefaultState } from 'koa';
 import { AuthService } from '../services/auth-service';
@@ -64,11 +68,11 @@ import ValidBody = Security.ValidBody;
  * @param  {Object}  ctx  the default koa context whose encapsulates
  *                          node's request and response objects into a single object
  */
-async function logout(ctx) {
-  // TODO logout
-  ctx.session = null;
-  ctx.status = 204;
-}
+// async function logout(ctx) {
+//   // TODO logout
+//   ctx.session = null;
+//   ctx.status = 204;
+// }
 
 // async function register(ctx) {
 //   ctx.status = 200;
@@ -113,13 +117,13 @@ function getLoginHandler() {
   };
 }
 
-function getChangeRoleHandler() {
-  const validInput = {
-    role: `required|in:${ROLE_ADMIN},${ROLE_USER}`
-  };
+// function getChangeRoleHandler() {
+//   const validInput = {
+//     role: `required|in:${ROLE_ADMIN},${ROLE_USER}`
+//   };
 
-  return async (ctx) => await ctx.validate(validInput);
-}
+//   return async (ctx) => await ctx.validate(validInput);
+// }
 
 class AuthController {
   constructor() {}
@@ -143,7 +147,7 @@ class AuthController {
 //   }
 // }
 
-export default new Router<DefaultState, Context>()
+export default new Router<DefaultState, CustomContext>()
   .post('/register', getRegisterHandler())
   .post('/login', getLoginHandler());
 // .post('/login', login)

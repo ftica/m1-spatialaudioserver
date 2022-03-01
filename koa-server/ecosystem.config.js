@@ -16,7 +16,6 @@ module.exports = {
 
     // Options reference: https://pm2.io/doc/en/runtime/reference/ecosystem-file/
 
-    watch: true,
     autorestart: true,
     env: {
       NODE_ENV: 'development',

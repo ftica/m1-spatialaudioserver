@@ -1,4 +1,7 @@
-export default () => async (ctx, next) => {
+import { Next } from 'koa';
+import { CustomContext } from '../types';
+
+export default () => async (ctx: CustomContext, next: Next) => {
   try {
     await next();
   } catch (error) {
