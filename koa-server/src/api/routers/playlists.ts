@@ -1,7 +1,15 @@
 import Router from '@koa/router';
 import { Context, DefaultState } from 'koa';
-import { Playlist } from '@prisma/client';
+import { Playlist, Role } from '@prisma/client';
 import playlistService from '../services/playlist-service';
+import { Authenticated, Authorized } from '../decorators';
+
+class PlaylistResource {
+    @Authenticated
+    private async all(ctx: Context, next?: () => any): Promise<any> {
+
+    }
+}
 
 const getAll = async ctx => {
     const playlists: Playlist[] = await playlistService.getAll(ctx.prisma.playlist);

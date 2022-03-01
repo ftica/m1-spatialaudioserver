@@ -1,37 +1,37 @@
 import Router from '@koa/router';
 import { Context, DefaultState } from 'koa';
-import { Track } from '@prisma/client';
+import { Prisma, Track } from '@prisma/client';
 import trackService from '../services/track-service';
 
 const getAll = async ctx => {
   const tracks: Track[] = await trackService.getAll(ctx.prisma.track);
   ctx.body = tracks;
-}
+};
 
 const getById = async ctx => {
   const id: string = ctx.params.id;
   const track: Track = await trackService.getById(ctx.prisma.track, id);
   ctx.body = track;
-}
+};
 
 const update = async ctx => {
   const id: string = ctx.params.id;
-  const data: Track = ctx.request.body;
+  const data: Prisma.TrackUpdateArgs = ctx.request.body;
   const track: Track = await trackService.update(ctx.prisma.track, id, data);
   ctx.body = track;
-}
+};
 
 const del = async ctx => {
   const id: string = ctx.params.id;
   const track: Track = await trackService.delete(ctx.prisma.track, id);
   ctx.body = track;
-}
+};
 
 export default new Router<DefaultState, Context>()
   .get('/', getAll)
   .get('/:id', getById)
   .put('/:id', update)
-  .del('/:id', del)
+  .del('/:id', del);
 
 // // eslint-disable-next-line
 // import { rm } from 'fs/promises';

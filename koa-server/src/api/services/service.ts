@@ -7,34 +7,38 @@
 //     delete  : async (table, id: string): Promise<Model> => await table.delete({ where: { id } })
 // }}
 
-export default class Service<Model> {
-    
-    async getById(table, id: string): Promise<Model> {
-        return await table.findUnique({ where: id });
-    }
+export interface PrismaTableAware {
+  getTable();
+}
 
-    async getAll(table): Promise<Model[]> {
-        return await table.findMany();
-    }
+export default abstract class Service<Model> implements PrismaTableAware {
+  async getById(table, id: string): Promise<Model> {
+    return await table.findUnique({ where: id });
+  }
 
-    async getPage(table, page: number, size: number): Promise<Model[]> {
-        return await table.findMany({ skip: page * size, take: size });
-    }
+  async getAll(table): Promise<Model[]> {
+    return await table.findMany();
+  }
 
-    async count(table): Promise<number> {
-        return await table.count();
-    }
+  async getPage(table, page: number, size: number): Promise<Model[]> {
+    return await table.findMany({ skip: page * size, take: size });
+  }
 
-    async update(table, id: string, data): Promise<Model> {
-        return await table.update({ where: { id }, data })
-    }
+  async count(table): Promise<number> {
+    return await table.count();
+  }
 
-    async delete(table, id: string): Promise<Model> {
-        return await table.delete({ where: { id } });
-    }
+  async update(table, id: string, data): Promise<Model> {
+    return await table.update({ where: { id }, data });
+  }
 
-    async create(table, data: Model): Promise<Model> {
-        return await table.create({ data });
-    }
+  async delete(table, id: string): Promise<Model> {
+    return await table.delete({ where: { id } });
+  }
 
+  async create(table, data: Model): Promise<Model> {
+    return await table.create({ data });
+  }
+
+  abstract getTable();
 }
