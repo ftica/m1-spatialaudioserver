@@ -1,10 +1,6 @@
 import { Playlist } from '@prisma/client';
 import Service from './service';
 
-class PlaylistService extends Service<Playlist> {
-  constructor() {
-    super('playlist');
-  }
-}
+class PlaylistService extends Service<Playlist> { }
 
-export default new PlaylistService();
+export default new PlaylistService('playlist');

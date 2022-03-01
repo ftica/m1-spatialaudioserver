@@ -6,12 +6,10 @@ import { CustomContext } from '../../koa/types';
 import Endpoint from './endpoint';
 
 export class Tracks extends Endpoint<Track> {
-  constructor() {
-    super(trackService);
-  }
+
 }
 
-const tracks = new Tracks();
+const tracks = new Tracks(trackService);
 
 export default new Router<DefaultState, CustomContext>()
   .get('/', tracks.getAll)

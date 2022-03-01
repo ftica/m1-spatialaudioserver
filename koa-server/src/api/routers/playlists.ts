@@ -3,48 +3,29 @@ import { DefaultState } from 'koa';
 import { Playlist } from '@prisma/client';
 import playlistService from '../services/playlist-service';
 import { CustomContext } from '../../koa/types';
+import Endpoint from './endpoint';
 
-const getAll = async (ctx: CustomContext) => {
-  const playlists: Playlist[] = await playlistService.getAll(ctx.prisma);
-  ctx.body = playlists;
-};
+class Playlists extends Endpoint<Playlist> {
+  async setTracks(ctx: CustomContext) {
+    const id: string = ctx.params.id;
+    const tracks: string[] = ctx.request.body;
+    const playlist: Playlist = await playlistService.update(ctx.prisma, id, { tracks: tracks.map(track => { return { id: track }; }) }, { tracks: true });
+    if (playlist === null) {
+      ctx.status = 404;
+    } else {
+      ctx.body = playlist;
+    }
+  }
 
-const getById = async (ctx: CustomContext) => {
-  const id: string = ctx.params.id;
-  const playlist: Playlist = await playlistService.getById(ctx.prisma, id, { Track: true });
-  ctx.body = playlist;
-};
-
-const update = async (ctx: CustomContext) => {
-  const id: string = ctx.params.id;
-  const data: Playlist = ctx.request.body;
-  const playlist: Playlist = await playlistService.update(ctx.prisma, id, data);
-  ctx.body = playlist;
-};
-
-const del = async (ctx: CustomContext) => {
-  const id: string = ctx.params.id;
-  const playlist: Playlist = await playlistService.delete(ctx.prisma, id);
-  ctx.body = playlist;
-};
-
-const setTracks = async (ctx: CustomContext) => {
-  const id: string = ctx.params.id;
-  const tracks: string[] = ctx.request.body;
-  const playlist: Playlist = await playlistService.update(ctx.prisma, id, { tracks: tracks.map(track => { return { id: track }; }) }, { tracks: true });
-  if (playlist === null) {
-    ctx.status = 404;
-  } else {
+  async setFavorite(ctx: CustomContext) {
+    const id: string = ctx.params.id;
+    const favorite: boolean = ctx.request.body.favorite;
+    const playlist: Playlist = await playlistService.update(ctx.prisma, id, { favorite });
     ctx.body = playlist;
   }
-};
+}
 
-const setFavorite = async (ctx: CustomContext) => {
-  const id: string = ctx.params.id;
-  const favorite: boolean = ctx.request.body.favorite;
-  const playlist: Playlist = await playlistService.update(ctx.prisma, id, { favorite });
-  ctx.body = playlist;
-};
+const playlists = new Playlists(playlistService);
 
 // const getAllowedUsers = async (ctx: CustomContext) => {
 //     const id: string = ctx.params.id;
@@ -59,13 +40,14 @@ const setFavorite = async (ctx: CustomContext) => {
 // }
 
 export default new Router<DefaultState, CustomContext>()
-  .get('/', getAll)
-  .get('/:id', getById)
-  .post('/')
-  .put('/:id', update)
-  .del('/:id', del)
-  .patch('/:id/tracks', setTracks)
-  .patch('/:id/favorite', setFavorite);
+  .get('/', playlists.getAll)
+  .get('/:id', playlists.getById)
+  .post('/', playlists.create)
+  .put('/:id', playlists.update)
+  .del('/:id', playlists.del)
+  .patch('/:id/tracks', playlists.setTracks)
+  .patch('/:id/favorite', playlists.setFavorite);
+
 //   .get('/:id/allowed-users', getAllowedUsers)
 //   .patch('/:id/allowed-users', setAllowedUsers)
 

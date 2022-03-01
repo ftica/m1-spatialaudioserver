@@ -1,12 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 
 export default class Service<Model> {
-  // abstract getTable(): string;
-
-  public table: string;
+  protected table: string;
 
   constructor(table: string) {
     this.table = table;
+    console.log('Service: ' + table);
   }
 
   async getById(prisma: PrismaClient, id: string, include: any = undefined): Promise<Model> {
