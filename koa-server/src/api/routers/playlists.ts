@@ -1,72 +1,73 @@
 import Router from '@koa/router';
-import { Context, DefaultState } from 'koa';
+import { DefaultState } from 'koa';
 import { Playlist } from '@prisma/client';
 import playlistService from '../services/playlist-service';
+import { CustomContext } from '../../koa/middleware';
 
-const getAll = async ctx => {
-    const playlists: Playlist[] = await playlistService.getAll(ctx.prisma.playlist);
-    ctx.body = playlists;
-}
+const getAll = async (ctx: CustomContext) => {
+  const playlists: Playlist[] = await playlistService.getAll(ctx.prisma.playlist);
+  ctx.body = playlists;
+};
 
-const getById = async ctx => {
-    const id: string = ctx.params.id;
-    const playlist: Playlist = await playlistService.getById(ctx.prisma.playlist, id);
+const getById = async (ctx: CustomContext) => {
+  const id: string = ctx.params.id;
+  const playlist: Playlist = await playlistService.getById(ctx.prisma.playlist, id, { Track: true });
+  ctx.body = playlist;
+};
+
+const update = async (ctx: CustomContext) => {
+  const id: string = ctx.params.id;
+  const data: Playlist = ctx.request.body;
+  const playlist: Playlist = await playlistService.update(ctx.prisma.playlist, id, data);
+  ctx.body = playlist;
+};
+
+const del = async (ctx: CustomContext) => {
+  const id: string = ctx.params.id;
+  const playlist: Playlist = await playlistService.delete(ctx.prisma.playlist, id);
+  ctx.body = playlist;
+};
+
+const setTracks = async (ctx: CustomContext) => {
+  const id: string = ctx.params.id;
+  const tracks: string[] = ctx.request.body;
+  const playlist: Playlist = await playlistService.update(ctx.prisma.playlist, id, { tracks: tracks.map(track => { return { id: track }; }) }, { tracks: true });
+  if (playlist === null) {
+    ctx.status = 404;
+  } else {
     ctx.body = playlist;
-}
+  }
+};
 
-const update = async ctx => {
-    const id: string = ctx.params.id;
-    const data: Playlist = ctx.request.body;
-    const playlist: Playlist = await playlistService.update(ctx.prisma.playlist, id, data);
-    ctx.body = playlist;
-}
+const setFavorite = async (ctx: CustomContext) => {
+  const id: string = ctx.params.id;
+  const favorite: boolean = ctx.request.body.favorite;
+  const playlist: Playlist = await playlistService.update(ctx.prisma.playlist, id, { favorite });
+  ctx.body = playlist;
+};
 
-const del = async ctx => {
-    const id: string = ctx.params.id;
-    const playlist: Playlist = await playlistService.delete(ctx.prisma.playlist, id);
-    ctx.body = playlist;
-}
-
-const setTracks = async ctx => {
-    const id: string = ctx.params.id;
-    const tracks: string[] = ctx.request.body;
-    const playlist: Playlist = await playlistService.update(ctx.prisma.playlist, id, { tracks: tracks.map(t => { id: t }) });
-    ctx.body = playlist;
-}
-
-const setFavorite = async ctx => {
-    const id: string = ctx.params.id;
-    const favorite: boolean = ctx.request.body.favorite;
-    const playlist: Playlist = await playlistService.update(ctx.prisma.playlist, id, { favorite });
-    ctx.body = playlist;
-}
-
-// const getAllowedUsers = async ctx => {
+// const getAllowedUsers = async (ctx: CustomContext) => {
 //     const id: string = ctx.params.id;
 //     const playlist: User[] = await playlistService.getById(ctx.prisma, id);
 //     ctx.body = playlist;
 // }
 
-// const setAllowedUsers = async ctx => {
+// const setAllowedUsers = async (ctx: CustomContext) => {
 //     const id: string = ctx.params.id;
 //     const playlist: User[] = await playlistService.update(ctx.prisma. id).allowed_users;
 //     ctx.body = playlist;
 // }
 
-export default new Router<DefaultState, Context>()
+export default new Router<DefaultState, CustomContext>()
   .get('/', getAll)
   .get('/:id', getById)
   .post('/')
   .put('/:id', update)
   .del('/:id', del)
   .patch('/:id/tracks', setTracks)
-  .patch('/:id/favorite', setFavorite)
+  .patch('/:id/favorite', setFavorite);
 //   .get('/:id/allowed-users', getAllowedUsers)
 //   .patch('/:id/allowed-users', setAllowedUsers)
-
-
-
-
 
 // import _ from 'lodash';
 // import Router from '@koa/router';
@@ -81,7 +82,7 @@ export default new Router<DefaultState, Context>()
 // //  */
 // // protectored: ['create', 'update', 'del'],
 // /**
-//  * @param  {Object}  ctx  the default koa context whose encapsulates
+//  * @param  {Object}  (ctx: CustomContext)  the default koa context whose encapsulates
 //  *                          node's request and response objects into a single object
 //  */
 // async function list(ctx) {
@@ -92,7 +93,7 @@ export default new Router<DefaultState, Context>()
 
 // /**
 //  * Creating a new playlist by PlaylistModel and save it to DB
-//  * @param  {Object}  ctx  the default koa context whose encapsulates
+//  * @param  {Object}  (ctx: CustomContext)  the default koa context whose encapsulates
 //  *                          node's request and response objects into a single object
 //  */
 // async function create(ctx) {
@@ -111,7 +112,7 @@ export default new Router<DefaultState, Context>()
 
 // /**
 //  * Updating a playlist by playlist id and save it to DB
-//  * @param  {Object}  ctx  the default koa context whose encapsulates
+//  * @param  {Object}  (ctx: CustomContext)  the default koa context whose encapsulates
 //  *                          node's request and response objects into a single object
 //  */
 // async function update(ctx) {
@@ -137,7 +138,7 @@ export default new Router<DefaultState, Context>()
 // /**
 //  * Removing a playlist from DB by playlist id and return empty body with 204;
 //  * returns 404 if not found
-//  * @param  {Object}  ctx  the default koa context whose encapsulates
+//  * @param  {Object}  (ctx: CustomContext)  the default koa context whose encapsulates
 //  *                          node's request and response objects into a single object
 //  */
 // async function remove(ctx) {

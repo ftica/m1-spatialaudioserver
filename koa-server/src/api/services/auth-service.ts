@@ -16,7 +16,7 @@ const login = async (prisma: PrismaClient, input: UserLoginInput): Promise<Acces
   const user: User = await prisma.user.findUnique({ where: { username: input.username } });
 
   if (!await verifyPassword(input.password, fromPasswordString(user.password))) {
-    console.log("AAAAAAAAAAAAaaaaaaaa");
+    console.log('AAAAAAAAAAAAaaaaaaaa');
     return null;
   }
 

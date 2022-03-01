@@ -8,33 +8,33 @@
 // }}
 
 export default class Service<Model> {
-    
-    async getById(table, id: string): Promise<Model> {
-        return await table.findUnique({ where: id });
-    }
+  async getById(table, id: string, include: any = undefined): Promise<Model> {
+    return await table.findUnique({ where: { id } }, { include });
+  }
 
-    async getAll(table): Promise<Model[]> {
-        return await table.findMany();
-    }
+  async getAll(table): Promise<Model[]> {
+    return await table.findMany();
+  }
 
-    async getPage(table, page: number, size: number): Promise<Model[]> {
-        return await table.findMany({ skip: page * size, take: size });
-    }
+  async getPage(table, page: number, size: number): Promise<Model[]> {
+    return await table.findMany({ skip: page * size, take: size });
+  }
 
-    async count(table): Promise<number> {
-        return await table.count();
-    }
+  async count(table): Promise<number> {
+    const num = await table.count();
+    console.log(num);
+    return num;
+  }
 
-    async update(table, id: string, data): Promise<Model> {
-        return await table.update({ where: { id }, data })
-    }
+  async update(table, id: string, data, include = undefined): Promise<Model> {
+    return await table.update({ where: { id }, data }, include);
+  }
 
-    async delete(table, id: string): Promise<Model> {
-        return await table.delete({ where: { id } });
-    }
+  async delete(table, id: string): Promise<Model> {
+    return await table.delete({ where: { id } });
+  }
 
-    async create(table, data: Model): Promise<Model> {
-        return await table.create({ data });
-    }
-
+  async create(table, data: Model): Promise<Model> {
+    return await table.create({ data });
+  }
 }
