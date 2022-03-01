@@ -18,24 +18,22 @@ export class AuthService {
     return new Date(Date.now() + (60 * 60));
   }
 
-  private static getRequestToken(value: AccessToken & { user: { username: string, role: Role } }) {
+  private static getRequestToken(value: Token) {
     return {
       id: value.id,
       validUntil: value.validUntil,
       userId: value.userId,
-      username: value.user.username,
-      roles: [value.user.role]
+      username: value.username,
+      roles: value.roles
     };
   }
 
   private async createToken(prisma: PrismaClient, user: User): Promise<Token> {
-    // return await prisma.accessToken
-    //   .create({
-    //     data: { validUntil: this.validUntil, userId: user.id },
-    //     include: { user: { select: { username: true, role: true } } }
-    //   })
-    //   .then(AuthService.getRequestToken);
-    return null;
+    return await prisma.accessToken
+      .create({
+        data: { validUntil: this.validUntil, userId: user.id }
+      })
+      .then(AuthService.getRequestToken);
   }
 
   public async login(prisma: PrismaClient, input: UserLoginInput): Promise<string> {
