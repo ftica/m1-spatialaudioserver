@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
 
-import { encryptSync } from '../services/encryption-service';
+// import { encryptSync } from '../services/encryption-service';
 import Model from './model';
 
 export default class UserModel extends Model {
@@ -30,9 +30,9 @@ export default class UserModel extends Model {
     }
 
     if (_.has(item, 'password')) {
-      const { hash, salt } = encryptSync(_.get(item, 'password'));
-      this.#item.hash = hash;
-      this.#item.salt = salt;
+      // const { hash, salt } = encryptSync(_.get(item, 'password'));
+      // this.#item.hash = hash;
+      // this.#item.salt = salt;
     }
   }
 

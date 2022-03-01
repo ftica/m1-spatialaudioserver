@@ -2,10 +2,10 @@ import Router from '@koa/router';
 import { DefaultState } from 'koa';
 import { Track } from '@prisma/client';
 import { CustomContext } from '../../koa/types';
-import Endpoint from './endpoint';
+import ModelEndpoint from './model-endpoint';
 import trackService, { TrackService } from '../services/track-service';
 
-export class Tracks extends Endpoint<Track, TrackService> { }
+export class Tracks extends ModelEndpoint<Track, TrackService> { }
 
 const tracks = new Tracks(trackService);
 

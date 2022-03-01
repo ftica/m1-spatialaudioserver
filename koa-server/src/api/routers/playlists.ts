@@ -2,10 +2,10 @@ import Router from '@koa/router';
 import { DefaultState } from 'koa';
 import { Playlist } from '@prisma/client';
 import { CustomContext } from '../../koa/types';
-import Endpoint from './endpoint';
+import ModelEndpoint from './model-endpoint';
 import playlistService, { PlaylistService } from '../services/playlist-service';
 
-class Playlists extends Endpoint<Playlist, PlaylistService> {
+class Playlists extends ModelEndpoint<Playlist, PlaylistService> {
   async setTracks(ctx: CustomContext) {
     const id: string = ctx.params.id;
     const tracks: string[] = ctx.request.body;

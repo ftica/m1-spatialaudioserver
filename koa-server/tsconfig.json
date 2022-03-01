@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
     "outDir": "./build",
-    "allowJs": true,
     "target": "es5",
-    "esModuleInterop": true
+    "allowJs": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true
   },
   "include": ["./src/**/*"]
 }
