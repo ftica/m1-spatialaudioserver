@@ -5,33 +5,33 @@ import playlistService from '../services/playlist-service';
 import { CustomContext } from '../../koa/types';
 
 const getAll = async (ctx: CustomContext) => {
-  const playlists: Playlist[] = await playlistService.getAll(ctx.prisma.playlist);
+  const playlists: Playlist[] = await playlistService.getAll(ctx.prisma);
   ctx.body = playlists;
 };
 
 const getById = async (ctx: CustomContext) => {
   const id: string = ctx.params.id;
-  const playlist: Playlist = await playlistService.getById(ctx.prisma.playlist, id, { Track: true });
+  const playlist: Playlist = await playlistService.getById(ctx.prisma, id, { Track: true });
   ctx.body = playlist;
 };
 
 const update = async (ctx: CustomContext) => {
   const id: string = ctx.params.id;
   const data: Playlist = ctx.request.body;
-  const playlist: Playlist = await playlistService.update(ctx.prisma.playlist, id, data);
+  const playlist: Playlist = await playlistService.update(ctx.prisma, id, data);
   ctx.body = playlist;
 };
 
 const del = async (ctx: CustomContext) => {
   const id: string = ctx.params.id;
-  const playlist: Playlist = await playlistService.delete(ctx.prisma.playlist, id);
+  const playlist: Playlist = await playlistService.delete(ctx.prisma, id);
   ctx.body = playlist;
 };
 
 const setTracks = async (ctx: CustomContext) => {
   const id: string = ctx.params.id;
   const tracks: string[] = ctx.request.body;
-  const playlist: Playlist = await playlistService.update(ctx.prisma.playlist, id, { tracks: tracks.map(track => { return { id: track }; }) }, { tracks: true });
+  const playlist: Playlist = await playlistService.update(ctx.prisma, id, { tracks: tracks.map(track => { return { id: track }; }) }, { tracks: true });
   if (playlist === null) {
     ctx.status = 404;
   } else {
@@ -42,7 +42,7 @@ const setTracks = async (ctx: CustomContext) => {
 const setFavorite = async (ctx: CustomContext) => {
   const id: string = ctx.params.id;
   const favorite: boolean = ctx.request.body.favorite;
-  const playlist: Playlist = await playlistService.update(ctx.prisma.playlist, id, { favorite });
+  const playlist: Playlist = await playlistService.update(ctx.prisma, id, { favorite });
   ctx.body = playlist;
 };
 

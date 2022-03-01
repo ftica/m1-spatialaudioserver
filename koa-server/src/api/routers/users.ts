@@ -6,13 +6,13 @@ import { validate } from '../validation';
 import { CustomContext } from '../../koa/types';
 
 const getAll = async (ctx: CustomContext) => {
-  const users = await userService.getAll(ctx.prisma.user);
+  const users = await userService.getAll(ctx.prisma);
   ctx.body = users;
 };
 
 const getByUsername = async (ctx: CustomContext) => {
   const username: string = ctx.params.username;
-  const user = await userService.getByUsername(ctx.prisma.user, username);
+  const user = await userService.getByUsername(ctx.prisma, username);
   if (user === null) {
     ctx.status = 404;
   } else {
@@ -23,7 +23,7 @@ const getByUsername = async (ctx: CustomContext) => {
 const update = async (ctx: CustomContext) => {
   const username: string = ctx.params.username;
   const data: User = ctx.request.body;
-  const user = await userService.update(ctx.prisma.user, username, data);
+  const user = await userService.update(ctx.prisma, username, data);
   if (user == null) {
     ctx.status = 404;
   } else {
@@ -33,7 +33,7 @@ const update = async (ctx: CustomContext) => {
 
 const del = async (ctx: CustomContext) => {
   const username: string = ctx.params.username;
-  const user = await userService.delete(ctx.prisma.user, username);
+  const user = await userService.delete(ctx.prisma, username);
   if (user == null) {
     ctx.status = 404;
   } else {
@@ -52,17 +52,10 @@ const create = async (ctx: CustomContext) => {
   // TODO: if current user not admin?
   // delete data.role;
 
-  // const parsedData: User = {
-  //   username: data.username,
-  //   password: data.password,
-  // }
-
   const errors = await validate(data, {
     username: 'required|minLength:2|maxLength:20', // TODO: "profile" and "count" are reserved because /users/:username wouldn't map to getById when querying for that user
     password: 'required|minLength:5|maxLength:255'
   });
-
-  console.log(errors);
 
   if (errors) {
     ctx.status = 400;
@@ -70,19 +63,7 @@ const create = async (ctx: CustomContext) => {
     return;
   }
 
-  // const validator = new Validator(data, {
-  //   username: "required|minLength:2",
-  //   password: "required|minLength:8",
-  //   // email: "required|email"
-  // });
-
-  // if(!await validator.check()) {
-  //   ctx.status = 400;
-  //   ctx.body = { errors: validator.errors }
-  //   return;
-  // }
-
-  const user = await userService.create(ctx.prisma.user, data);
+  const user = await userService.create(ctx.prisma, data);
 
   delete user.password;
 
@@ -97,15 +78,12 @@ const setActive = async (ctx: CustomContext) => {
   const id: string = ctx.params.id;
   const active: boolean = ctx.request.body.active;
 
-  const user = await userService.update(ctx.prisma.user, id, { active });
+  const user = await userService.update(ctx.prisma, id, { active });
   ctx.body = user;
 };
 
 const getCount = async (ctx: CustomContext) => {
-  console.log('num');
-  const num = await userService.count(ctx.prisma.user);
-  console.log(num);
-  ctx.body = num;
+  ctx.body = await userService.count(ctx.prisma);
 };
 
 export default new Router<DefaultState, CustomContext>()
