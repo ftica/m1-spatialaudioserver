@@ -1,7 +1,9 @@
+import { Role } from '@prisma/client';
 import { Next } from 'koa';
+import { Token } from '../../api/services/jwt-service';
 import { CustomContext } from '../types';
 
-const authorize = (tokenTestFn) => async (ctx: CustomContext, next: Next) => {
+export const authorize = (tokenTestFn: (token: Token) => boolean) => async (ctx: CustomContext, next: Next) => {
   if (!tokenTestFn(ctx.token)) {
     ctx.throw(403, 'Unauthorized!');
   }
@@ -9,11 +11,5 @@ const authorize = (tokenTestFn) => async (ctx: CustomContext, next: Next) => {
   await next();
 };
 
-const hasAnyRole = (...roles) => authorize(
-  (token) => token.roles.some((role) => roles.includes(role))
-);
-
-export {
-  authorize,
-  hasAnyRole
-};
+export const hasAnyRole = (...roles: Role[]) =>
+  authorize((token: Token) => roles.includes(token.role));
