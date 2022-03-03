@@ -5,14 +5,14 @@ import logger from 'koa-logger';
 import bodyparser from 'koa-bodyparser';
 import serve from 'koa-static';
 // import session from 'koa-session';
-import { koa as validator } from 'node-input-validator';
+// import { koa as validator } from 'node-input-validator';
 
 // import cors from './cors';
 import errors from './errors';
 import tokenParser from './token-parser';
 import database from './database';
 
-const dir = path.join(__dirname, '../..', 'www');
+const staticDir = path.join(__dirname, '../../..', 'public');
 
 export default () => compose([
   logger(),
@@ -22,6 +22,6 @@ export default () => compose([
   tokenParser(),
   bodyparser(),
   // @ts-ignore
-  validator(),
-  serve(dir)
+  // validator(),
+  serve(staticDir)
 ]);
