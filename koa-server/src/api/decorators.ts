@@ -16,11 +16,11 @@ export namespace Security {
 
   const getAuthorizedHandler = (original: AsyncHandler, roles: Role[]): AsyncHandler =>
     async (ctx: CustomContext, next?: Next) => {
-      if (!ctx.token.roles) {
+      if (!ctx.token.role) {
         ctx.throw(400, 'Failed to authorize user');
       }
 
-      if (!roles.filter(r => ctx.token.roles.includes(r)).length) {
+      if (!roles.includes(ctx.token.role)) {
         ctx.throw(403, 'Unauthorized');
       }
 

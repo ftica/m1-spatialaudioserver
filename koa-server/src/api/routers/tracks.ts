@@ -57,8 +57,7 @@ export default new Router<DefaultState, CustomContext>()
 //   // and should be added the status of live broadcast
 
 //   // FIXME: all this setting need to move to env var
-//   await got.get(`http://m1-transcode/play?sound=${track.originalname}&id=${track.id}`)
-//     .json();
+//   await got.get(`http://m1-transcode/play?sound=${track.originalname}&id=${track.id}`).json();
 //   await ctx.redis.hset(`track:${id}`, { prepared: true });
 //   ctx.status = 204;
 // }

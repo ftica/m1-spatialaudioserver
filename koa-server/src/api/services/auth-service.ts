@@ -1,10 +1,11 @@
 import { AccessToken, PrismaClient, Role, User } from '@prisma/client';
 import encryptionService, { EncryptionService } from './encryption-service';
 import jwtService, { JwtService, Token } from './jwt-service';
+import userService from './user-service';
 
 export type UserLoginInput = { username: string, password: string };
 export type UserRegisterInput = { username: string, password: string };
-export type UserInfo = { username: string, roles: string[] };
+export type UserInfo = { username: string, role: string };
 export type TokenData = AccessToken & UserInfo;
 
 export class AuthService {
@@ -17,26 +18,22 @@ export class AuthService {
     return new Date(Date.now() + (60 * 60));
   }
 
-  private static getRequestToken(value: Token) {
+  private async getOrCreateToken(prisma: PrismaClient, user: User): Promise<Token> {
+    const token: AccessToken =
+      await prisma.accessToken.findUnique({ where: { id: undefined, userId: user.id } }) ??
+      await prisma.accessToken.create({ data: { userId: user.id, validUntil: this.validUntil } });
+
     return {
-      id: value.id,
-      validUntil: value.validUntil,
-      userId: value.userId,
-      username: value.username,
-      roles: value.roles
+      id: token.id,
+      userId: user.id,
+      validUntil: token.validUntil,
+      username: user.username,
+      role: user.role
     };
   }
 
-  private async createToken(prisma: PrismaClient, user: User): Promise<Token> {
-    return await prisma.accessToken
-      .create({
-        data: { validUntil: this.validUntil, userId: user.id }
-      })
-      .then(AuthService.getRequestToken);
-  }
-
   public async login(prisma: PrismaClient, input: UserLoginInput): Promise<string> {
-    const user: User = await prisma.user.findUnique({ where: { username: input.username } });
+    const user: User = await userService.getByUsername(prisma, input.username);
     const passwordCorrect: boolean = await this.encryptionService.verifyPassword(input.password, user.password);
 
     if (!passwordCorrect) {
@@ -44,20 +41,18 @@ export class AuthService {
       return null;
     }
 
-    const token: Token = await this.createToken(prisma, user);
+    const token: Token = await this.getOrCreateToken(prisma, user);
 
     return await this.jwtService.sign(token);
   }
 
   public async register(prisma: PrismaClient, input: UserRegisterInput): Promise<User> {
-    return await prisma.user
-      .create({
-        data: {
-          username: input.username,
-          password: await this.encryptionService.digest(input.password),
-          role: Role.USER
-        }
-      });
+    return await userService.create(prisma, {
+      id: undefined,
+      username: input.username,
+      password: await this.encryptionService.digest(input.password),
+      role: Role.USER
+    });
   }
 }
 

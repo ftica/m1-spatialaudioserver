@@ -1,10 +1,10 @@
 import path from 'path';
-import { readFile } from 'fs/promises';
+import { readFileSync } from 'fs';
 import { AccessToken, Role } from '@prisma/client';
 import { promisify } from 'util';
 import jwt, { Secret, SignOptions, VerifyOptions } from 'jsonwebtoken';
 
-export type Payload = { 'username': 'PUBLIC', 'roles': Role[] }
+export type Payload = { 'username': string, 'role': Role }
 export type Token = AccessToken & Payload;
 
 export class JwtService {
@@ -35,13 +35,7 @@ export class JwtService {
   }
 }
 
-let jwtService: JwtService = null;
-
-Promise.all([
-  readFile(path.resolve(__dirname, '../../auth/dev.key')),
-  readFile(path.resolve(__dirname, '../../auth/dev.key.pub'))
-]).then(([privateKey, publicKey]) => {
-  jwtService = new JwtService(privateKey, publicKey);
-});
-
-export default jwtService;
+export default new JwtService(
+  readFileSync(path.resolve(__dirname, '../../auth/dev.key')),
+  readFileSync(path.resolve(__dirname, '../../auth/dev.key.pub'))
+);

@@ -30,7 +30,7 @@ class Auth {
   }
 
   private static readonly validUserLoginInput = {
-    email: 'required|email',
+    username: 'required',
     password: 'required|minLength:8'
   };
 
