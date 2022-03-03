@@ -1,8 +1,7 @@
 import path from 'path';
 import { readFileSync } from 'fs';
 import { AccessToken, Role } from '@prisma/client';
-import { promisify } from 'util';
-import jwt, { Secret, SignOptions, VerifyOptions } from 'jsonwebtoken';
+import jwt, { Secret, SignOptions, VerifyOptions, Jwt } from 'jsonwebtoken';
 
 export type Payload = { 'username': string, 'role': Role }
 export type Token = AccessToken & Payload;
@@ -20,18 +19,18 @@ export class JwtService {
     };
   }
 
-  private static readonly signJwt: (payload: Payload, secret: Secret, options?: SignOptions) => Promise<string>
-    = promisify(jwt.sign);
+  private static readonly signJwt: (payload: Payload, secret: Secret, options?: SignOptions) => string =
+    jwt.sign;
 
-  private static readonly verifyToken: (token: string, secret: Secret, options?: VerifyOptions) => Promise<object>
-    = promisify(jwt.verify);
+  private static readonly verifyToken: (token: string, secret: Secret, options?: VerifyOptions) => Jwt =
+    jwt.verify;
 
-  public async sign(payload: Payload): Promise<string> {
-    return await JwtService.signJwt(payload, this.secret, this.signOptions);
+  public sign(payload: Payload): string {
+    return JwtService.signJwt(payload, this.secret, this.signOptions);
   }
 
-  public async verify(token: string): Promise<object> {
-    return await JwtService.verifyToken(token, this.publicKey, { complete: false });
+  public verify(token: string): Jwt {
+    return JwtService.verifyToken(token, this.publicKey, { complete: true });
   }
 }
 

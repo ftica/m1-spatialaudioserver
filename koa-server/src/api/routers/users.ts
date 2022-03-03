@@ -38,7 +38,11 @@ class Users extends ModelEndpoint<User, UserService> {
   }
 
   async profile(ctx: CustomContext) {
-    ctx.body = 'profile';
+    if (ctx.token) {
+      ctx.body = ctx.token?.username;
+    } else {
+      ctx.status = 404;
+    }
   }
 
   async setActive(ctx: CustomContext) {

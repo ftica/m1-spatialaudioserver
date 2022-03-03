@@ -34,15 +34,17 @@ export class AuthService {
 
   public async login(prisma: PrismaClient, input: UserLoginInput): Promise<string> {
     const user: User = await userService.getByUsername(prisma, input.username);
-    const passwordCorrect: boolean = await this.encryptionService.verifyPassword(input.password, user.password);
+    if (user) {
+      return null;
+    }
 
+    const passwordCorrect: boolean = await this.encryptionService.verifyPassword(input.password, user.password);
     if (!passwordCorrect) {
       console.log(`${new Date()} Failed login for user ${user.username}#${user.id}`);
       return null;
     }
 
     const token: Token = await this.getOrCreateToken(prisma, user);
-
     return await this.jwtService.sign(token);
   }
 
