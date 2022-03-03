@@ -2,11 +2,9 @@ import { CustomContext } from '../../koa/types';
 import Service from '../services/service';
 
 export default class ModelEndpoint<Model, ModelService extends Service<Model>> {
-  protected readonly service: ModelService;
-
-  constructor(service: ModelService) {
-    this.service = service;
-  }
+  constructor(
+    protected readonly service: ModelService
+  ) { }
 
   async getAll(ctx: CustomContext) {
     const models = await this.service.getAll(ctx.prisma);

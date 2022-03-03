@@ -1,7 +1,6 @@
 import Router from '@koa/router';
 import { DefaultState } from 'koa';
 import { User } from '@prisma/client';
-import { validate } from '../validation';
 import { CustomContext } from '../../koa/types';
 import ModelEndpoint from './model-endpoint';
 import userService, { UserService } from '../services/user-service';
@@ -38,35 +37,6 @@ class Users extends ModelEndpoint<User, UserService> {
     }
   }
 
-  async create(ctx: CustomContext) {
-    const data: User = {
-      id: undefined,
-      username: ctx.request.body.username,
-      password: ctx.request.body.password,
-      role: ctx.request.body.role
-    };
-
-    // TODO: if current user not admin?
-    // delete data.role;
-
-    const errors = await validate(data, {
-      username: 'required|minLength:2|maxLength:20', // TODO: "profile" and "count" are reserved because /users/:username wouldn't map to getById when querying for that user
-      password: 'required|minLength:5|maxLength:255'
-    });
-
-    if (errors) {
-      ctx.status = 400;
-      ctx.body = { errors };
-      return;
-    }
-
-    const user = await this.service.create(ctx.prisma, data);
-
-    delete user.password;
-
-    ctx.body = user;
-  }
-
   async profile(ctx: CustomContext) {
     ctx.body = 'profile';
   }
@@ -87,7 +57,6 @@ export default new Router<DefaultState, CustomContext>()
   .get('/count', users.count.bind(users))
   .get('/profile', users.profile.bind(users))
   .get('/:username', users.getByUsername.bind(users))
-  .post('/', users.create.bind(users))
   .put('/:username', users.update.bind(users))
   .del('/:username', users.del.bind(users))
   .patch('/:username/active', users.setActive.bind(users));

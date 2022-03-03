@@ -32,10 +32,6 @@ export class EncryptionService {
   private static readonly pbkdf2: (password: BinaryLike, salt: BinaryLike, iterations: number, keyLength: number, digest: string) => Promise<Buffer> =
     promisify(crypto.pbkdf2);
 
-  public passwordString(algorithm: string, iterations: number, length: number, hash: string, salt: string): string {
-    return `${algorithm}:${iterations}:${length}:${hash}:${salt}`;
-  }
-
   public constructor(
     private readonly config?: EncryptionConfig
   ) {
@@ -46,6 +42,10 @@ export class EncryptionService {
       saltBytes: parseInt(process.env.PASS_SALT_BYTES) || EncryptionService.DEFAULT_CONFIG.saltBytes,
       encoding: EncryptionService.DEFAULT_CONFIG.encoding
     };
+  }
+
+  public passwordString(algorithm: string, iterations: number, length: number, hash: string, salt: string): string {
+    return `${algorithm}:${iterations}:${length}:${hash}:${salt}`;
   }
 
   public passwordObject(password: string): PasswordObject {
@@ -72,13 +72,7 @@ export class EncryptionService {
       .pbkdf2(input, salt, this.config.iterations, this.config.hashLength, this.config.algorithm)
       .then(bytes => bytes.toString(this.config.encoding));
 
-    return this.passwordString(
-      this.config.algorithm,
-      this.config.iterations,
-      this.config.hashLength,
-      hash,
-      salt
-    );
+    return this.passwordString(this.config.algorithm, this.config.iterations, this.config.hashLength, hash, salt);
   }
 
   public async verifyPassword(input: string, savedPassword: string): Promise<boolean> {

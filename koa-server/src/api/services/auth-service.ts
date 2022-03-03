@@ -8,11 +8,10 @@ export type UserInfo = { username: string, roles: string[] };
 export type TokenData = AccessToken & UserInfo;
 
 export class AuthService {
-  // eslint-disable-next-line no-useless-constructor
   constructor(
     private readonly encryptionService: EncryptionService,
     private readonly jwtService: JwtService
-  ) {}
+  ) { }
 
   private get validUntil() {
     return new Date(Date.now() + (60 * 60));
@@ -89,7 +88,6 @@ export default new AuthService(encryptionService, jwtService);
 //     return this.encryptionServiceClass.getInstance();
 //   }
 
-//   // eslint-disable-next-line no-useless-constructor
 //   private constructor(
 //      private readonly encryptionServiceClass: (typeof EncryptionService) = EncryptionService
 //   ) {}

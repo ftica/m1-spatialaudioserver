@@ -1,11 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 
 export default class Service<Model> {
-  protected readonly table: string;
-
-  constructor(table: string) {
-    this.table = table;
-  }
+  constructor(
+    protected readonly table: string
+  ) { }
 
   async getById(prisma: PrismaClient, id: string, include: any = undefined): Promise<Model> {
     return await prisma[this.table].findUnique({ where: { id } }, { include });
