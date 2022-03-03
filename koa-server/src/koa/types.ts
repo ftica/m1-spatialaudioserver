@@ -7,6 +7,6 @@ export type CustomContext = Context & {
   prisma: PrismaClient;
   request: Request;
   token?: Token;
-  validate?: Function,
-  validator?: Validator
+  validate?: Function;
+  validator?: Validator;
 }
