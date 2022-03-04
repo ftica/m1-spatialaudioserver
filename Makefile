@@ -1,62 +1,91 @@
-s3_bucket_name =
-s3_stage_bucket_name =
-
+#s3_bucket_name =
+#s3_stage_bucket_name =
+#
 # getting OS type
 ifeq ($(OS),Windows_NT)
+	SHELL=pwsh
 	detected_OS := Windows
 else
 	detected_OS := $(shell uname)
 endif
-
+#
 clean:
-	cd vue-front && rm -rf ./node_modules
-	cd koa-server && rm -rf ./node_modules
+ifeq ($(OS),Windows_NT)
+	del /s .\vue-front\node_modules .\vue-front\dist .\koa-server\node_modules .\koa-server\build
+else
+	rm -rf ./vue-front/node_modules ./vue-front/dist ./koa-server/node_modules ./koa-server/build
+endif
 clear: clean
 
 stop:
-ifeq ($(shell docker ps -q --filter name="m1*"),)
-	# No m1 containers found.
-else
-	docker container stop $(shell docker ps -q --filter name="m1*")
-endif
+	@echo Stopped
+#ifneq ($(shell docker ps -q --filter name="m1*"),)
+#	docker container stop $(shell docker ps -q --filter name="m1*")
+#endif
 
-setup:
-	cd koa-server && npm i
-	cd vue-front && npm i
+build-ffmpeg:
+	docker buildx build -t mach1-spatial/m1-ffmpeg:4.4-build . -f ./containers/ffmpeg/Dockerfile --no-cache
 
-# docker network create m1-network &> /dev/null
-build: stop
-	docker build -f ./containers/koa/Dockerfile -t m1-api .
-	docker build -f ./containers/nginx/Dockerfile -t m1-transcode .
-	docker build -f ./containers/redis/Dockerfile -t m1-redis .
+build-nginx:
+	docker buildx build -t mach1-spatial/m1-nginx:1.21.6-build . -f ./containers/nginx/Dockerfile --no-cache
 
-deploy: build
-	# deploys build to public AWS bucket
-	# NOTE: relies on `mach1` keys in `~/.aws/credentials`
+build-vue:
+	docker buildx build -t mach1-spatial/m1-vue:dev-build . -f ./containers/vue/Dockerfile --no-cache
 
-stage: build
-	# deploys build to public staging AWS bucket
-	# NOTE: relies on `mach1` keys in `~/.aws/credentials`
+build-web: build-ffmpeg build-nginx build-vue
+	docker buildx build -t mach1-spatial/m1-spatial-web:dev . -f ./containers/frontend/Dockerfile --no-cache
 
-local: build
-	make -i -k stop
-	make run_redis_docker
-	make run_node_docker
-	make run_nginx_docker
+run-web: build-web
+	docker run -d mach1-spatial/m1-spatial-web:dev -p 1935:1935 -p 8080:80 -p 443:443
 
-run_node_docker:
-	docker run -it -d --net m1-network --name m1-api --rm m1-api
-run_redis_docker:
-	docker run -it -d -p 6379:6379 --net m1-network --name m1-redis --rm m1-redis
-run_nginx_docker:
-	docker run -it -p 1935:1935 -p 8080:80 \
-		--net m1-network \
-		 --mount type=bind,source="$(shell pwd)/koa-server/public",target=/share/sound \
-		 --name m1-transcode \
-		 --rm m1-transcode
+# docker run -it -p 1935:1935 -p 8080:80 -p 443:443 mach1.tech/runtime/m1-spatial-web:dev --mount type=bind,source="C:\\Users\\Fedja\\Webstor
+  #mProjects\\m1-spatialaudioserver\\koa-server\\public",target=/share/sound --name m1-spatial-web --rm m1-spatial-web
 
-development: stop
-	io.elementary.terminal --new-tab --working-directory="$(shell pwd)" --execute="make run_redis_docker"
-	io.elementary.terminal --new-tab --working-directory="$(shell pwd)" --execute="make run_nginx_docker"
-	io.elementary.terminal --new-tab --working-directory="$(shell pwd)" --execute="make run_node_docker"
-	io.elementary.terminal --new-tab --working-directory="$(shell pwd)/vue-front"
+#
+#stop:
+#ifeq ($(shell docker ps -q --filter name="m1*"),)
+#	# No m1 containers found.
+#else
+#	docker container stop $(shell docker ps -q --filter name="m1*")
+#endif
+#
+#setup:
+#	cd koa-server && npm i
+#	cd vue-front && npm i
+#
+## docker network create m1-network &> /dev/null
+#build: stop
+#	docker build -f ./containers/koa/Dockerfile -t m1-api .
+#	docker build -f ./containers/nginx/Dockerfile -t m1-transcode .
+#	docker build -f ./containers/redis/Dockerfile -t m1-redis .
+#
+#deploy: build
+#	# deploys build to public AWS bucket
+#	# NOTE: relies on `mach1` keys in `~/.aws/credentials`
+#
+#stage: build
+#	# deploys build to public staging AWS bucket
+#	# NOTE: relies on `mach1` keys in `~/.aws/credentials`
+#
+#local: build
+#	make -i -k stop
+#	make run_redis_docker
+#	make run_node_docker
+#	make run_nginx_docker
+#
+#run_node_docker:
+#	docker run -it -d --net m1-network --name m1-api --rm m1-api
+#run_redis_docker:
+#	docker run -it -d -p 6379:6379 --net m1-network --name m1-redis --rm m1-redis
+#run_nginx_docker:
+#	docker run -it -p 1935:1935 -p 8080:80 \
+#		--net m1-network \
+#		 --mount type=bind,source="$(shell pwd)/koa-server/public",target=/share/sound \
+#		 --name m1-transcode \
+#		 --rm m1-transcode
+#
+#development: stop
+#	io.elementary.terminal --new-tab --working-directory="$(shell pwd)" --execute="make run_redis_docker"
+#	io.elementary.terminal --new-tab --working-directory="$(shell pwd)" --execute="make run_nginx_docker"
+#	io.elementary.terminal --new-tab --working-directory="$(shell pwd)" --execute="make run_node_docker"
+#	io.elementary.terminal --new-tab --working-directory="$(shell pwd)/vue-front"

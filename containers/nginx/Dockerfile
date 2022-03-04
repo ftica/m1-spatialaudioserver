@@ -1,208 +1,82 @@
-# Global Enviroment Variable
-ARG FFMPEG=4.4
-ARG LUA_JIT=2.0.5
-ARG LUA_NGINX_MODULE=0.10.19
-ARG NGINX_DEV=0.3.1
-ARG NGINX=1.20.0
-ARG RTMP_MODULE=1.2.1
-ARG VOD_MODULE=1.28
+FROM alpine:3.15.0 as nginx-build
 
-# NGINX build with RTMP module from source code
-FROM ubuntu:focal as nginx-build
-ARG LUA_JIT=2.1-20210510
-ARG LUA_NGINX_MODULE=0.10.19
-ARG LUA_RESTY_CORE=0.1.21
-ARG LUA_RESTY_CACHE=0.10
-ARG NGINX_DEV=0.3.1
-ARG NGINX=1.20.0
-ARG RTMP_MODULE=1.2.1
-ARG VOD_MODULE=1.28
+ARG NGINX_VER=1.21.6
+ARG NGINX_RTMP_VER=1.2.2
+ARG NGINX_DEV_KIT_VER=0.3.1
+ARG NGINX_VOD_VER=1.28
+ARG LUA_NGINGX_MODULE_VER=0.10.19
+ARG LUA_JIT_VER=2.1-20210510
+ARG LUA_RESTY_CORE_VER=0.1.21
+ARG LUA_RESTY_CACHE_VER=0.10
+ARG MAKEFLAGS="-j4"
 
-# Install build dependencies for Ubuntu
-RUN apt-get update && apt-get install -y \
-  build-essential \
+# install dependencies
+RUN apk add --no-cache \
+  build-base \
   ca-certificates \
-  libpcre3-dev \
-  libssl-dev \
+  curl \
+  gcc \
+  libc-dev \
+  libgcc \
+  linux-headers \
+  make \
+  musl-dev \
   openssl \
-  wget \
-  zlib1g-dev
+  openssl-dev \
+  pcre \
+  pcre-dev \
+  pkgconf \
+  pkgconfig \
+  zlib-dev
 
-# Download and extract NGINX
-RUN cd /tmp && \
-  wget https://nginx.org/download/nginx-${NGINX}.tar.gz && \
-  tar zxf nginx-${NGINX}.tar.gz && \
-  rm nginx-${NGINX}.tar.gz
+WORKDIR /tmp
 
-# Download and extract RTMP module for NGINX
-RUN cd /tmp && \
-  wget https://github.com/arut/nginx-rtmp-module/archive/v${RTMP_MODULE}.tar.gz && \
-  tar zxf v${RTMP_MODULE}.tar.gz && rm v${RTMP_MODULE}.tar.gz
+# get sources
+    # nginx
+RUN wget -qO- https://nginx.org/download/nginx-${NGINX_VER}.tar.gz | tar zxf - && \
+    # nginx-rtmp-module
+    wget -qO- https://github.com/arut/nginx-rtmp-module/archive/v${NGINX_RTMP_VER}.tar.gz | tar zxf - && \
+    # nginx-vod-module
+    wget -qO- https://github.com/kaltura/nginx-vod-module/archive/${NGINX_VOD_VER}.tar.gz | tar zxf - && \
+    # nginx-devel-kit
+    wget -qO- https://github.com/vision5/ngx_devel_kit/archive/refs/tags/v${NGINX_DEV_KIT_VER}.tar.gz | tar zxf - && \
+    # luajit
+    wget -qO- https://github.com/openresty/luajit2/archive/refs/tags/v${LUA_JIT_VER}.tar.gz | tar zxf - && \
+    # lua-nginx-module
+    wget -qO- https://github.com/openresty/lua-nginx-module/archive/refs/tags/v${LUA_NGINGX_MODULE_VER}.tar.gz | tar zxf - && \
+    # lua-resty-core
+    wget -qO- https://github.com/openresty/lua-resty-core/archive/refs/tags/v${LUA_RESTY_CORE_VER}.tar.gz | tar zxf - && \
+    # lua-resty-cache
+    wget -qO- https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v${LUA_RESTY_CACHE_VER}.tar.gz | tar zxf -
 
-RUN cd /tmp && \
-  wget https://github.com/kaltura/nginx-vod-module/archive/${VOD_MODULE}.tar.gz && \
-  tar zxf ${VOD_MODULE}.tar.gz && rm ${VOD_MODULE}.tar.gz
+# build luajit
+RUN make -C ./luajit2-${LUA_JIT_VER} prefix=/usr/local/luajit && \
+    make install -C ./luajit2-${LUA_JIT_VER} prefix=/usr/local/luajit && \
+    make -C ./lua-resty-core-${LUA_RESTY_CORE_VER} prefix=/usr/local/luajit && \
+    make install -C ./lua-resty-core-${LUA_RESTY_CORE_VER} prefix=/usr/local/luajit && \
+    make -C ./lua-resty-lrucache-${LUA_RESTY_CACHE_VER} prefix=/usr/local/luajit && \
+    make install -C ./lua-resty-lrucache-${LUA_RESTY_CACHE_VER} prefix=/usr/local/luajit
 
-# Download and extract LuaJIT (all staff for it)
-RUN cd /tmp && \
-  wget https://github.com/openresty/luajit2/archive/refs/tags/v${LUA_JIT}.tar.gz && \
-  wget https://github.com/openresty/lua-nginx-module/archive/refs/tags/v${LUA_NGINX_MODULE}.tar.gz && \
-  wget https://github.com/vision5/ngx_devel_kit/archive/refs/tags/v${NGINX_DEV}.tar.gz && \
-  wget https://github.com/openresty/lua-resty-core/archive/refs/tags/v${LUA_RESTY_CORE}.tar.gz && \
-  wget https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v${LUA_RESTY_CACHE}.tar.gz && \
-  tar zxf v${LUA_JIT}.tar.gz && rm v${LUA_JIT}.tar.gz && \
-  tar zxf v${LUA_NGINX_MODULE}.tar.gz && rm v${LUA_NGINX_MODULE}.tar.gz && \
-  tar zxf v${LUA_RESTY_CORE}.tar.gz && rm v${LUA_RESTY_CORE}.tar.gz && \
-  tar zxf v${LUA_RESTY_CACHE}.tar.gz && rm v${LUA_RESTY_CACHE}.tar.gz && \
-  tar zxf v${NGINX_DEV}.tar.gz && rm v${NGINX_DEV}.tar.gz && ls
+# compile nginx with rtmp module
+WORKDIR /tmp/nginx-${NGINX_VER}
 
-RUN cd /tmp && ls
+ARG LUAJIT_LIB=/usr/local/luajit/lib
+ARG LUAJIT_INC=/usr/local/luajit/include/luajit-2.1
 
-# Build LuaJIT
-RUN cd /tmp/luajit2-${LUA_JIT} && \
-  make PREFIX=/usr/local/luajit && make install PREFIX=/usr/local/luajit
-
-RUN cd /tmp/lua-resty-core-${LUA_RESTY_CORE} && \
-  make PREFIX=/usr/local/luajit && make install PREFIX=/usr/local/luajit
-
-RUN cd /tmp/lua-resty-lrucache-${LUA_RESTY_CACHE} && \
-  make PREFIX=/usr/local/luajit && make install PREFIX=/usr/local/luajit
-
-RUN cd /usr/local/luajit && \
-  ls
-
-# Build NGINX with RTMP module
-RUN cd /tmp/nginx-${NGINX} && LUAJIT_LIB=/usr/local/luajit/lib LUAJIT_INC=/usr/local/luajit/include/luajit-2.1 \
-  ./configure \
-    --prefix=/usr/local/nginx \
-    --add-module=/tmp/nginx-rtmp-module-${RTMP_MODULE} \
-    --add-module=/tmp/nginx-vod-module-${VOD_MODULE} \
-    --add-module=/tmp/ngx_devel_kit-${NGINX_DEV} \
-    --add-module=/tmp/lua-nginx-module-${LUA_NGINX_MODULE} \
-    --conf-path=/etc/nginx/nginx.conf \
+RUN ./configure \
     --with-threads \
     --with-file-aio \
     --with-http_ssl_module \
     --with-debug \
-    --with-cc-opt="-Wimplicit-fallthrough=0" && \
-  cd /tmp/nginx-${NGINX} && make && make install
+    --add-module=/tmp/nginx-rtmp-module-${NGINX_RTMP_VER} \
+    --add-module=/tmp/nginx-vod-module-${NGINX_VOD_VER} \
+    --add-module=/tmp/ngx_devel_kit-${NGINX_DEV_KIT_VER} \
+    --add-module=/tmp/lua-nginx-module-${LUA_NGINGX_MODULE_VER} \
+    --conf-path=/etc/nginx/nginx.conf \
+    --with-cc-opt="-Wimplicit-fallthrough=0" \
+    --prefix=/usr/local/nginx && \
+    make && \
+    make install
 
-# FFpeg build from source code
-FROM ubuntu:focal as ffmpeg-build
-ARG FFMPEG=4.4
-ARG DEBIAN_FRONTEND=noninteractive
-
-ENV TZ=america/new_york
-
-RUN apt-get update && apt-get install -y \
-  build-essential \
-  cmake \
-  libass-dev \
-  libfdk-aac-dev \
-  libmp3lame-dev \
-  libopus-dev \
-  libssl-dev \
-  libtheora-dev \
-  libvorbis-dev \
-  libvpx-dev \
-  libx264-dev \
-  mercurial \
-  openssl \
-  wget \
-  yasm
-
-# Download and extract FFmpeg
-RUN cd /tmp && \
-  wget http://ffmpeg.org/releases/ffmpeg-${FFMPEG}.tar.gz && \
-  tar zxf ffmpeg-${FFMPEG}.tar.gz && rm ffmpeg-${FFMPEG}.tar.gz
-
-# Build FFmpeg without x265 and libwebp modules (should be build from source code first)
-RUN cd /tmp/ffmpeg-${FFMPEG} && \
-  ./configure \
-    --disable-debug \
-    --disable-doc \
-    --disable-ffplay \
-    --enable-avresample \
-    --enable-gpl \
-    --enable-libass \
-    --enable-libfdk-aac \
-    --enable-libfreetype \
-    --enable-libmp3lame \
-    --enable-libopus \
-    --enable-libtheora \
-    --enable-libvorbis \
-    --enable-libvpx \
-    --enable-libx264 \
-    --enable-nonfree \
-    --enable-openssl \
-    --enable-postproc \
-    --enable-small \
-    --enable-version3 \
-    --prefix=/usr/local \
-    --extra-libs="-lpthread -lm" && \
-  make && make install && make distclean
-
-# Frontend Build
-FROM node:14.16 as vue-build
-
-WORKDIR /tmp/build
-
-COPY ./vue-front/package*.json ./
-RUN npm install
-
-COPY ./vue-front .
-RUN npm run build
-
-
-# Core Builds image with NGINX, RTMP and FFmpeg
-FROM ubuntu:focal
-
-LABEL MAINTAINER MACH1 <whatsup@mach1.tech>
-
-ENV HTTP_PORT 80
-ENV HTTPS_PORT 443
-ENV STREAM_PORT 1935
-
-RUN apt-get update && apt-get install -y \
-  ca-certificates \
-  gettext-base \
-  libass9 \
-  libfdk-aac1 \
-  libmp3lame0 \
-  libopus0 \
-  libpcre3 \
-  libvpx6 \
-  openssl \
-  libtheora-bin \
-  libx264-155 \
-  zlib1g
-
-RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login nginx
-
-# Moving all packages from build images to the core instance
-COPY --from=nginx-build /usr/local/luajit /usr/local/luajit
-COPY --from=nginx-build /usr/local/nginx /usr/local/nginx
-COPY --from=nginx-build /etc/nginx /etc/nginx
-COPY --from=ffmpeg-build /usr/local /usr/local
-COPY --from=vue-build /tmp/build/dist /www
-
-VOLUME ["/share/sound"]
-
-# Updating NGINX enviroment
-ENV PATH "${PATH}:/usr/local/nginx/sbin"
-# Updating Lua enviroment
-# ENV LD_LIBRARY_PATH "/usr/local/luajit:$LD_LIBRARY_PATH"
-
-# Adding NGINX configs
-COPY ./containers/nginx/nginx.conf /etc/nginx/nginx.conf.template
-RUN mkdir -p /opt/data && mkdir -p /opt/data/dash && touch /opt/data/dash/play.mpd
-
-EXPOSE 1935
-EXPOSE 80
-
-CMD chown nginx /opt/data/dash && \
- chmod 777 /opt/data/dash && chmod -R 777 /share/sound && \
- envsubst "$(env | sed -e 's/=.*//' -e 's/^/\$/g')" < \
- /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && \
- export LD_LIBRARY_PATH=/usr/local/luajit/lib:$LD_LIBRARY_PATH && \
- nginx
+# cleanup
+RUN rm -rf /tmp/*
