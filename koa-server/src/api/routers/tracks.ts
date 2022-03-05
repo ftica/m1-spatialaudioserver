@@ -8,13 +8,13 @@ import validate from '../validator';
 import Joi from 'joi';
 
 export class Tracks extends ModelEndpoint<Track, TrackService> {
-  static readonly validCreateBody = Joi.object({
-    name: Joi.string().min(3).max(100),
-    position: Joi.number().min(0),
-    playlistId: Joi.string().uuid()
+  static readonly validCreate = Joi.object({
+    name: Joi.string().min(3).max(100).required(),
+    position: Joi.number().min(0).required(),
+    playlistId: Joi.string().uuid().required()
   });
 
-  static readonly validUpdateBody = Joi.object({
+  static readonly validUpdate = Joi.object({
     name: Joi.string().min(3).max(100),
     position: Joi.number().min(0),
     playlistId: Joi.string().uuid()
@@ -26,8 +26,8 @@ const tracks = new Tracks(trackService);
 export default new Router<DefaultState, CustomContext>()
   .get('/', tracks.getAll.bind(tracks))
   .get('/:id', validate(Tracks.validId), tracks.getById.bind(tracks))
-  .post('/', validate(Tracks.validId, Tracks.validCreateBody), tracks.create.bind(tracks))
-  .put('/:id', validate(Tracks.validId, Tracks.validUpdateBody), tracks.update.bind(tracks))
+  // .post('/', validate(Tracks.validId, Tracks.validCreate), tracks.create.bind(tracks))
+  .put('/:id', validate(Tracks.validId, Tracks.validUpdate), tracks.update.bind(tracks))
   .del('/:id', validate(Tracks.validId), tracks.del.bind(tracks));
 
 // // eslint-disable-next-line
