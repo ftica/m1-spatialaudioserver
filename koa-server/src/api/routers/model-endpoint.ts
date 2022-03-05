@@ -11,6 +11,13 @@ export default class ModelEndpoint<Model, ModelService extends Service<Model>> {
     ctx.body = models;
   }
 
+  async getPage(ctx: CustomContext) {
+    const page: number = ctx.params.page;
+    const size: number = ctx.params.size;
+    const models = await this.service.getPage(ctx.prisma, page, size);
+    ctx.body = models;
+  }
+
   async getById(ctx: CustomContext) {
     const id: string = ctx.params.id;
     const model = await this.service.getById(ctx.prisma, id);
@@ -19,17 +26,6 @@ export default class ModelEndpoint<Model, ModelService extends Service<Model>> {
     } else {
       ctx.body = model;
     }
-  }
-
-  async getPage(ctx: CustomContext) {
-    const page: number = ctx.params.page;
-    const size: number = ctx.params.size;
-    const models = await this.service.getPage(ctx.prisma, page, size);
-    ctx.body = models;
-  }
-
-  async count(ctx: CustomContext) {
-    ctx.body = await this.service.count(ctx.prisma);
   }
 
   async create(ctx: CustomContext) {
@@ -57,5 +53,9 @@ export default class ModelEndpoint<Model, ModelService extends Service<Model>> {
     } else {
       ctx.body = model;
     }
+  }
+
+  async count(ctx: CustomContext) {
+    ctx.body = await this.service.count(ctx.prisma);
   }
 }

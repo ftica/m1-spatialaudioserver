@@ -32,7 +32,7 @@ export class EncryptionService {
   private static readonly pbkdf2: (password: BinaryLike, salt: BinaryLike, iterations: number, keyLength: number, digest: string) => Promise<Buffer> =
     promisify(crypto.pbkdf2);
 
-  public constructor(
+  constructor(
     private readonly config?: EncryptionConfig
   ) {
     this.config ??= {
@@ -44,11 +44,11 @@ export class EncryptionService {
     };
   }
 
-  public passwordString(algorithm: string, iterations: number, length: number, hash: string, salt: string): string {
+  passwordString(algorithm: string, iterations: number, length: number, hash: string, salt: string): string {
     return `${algorithm}:${iterations}:${length}:${hash}:${salt}`;
   }
 
-  public passwordObject(password: string): PasswordObject {
+  passwordObject(password: string): PasswordObject {
     const parts = password.split(':');
 
     if (parts.length !== 5) {
@@ -64,7 +64,7 @@ export class EncryptionService {
     };
   }
 
-  public async digest(input: string): Promise<string> {
+  async digest(input: string): Promise<string> {
     const salt: string = await EncryptionService
       .randomBytes(this.config.saltBytes)
       .then(bytes => bytes.toString(this.config.encoding));
@@ -75,7 +75,7 @@ export class EncryptionService {
     return this.passwordString(this.config.algorithm, this.config.iterations, this.config.hashLength, hash, salt);
   }
 
-  public async verifyPassword(input: string, savedPassword: string): Promise<boolean> {
+  async verifyPassword(input: string, savedPassword: string): Promise<boolean> {
     return await this.verifyPasswordObject(input, this.passwordObject(savedPassword));
   }
 

@@ -6,6 +6,7 @@ import { Token } from '../api/services/jwt-service';
 export type CustomContext = Context & {
   prisma: PrismaClient;
   request: Request;
+  params: any;
   token?: Token;
   validate?: Function;
   // validator?: Validator;

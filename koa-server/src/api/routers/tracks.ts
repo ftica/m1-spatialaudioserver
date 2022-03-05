@@ -4,16 +4,31 @@ import { Track } from '@prisma/client';
 import { CustomContext } from '../../koa/types';
 import ModelEndpoint from './model-endpoint';
 import trackService, { TrackService } from '../services/track-service';
+import validate from '../validator';
+import Joi from 'joi';
 
-export class Tracks extends ModelEndpoint<Track, TrackService> { }
+export class Tracks extends ModelEndpoint<Track, TrackService> {
+  static readonly validCreateBody = Joi.object({
+    name: Joi.string().min(3).max(100),
+    position: Joi.number().min(0),
+    playlistId: Joi.string().uuid()
+  });
+
+  static readonly validUpdateBody = Joi.object({
+    name: Joi.string().min(3).max(100),
+    position: Joi.number().min(0),
+    playlistId: Joi.string().uuid()
+  });
+}
 
 const tracks = new Tracks(trackService);
 
 export default new Router<DefaultState, CustomContext>()
   .get('/', tracks.getAll.bind(tracks))
-  .get('/:id', tracks.getById.bind(tracks))
-  .put('/:id', tracks.update.bind(tracks))
-  .del('/:id', tracks.del.bind(tracks));
+  .get('/:id', validate(Tracks.validId), tracks.getById.bind(tracks))
+  .post('/', validate(Tracks.validId, Tracks.validCreateBody), tracks.create.bind(tracks))
+  .put('/:id', validate(Tracks.validId, Tracks.validUpdateBody), tracks.update.bind(tracks))
+  .del('/:id', validate(Tracks.validId), tracks.del.bind(tracks));
 
 // // eslint-disable-next-line
 // import { rm } from 'fs/promises';

@@ -7,7 +7,7 @@ export type Payload = { 'username': string, 'role': Role }
 export type Token = AccessToken & Payload;
 
 export class JwtService {
-  public constructor(
+  constructor(
     private readonly privateKey: Buffer,
     private readonly publicKey: Buffer,
     private readonly secret?: Secret,
@@ -25,11 +25,11 @@ export class JwtService {
   private static readonly verifyToken: (token: string, secret: Secret, options?: VerifyOptions) => Jwt =
     jwt.verify;
 
-  public sign(payload: Payload): string {
+  sign(payload: Payload): string {
     return JwtService.signJwt(payload, this.secret, this.signOptions);
   }
 
-  public verify(token: string): Jwt {
+  verify(token: string): Jwt {
     return JwtService.verifyToken(token, this.publicKey, { complete: true });
   }
 }

@@ -32,7 +32,7 @@ export class AuthService {
     };
   }
 
-  public async login(prisma: PrismaClient, input: UserLoginInput): Promise<string> {
+  async login(prisma: PrismaClient, input: UserLoginInput): Promise<string> {
     const user: User = await userService.getByUsername(prisma, input.username);
     if (user) {
       return null;
@@ -48,7 +48,7 @@ export class AuthService {
     return await this.jwtService.sign(token);
   }
 
-  public async register(prisma: PrismaClient, input: UserRegisterInput): Promise<User> {
+  async register(prisma: PrismaClient, input: UserRegisterInput): Promise<User> {
     return await userService.create(prisma, {
       id: undefined,
       username: input.username,
