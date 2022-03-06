@@ -2,7 +2,7 @@ import path from 'path';
 
 import compose from 'koa-compose';
 import logger from 'koa-logger';
-import bodyparser from 'koa-bodyparser';
+import bodyParser from 'koa-bodyparser';
 import serve from 'koa-static';
 // import session from 'koa-session';
 
@@ -19,7 +19,7 @@ export default () => compose([
   errors(),
   database(),
   tokenParser(),
-  bodyparser({
+  bodyParser({
     enableTypes: ['json', 'text'],
     onerror: (err, ctx) => {
       ctx.status = 400;
