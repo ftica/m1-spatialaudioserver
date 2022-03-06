@@ -6,19 +6,19 @@ export default class ModelEndpoint<Model, ModelService extends Service<Model>> {
     protected readonly service: ModelService
   ) { }
 
-  async getAll(ctx: Context) {
+  getAll = async (ctx: Context) => {
     const models = await this.service.getAll(ctx.prisma);
     ctx.body = models;
   }
 
-  async getPage(ctx: Context) {
+  getPage = async (ctx: Context) => {
     const page: number = ctx.params.page;
     const size: number = ctx.params.size;
     const models = await this.service.getPage(ctx.prisma, page, size);
     ctx.body = models;
   }
 
-  async getById(ctx: Context) {
+  getById = async (ctx: Context) => {
     const id: string = ctx.params.id;
     const model = await this.service.getById(ctx.prisma, id);
     if (model === null) {
@@ -28,13 +28,13 @@ export default class ModelEndpoint<Model, ModelService extends Service<Model>> {
     }
   }
 
-  async create(ctx: Context) {
+  create = async (ctx: Context) => {
     const data: Model = ctx.request.body;
     const model = await this.service.create(ctx.prisma, data);
     ctx.body = model;
   }
 
-  async update(ctx: Context) {
+  update = async (ctx: Context) => {
     const id: string = ctx.params.id;
     const data: Model = ctx.request.body;
     const model = await this.service.update(ctx.prisma, id, data);
@@ -45,7 +45,7 @@ export default class ModelEndpoint<Model, ModelService extends Service<Model>> {
     }
   }
 
-  async del(ctx: Context) {
+  del = async (ctx: Context) => {
     const id: string = ctx.params.id;
     const model = await this.service.delete(ctx.prisma, id);
     if (model == null) {
@@ -55,7 +55,7 @@ export default class ModelEndpoint<Model, ModelService extends Service<Model>> {
     }
   }
 
-  async count(ctx: Context) {
+  count = async (ctx: Context) => {
     ctx.body = await this.service.count(ctx.prisma);
   }
 }

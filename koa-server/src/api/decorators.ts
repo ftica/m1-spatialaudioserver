@@ -60,3 +60,15 @@ export namespace Security {
     };
   }
 }
+
+export function NotFound(target: any, _methodName: string, descriptor: PropertyDescriptor) {
+  const originalMethod = descriptor.value;
+
+  descriptor.value = (ctx: Context) => {
+    const result = originalMethod.call(this, ctx);
+    if (result) ctx.body = result;
+    else ctx.status = 404;
+  };
+
+  return descriptor;
+};
