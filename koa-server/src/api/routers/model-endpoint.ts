@@ -1,4 +1,3 @@
-import Joi from 'joi';
 import { CustomContext } from '../../koa/types';
 import Service from '../services/service';
 
@@ -6,10 +5,6 @@ export default class ModelEndpoint<Model, ModelService extends Service<Model>> {
   constructor(
     protected readonly service: ModelService
   ) { }
-
-  static readonly validId = Joi.object({
-    id: Joi.string().uuid().required()
-  });
 
   async getAll(ctx: CustomContext) {
     const models = await this.service.getAll(ctx.prisma);

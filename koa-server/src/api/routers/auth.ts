@@ -1,61 +1,49 @@
 import Router from '@koa/router';
+import Joi from 'joi';
 import { DefaultState } from 'koa';
 import { CustomContext } from '../../koa/types';
-import authService, { AuthService, UserLoginInput, UserRegisterInput } from '../services/auth-service';
+import authService, { AuthService } from '../services/auth-service';
+import validate from '../validator';
 
 class Auth {
   constructor(
     private readonly service: AuthService
   ) { }
 
-  private static readonly validUserRegisterInput = {
-    username: 'required',
-    password: 'required|minLength:8'
-  };
+  static readonly validUsername = Joi.string().min(4).max(30).required();
+  static readonly validPassword = Joi.string().min(8).required();
+
+  static readonly validRegister = Joi.object({
+    username: this.validUsername,
+    password: this.validPassword
+  });
+
+  static readonly validLogin = this.validRegister;
 
   async register(ctx: CustomContext) {
-    await ctx.validate(Auth.validUserRegisterInput);
+    const username: string = ctx.request.body.username;
+    const password: string = ctx.request.body.password;
 
-    const input: UserRegisterInput = {
-      username: ctx.request.body.username,
-      password: ctx.request.body.password
-    };
-
-    const user = await this.service.register(ctx.prisma, input);
-    if (user === null) {
-      ctx.status = 404;
-    } else {
-      ctx.body = user;
-    }
+    const user = await this.service.register(ctx.prisma, { username, password });
+    if (user === null) ctx.status = 404;
+    else ctx.body = user;
   }
 
-  private static readonly validUserLoginInput = {
-    username: 'required',
-    password: 'required|minLength:8'
-  };
-
   async login(ctx: CustomContext) {
-    await ctx.validate(Auth.validUserLoginInput);
+    const username: string = ctx.request.body.username;
+    const password: string = ctx.request.body.password;
 
-    const input: UserLoginInput = {
-      username: ctx.request.body.username,
-      password: ctx.request.body.password
-    };
-
-    const token = await authService.login(ctx.prisma, input);
-    if (token == null) {
-      ctx.status = 400;
-    } else {
-      ctx.body = token;
-    }
+    const token = await authService.login(ctx.prisma, { username, password });
+    if (token == null) ctx.status = 400;
+    else ctx.body = token;
   }
 }
 
 const auth = new Auth(authService);
 
 export default new Router<DefaultState, CustomContext>()
-  .post('/register', auth.register.bind(auth))
-  .post('/login', auth.login.bind(auth));
+  .post('/register', validate(null, Auth.validRegister), auth.register.bind(auth))
+  .post('/login', validate(null, Auth.validLogin), auth.login.bind(auth));
 
 // import Router from '@koa/router';
 // import { CustomContext } from '../../koa/types';

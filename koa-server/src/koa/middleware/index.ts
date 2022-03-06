@@ -5,7 +5,6 @@ import logger from 'koa-logger';
 import bodyparser from 'koa-bodyparser';
 import serve from 'koa-static';
 // import session from 'koa-session';
-// import { koa as validator } from 'node-input-validator';
 
 // import cors from './cors';
 import errors from './errors';
@@ -20,8 +19,12 @@ export default () => compose([
   errors(),
   database(),
   tokenParser(),
-  bodyparser(),
-  // @ts-ignore
-  // validator(),
+  bodyparser({
+    enableTypes: ['json', 'text'],
+    onerror: (err, ctx) => {
+      ctx.status = 400;
+      ctx.body = err.message;
+    }
+  }),
   serve(staticDir)
 ]);

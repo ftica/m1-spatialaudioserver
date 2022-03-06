@@ -8,6 +8,4 @@ export type CustomContext = Context & {
   request: Request;
   params: any;
   token?: Token;
-  validate?: Function;
-  // validator?: Validator;
 }
