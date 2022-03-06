@@ -1,7 +1,6 @@
 import Router from '@koa/router';
-import { DefaultState } from 'koa';
+import { Context, DefaultState } from 'koa';
 import { Role, User } from '@prisma/client';
-import { CustomContext } from '../../koa/types';
 import ModelEndpoint from './model-endpoint';
 import userService, { UserService } from '../services/user-service';
 import validate, { Valid } from '../validator';
@@ -13,19 +12,19 @@ class Users extends ModelEndpoint<User, UserService> {
 
   static readonly validUsernameParam = Joi.object({ username: this.validUsername });
 
-  async getByUsername(ctx: CustomContext) {
+  async getByUsername(ctx: Context) {
     const user = await this.service.getByUsername(ctx.prisma, ctx.params.username);
     if (user === null) ctx.status = 404;
     else ctx.body = user;
   }
 
-  async del(ctx: CustomContext) {
+  async del(ctx: Context) {
     const user = await this.service.delete(ctx.prisma, ctx.params.username);
     if (user == null) ctx.status = 404;
     else ctx.body = user;
   }
 
-  async profile(ctx: CustomContext) {
+  async profile(ctx: Context) {
     if (ctx.token) {
       ctx.body = ctx.token?.username;
     } else {
@@ -33,19 +32,19 @@ class Users extends ModelEndpoint<User, UserService> {
     }
   }
 
-  async updateUsername(ctx: CustomContext) {
+  async updateUsername(ctx: Context) {
     const user = await this.service.update(ctx.prisma, ctx.params.username, { username: ctx.request.body });
     if (user === null) ctx.status = 404;
     else ctx.body = user;
   }
 
-  async updateRole(ctx: CustomContext) {
+  async updateRole(ctx: Context) {
     const user = await this.service.update(ctx.prisma, ctx.params.username, { role: ctx.request.body });
     if (user === null) ctx.status = 404;
     else ctx.body = user;
   }
 
-  async updateActive(ctx: CustomContext) {
+  async updateActive(ctx: Context) {
     const user = await this.service.update(ctx.prisma, ctx.params.username, { active: ctx.request.body === 'true' });
     if (user === null) ctx.status = 404;
     else ctx.body = user;
@@ -54,7 +53,7 @@ class Users extends ModelEndpoint<User, UserService> {
 
 const users = new Users(userService);
 
-export default new Router<DefaultState, CustomContext>()
+export default new Router<DefaultState, Context>()
   .get('/', users.getAll.bind(users))
   .get('/count', users.count.bind(users))
   .get('/profile', users.profile.bind(users))

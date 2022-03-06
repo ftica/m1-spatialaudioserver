@@ -1,7 +1,6 @@
 import Router from '@koa/router';
 import Joi from 'joi';
-import { DefaultState } from 'koa';
-import { CustomContext } from '../../koa/types';
+import { Context, DefaultState } from 'koa';
 import authService, { AuthService } from '../services/auth-service';
 import validate from '../validator';
 
@@ -20,7 +19,7 @@ class Auth {
 
   static readonly validLogin = this.validRegister;
 
-  async register(ctx: CustomContext) {
+  async register(ctx: Context) {
     const username: string = ctx.request.body.username;
     const password: string = ctx.request.body.password;
 
@@ -29,7 +28,7 @@ class Auth {
     else ctx.body = user;
   }
 
-  async login(ctx: CustomContext) {
+  async login(ctx: Context) {
     const username: string = ctx.request.body.username;
     const password: string = ctx.request.body.password;
 
@@ -41,12 +40,12 @@ class Auth {
 
 const auth = new Auth(authService);
 
-export default new Router<DefaultState, CustomContext>()
+export default new Router<DefaultState, Context>()
   .post('/register', validate(null, Auth.validRegister), auth.register.bind(auth))
   .post('/login', validate(null, Auth.validLogin), auth.login.bind(auth));
 
 // import Router from '@koa/router';
-// import { CustomContext } from '../../koa/types';
+// import { Context } from '../../koa/types';
 // import { DefaultState } from 'koa';
 // import { User } from '@prisma/client';
 
@@ -120,7 +119,7 @@ export default new Router<DefaultState, CustomContext>()
 //     password: 'required|minLength:8'
 //   };
 
-//   return async (ctx: CustomContext) => {
+//   return async (ctx: Context) => {
 //     await ctx.validate(validInput);
 
 //     const input: UserRegisterInput = ctx.request.body;
@@ -138,7 +137,7 @@ export default new Router<DefaultState, CustomContext>()
 //     password: 'required'
 //   };
 
-//   return async (ctx: CustomContext) => {
+//   return async (ctx: Context) => {
 //     await ctx.validate(validInput);
 
 //     const input: UserLoginInput = {
@@ -168,7 +167,7 @@ export default new Router<DefaultState, CustomContext>()
 // //     username: 'required',
 // //     password: 'required'
 // //   })
-// //   public async login(ctx: CustomContext) {
+// //   public async login(ctx: Context) {
 // //     const input: UserLoginInput = ctx.request.body;
 // //   }
 // // }
@@ -183,7 +182,7 @@ export default new Router<DefaultState, CustomContext>()
 // //   }
 // // }
 
-// export default new Router<DefaultState, CustomContext>()
+// export default new Router<DefaultState, Context>()
 //   .post('/register', getRegisterHandler())
 //   .post('/login', getLoginHandler());
 // // .post('/login', login)

@@ -1,8 +1,7 @@
 import Joi, { Schema } from 'joi';
-import { Next } from 'koa';
-import { CustomContext } from '../koa/types';
+import { Context, Next } from 'koa';
 
-export default (paramsSchema?: Schema, bodySchema?: Schema) => async (ctx: CustomContext, next: Next): Promise<void> => {
+export default (paramsSchema?: Schema, bodySchema?: Schema) => async (ctx: Context, next: Next): Promise<void> => {
   const error = paramsSchema?.validate(ctx.params).error ?? bodySchema?.validate(ctx.request.body).error;
   if (!error) return await next();
   ctx.status = 400;

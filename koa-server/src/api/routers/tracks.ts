@@ -1,7 +1,6 @@
 import Router from '@koa/router';
-import { DefaultState } from 'koa';
+import { Context, DefaultState } from 'koa';
 import { Track } from '@prisma/client';
-import { CustomContext } from '../../koa/types';
 import ModelEndpoint from './model-endpoint';
 import trackService, { TrackService } from '../services/track-service';
 import validate, { Valid } from '../validator';
@@ -16,19 +15,19 @@ export class Tracks extends ModelEndpoint<Track, TrackService> {
     playlistId: Valid.id
   });
 
-  async updateName(ctx: CustomContext) {
+  async updateName(ctx: Context) {
     const track = await this.service.update(ctx.prisma, ctx.params.id, { name: ctx.request.body });
     if (track === null) ctx.status = 404;
     else ctx.body = track;
   }
 
-  async updatePosition(ctx: CustomContext) {
+  async updatePosition(ctx: Context) {
     const track = await this.service.update(ctx.prisma, ctx.params.id, { position: parseInt(ctx.request.body) });
     if (track === null) ctx.status = 404;
     else ctx.body = track;
   }
 
-  async updatePlaylist(ctx: CustomContext) {
+  async updatePlaylist(ctx: Context) {
     const track = await this.service.update(ctx.prisma, ctx.params.id, { playlistId: ctx.request.body });
     if (track === null) ctx.status = 404;
     else ctx.body = track;
@@ -37,7 +36,7 @@ export class Tracks extends ModelEndpoint<Track, TrackService> {
 
 const tracks = new Tracks(trackService);
 
-export default new Router<DefaultState, CustomContext>()
+export default new Router<DefaultState, Context>()
   .get('/', tracks.getAll.bind(tracks))
   .get('/count', tracks.count.bind(tracks))
   .get('/:id', validate(Valid.idObject), tracks.getById.bind(tracks))

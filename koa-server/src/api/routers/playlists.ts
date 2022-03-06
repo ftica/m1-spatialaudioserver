@@ -1,7 +1,6 @@
 import Router from '@koa/router';
-import { DefaultState } from 'koa';
+import { Context, DefaultState } from 'koa';
 import { Playlist } from '@prisma/client';
-import { CustomContext } from '../../koa/types';
 import ModelEndpoint from './model-endpoint';
 import playlistService, { PlaylistService } from '../services/playlist-service';
 import validate, { Valid } from '../validator';
@@ -16,31 +15,31 @@ class Playlists extends ModelEndpoint<Playlist, PlaylistService> {
     ownerId: Valid.id
   });
 
-  async updateName(ctx: CustomContext) {
+  async updateName(ctx: Context) {
     const playlist = await this.service.update(ctx.prisma, ctx.params.id, { name: ctx.params.body });
     if (playlist === null) ctx.status = 404;
     else ctx.body = playlist;
   }
 
-  async updatePublic(ctx: CustomContext) {
+  async updatePublic(ctx: Context) {
     const playlist = await this.service.update(ctx.prisma, ctx.params.id, { public: ctx.params.body === 'true' });
     if (playlist === null) ctx.status = 404;
     else ctx.body = playlist;
   }
 
-  async setTracks(ctx: CustomContext) {
+  async setTracks(ctx: Context) {
     const playlist: Playlist = await this.service.update(ctx.prisma, ctx.params.id, { tracks: ctx.request.body.map(track => ({ id: track })) }, { tracks: true });
     if (playlist === null) ctx.status = 404;
     else ctx.body = playlist;
   }
 
-  async setFavorite(ctx: CustomContext) {
+  async setFavorite(ctx: Context) {
     const playlist: Playlist = await this.service.update(ctx.prisma, ctx.params.id, { favorite: ctx.request.body === 'true' }, { favorites: true });
     if (playlist === null) ctx.status = 404;
     else ctx.body = playlist;
   }
 
-  async setAllowedUsers(ctx: CustomContext) {
+  async setAllowedUsers(ctx: Context) {
     const playlist: Playlist = await this.service.update(ctx.prisma, ctx.params.id, { users: ctx.request.body.map(user => ({ id: user })) }, { users: true });
     if (playlist === null) ctx.status = 404;
     else ctx.body = playlist;
@@ -49,7 +48,7 @@ class Playlists extends ModelEndpoint<Playlist, PlaylistService> {
 
 const playlists = new Playlists(playlistService);
 
-export default new Router<DefaultState, CustomContext>()
+export default new Router<DefaultState, Context>()
   .get('/', playlists.getAll.bind(playlists))
   .get('/count', playlists.count.bind(playlists))
   .get('/:id', validate(Valid.idObject), playlists.getById.bind(playlists))
