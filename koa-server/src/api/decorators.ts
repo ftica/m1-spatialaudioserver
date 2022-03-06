@@ -1,12 +1,11 @@
 import { Role } from '@prisma/client';
-import { Next } from 'koa';
-import { CustomContext } from '../koa/types';
+import { Context, Next } from 'koa';
 
 export namespace Security {
-  type AsyncHandler = (ctx: CustomContext, next?: Next) => Promise<any>;
+  type AsyncHandler = (ctx: Context, next?: Next) => Promise<any>;
 
   const getAuthenticatedHandler = (original: AsyncHandler): AsyncHandler =>
-    async (ctx: CustomContext, next?: Next) => {
+    async (ctx: Context, next?: Next) => {
       if (!ctx.token) {
         ctx.throw(400, 'Failed to authenticate user');
       }
@@ -15,7 +14,7 @@ export namespace Security {
     };
 
   const getAuthorizedHandler = (original: AsyncHandler, roles: Role[]): AsyncHandler =>
-    async (ctx: CustomContext, next?: Next) => {
+    async (ctx: Context, next?: Next) => {
       if (!ctx.token.role) {
         ctx.throw(400, 'Failed to authorize user');
       }
@@ -28,7 +27,7 @@ export namespace Security {
     };
 
   const getValidBodyHandler = (original: AsyncHandler, valid: any): AsyncHandler =>
-    async (ctx: CustomContext, next?: Next) => {
+    async (ctx: Context, next?: Next) => {
       if (!ctx.validate) {
         ctx.throw(500, 'Validator not present');
       }

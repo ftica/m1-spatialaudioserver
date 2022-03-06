@@ -1,8 +1,7 @@
-import { Next } from 'koa';
-import { CustomContext } from '../types';
+import { Context, Next } from 'koa';
 // import jwtService, { Token } from '../../api/services/jwt-service';
 
-export default () => async (ctx: CustomContext, next: Next) => {
+export default () => async (ctx: Context, next: Next) => {
   delete ctx.token;
 
   if (ctx.headers.authorization != null) {

@@ -6,10 +6,9 @@ import playlists from './routers/playlists';
 import tracks from './routers/tracks';
 // import upload from './routers/upload';
 import users from './routers/users';
-import { DefaultState } from 'koa';
-import { CustomContext } from '../koa/types';
+import { Context, DefaultState } from 'koa';
 
-export default new Router<DefaultState, CustomContext>({ prefix: '/api/v1' })
+export default new Router<DefaultState, Context>({ prefix: '/api/v1' })
   .use('/auth', auth.routes(), auth.allowedMethods())
   .use('/playlists', playlists.routes(), playlists.allowedMethods())
   // .use('/profile', profile.routes(), profile.allowedMethods())

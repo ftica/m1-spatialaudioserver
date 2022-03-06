@@ -1,7 +1,6 @@
-import { Next } from 'koa';
-import { CustomContext } from '../types';
+import { Context, Next } from 'koa';
 
-export default () => async (ctx: CustomContext, next: Next) => {
+export default () => async (ctx: Context, next: Next) => {
   if (!ctx.token) {
     ctx.throw(400, 'Failed to authenticate user');
   }
