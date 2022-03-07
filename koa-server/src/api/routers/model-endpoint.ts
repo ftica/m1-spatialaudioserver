@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { Context } from 'koa';
 import { NotFound, Ok, Validate } from '../decorators';
 import ModelService from '../services/model-service';
-import { Valid } from '../validator';
+import { Valid } from '../valid';
 
 export default class ModelEndpoint<Model, Service extends ModelService<Model>> {
   constructor(

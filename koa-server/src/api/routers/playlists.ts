@@ -3,7 +3,7 @@ import { Context, DefaultState } from 'koa';
 import { Playlist, Role } from '@prisma/client';
 import ModelEndpoint from './model-endpoint';
 import playlistService, { PlaylistService } from '../services/playlist-service';
-import { Valid } from '../validator';
+import { Valid } from '../valid';
 import Joi from 'joi';
 import { AuthorizeRole, NotFound, Validate } from '../decorators';
 

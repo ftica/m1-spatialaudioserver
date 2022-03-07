@@ -3,7 +3,7 @@ import { Context, DefaultState } from 'koa';
 import { Role, Track } from '@prisma/client';
 import ModelEndpoint from './model-endpoint';
 import trackService, { TrackService } from '../services/track-service';
-import { Valid } from '../validator';
+import { Valid } from '../valid';
 import Joi from 'joi';
 import { AuthorizeRole, NotFound, Validate } from '../decorators';
 

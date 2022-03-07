@@ -3,7 +3,7 @@ import { Context, DefaultState } from 'koa';
 import { Role, User } from '@prisma/client';
 import ModelEndpoint from './model-endpoint';
 import userService, { UserService } from '../services/user-service';
-import { Valid } from '../validator';
+import { Valid } from '../valid';
 import Joi from 'joi';
 import { AuthorizeRole, NotFound, Validate } from '../decorators';
 
