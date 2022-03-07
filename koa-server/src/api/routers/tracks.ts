@@ -17,6 +17,7 @@ export class Tracks extends ModelEndpoint<Track, TrackService> {
   });
 
   @AuthorizeRole(Role.ADMIN)
+  @Validate(null, Tracks.validCreate)
   override async create(ctx: Context) {
     return super.create(ctx);
   }
