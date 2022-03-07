@@ -3,9 +3,9 @@ import { Context, DefaultState } from 'koa';
 import { Role, User } from '@prisma/client';
 import ModelEndpoint from './model-endpoint';
 import userService, { UserService } from '../services/user-service';
-import validate, { Valid } from '../validator';
+import { Valid } from '../validator';
 import Joi from 'joi';
-import { NotFound } from '../decorators';
+import { Authorize, NotFound, Validate } from '../decorators';
 
 class Users extends ModelEndpoint<User, UserService> {
   static readonly validUsername = Joi.string().min(4).max(20).required();
@@ -13,54 +13,55 @@ class Users extends ModelEndpoint<User, UserService> {
 
   static readonly validUsernameParam = Joi.object({ username: this.validUsername });
 
-  getByUsername = async (ctx: Context) => {
-    const user = await this.service.getByUsername(ctx.prisma, ctx.params.username);
-    if (user === null) ctx.status = 404;
-    else ctx.body = user;
+  @Authorize(Role.USER)
+  @Validate(Users.validUsernameParam)
+  @NotFound
+  async getByUsername(ctx: Context) {
+    return await this.service.getByUsername(ctx.prisma, ctx.params.username);
   }
 
-  del = async (ctx: Context) => {
-    const user = await this.service.delete(ctx.prisma, ctx.params.username);
-    if (user == null) ctx.status = 404;
-    else ctx.body = user;
+  @Authorize(Role.ADMIN)
+  @Validate(Users.validUsernameParam)
+  @NotFound
+  async del(ctx: Context) {
+    return await this.service.delete(ctx.prisma, ctx.params.username);
   }
 
-  profile = async (ctx: Context) => {
-    if (ctx.token) {
-      ctx.body = ctx.token?.username;
-    } else {
-      ctx.status = 404;
-    }
+  @Authorize(Role.USER)
+  async profile(ctx: Context) {
+    ctx.body = 'Profile of current session user';
   }
 
-  updateUsername = async (ctx: Context) => {
-    const user = await this.service.update(ctx.prisma, ctx.params.username, { username: ctx.request.body });
-    if (user === null) ctx.status = 404;
-    else ctx.body = user;
+  @Authorize(Role.USER)
+  @Validate(Users.validUsernameParam, Users.validUsername)
+  @NotFound
+  async updateUsername(ctx: Context) {
+    return await this.service.update(ctx.prisma, ctx.params.username, { username: ctx.request.body });
   }
 
+  @Authorize(Role.ADMIN)
+  @Validate(Users.validUsernameParam, Users.validRole)
   @NotFound
   async updateRole(ctx: Context) {
-    const user = await this.service.update(ctx.prisma, ctx.params.username, { role: ctx.request.body });
-    if (user === null) ctx.status = 404;
-    else ctx.body = user;
+    return await this.service.update(ctx.prisma, ctx.params.username, { role: ctx.request.body });
   }
 
-  updateActive = async (ctx: Context) => {
-    const user = await this.service.update(ctx.prisma, ctx.params.username, { active: ctx.request.body === 'true' });
-    if (user === null) ctx.status = 404;
-    else ctx.body = user;
+  @Authorize(Role.USER)
+  @Validate(Users.validUsernameParam, Valid.bool)
+  @NotFound
+  async updateActive(ctx: Context) {
+    return await this.service.update(ctx.prisma, ctx.params.username, { active: ctx.request.body === 'true' });
   }
 }
 
 const users = new Users(userService);
 
 export default new Router<DefaultState, Context>()
-  .get('/', users.getAll)
-  .get('/count', users.count)
-  .get('/profile', users.profile)
-  .get('/:username', validate(Users.validUsernameParam), users.getByUsername)
-  .del('/:username', validate(Users.validUsernameParam), users.del)
-  .patch('/:username/username', validate(Users.validUsernameParam, Users.validUsername), users.updateUsername)
-  .patch('/:username/role', validate(Users.validUsernameParam, Users.validRole), users.updateRole.bind(users))
-  .patch('/:username/active', validate(Users.validUsernameParam, Valid.bool), users.updateActive);
+  .get('/', users.getAll.bind(users))
+  .get('/count', users.count.bind(users))
+  .get('/profile', users.profile.bind(users))
+  .get('/:username', users.getByUsername.bind(users))
+  .del('/:username', users.del.bind(users))
+  .patch('/:username/username', users.updateUsername.bind(users))
+  .patch('/:username/role', users.updateRole.bind(users))
+  .patch('/:username/active', users.updateActive.bind(users));

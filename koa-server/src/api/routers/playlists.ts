@@ -1,10 +1,11 @@
 import Router from '@koa/router';
 import { Context, DefaultState } from 'koa';
-import { Playlist } from '@prisma/client';
+import { Playlist, Role } from '@prisma/client';
 import ModelEndpoint from './model-endpoint';
 import playlistService, { PlaylistService } from '../services/playlist-service';
-import validate, { Valid } from '../validator';
+import { Valid } from '../validator';
 import Joi from 'joi';
+import { Authorize, NotFound, Validate } from '../decorators';
 
 class Playlists extends ModelEndpoint<Playlist, PlaylistService> {
   static readonly validName = Joi.string().min(3).max(100).required();
@@ -15,34 +16,45 @@ class Playlists extends ModelEndpoint<Playlist, PlaylistService> {
     ownerId: Valid.id
   });
 
+  @Authorize(Role.ADMIN)
+  @Validate(null, Playlists.validCreate)
+  override async create(ctx: Context) {
+    return super.create(ctx);
+  }
+
+  @Authorize(Role.USER)
+  @Validate(Valid.idObject, Playlists.validName)
+  @NotFound
   async updateName(ctx: Context) {
-    const playlist = await this.service.update(ctx.prisma, ctx.params.id, { name: ctx.params.body });
-    if (playlist === null) ctx.status = 404;
-    else ctx.body = playlist;
+    return await this.service.update(ctx.prisma, ctx.params.id, { name: ctx.params.body });
   }
 
+  @Authorize(Role.USER)
+  @Validate(Valid.idObject, Valid.bool)
+  @NotFound
   async updatePublic(ctx: Context) {
-    const playlist = await this.service.update(ctx.prisma, ctx.params.id, { public: ctx.params.body === 'true' });
-    if (playlist === null) ctx.status = 404;
-    else ctx.body = playlist;
+    return await this.service.update(ctx.prisma, ctx.params.id, { public: ctx.params.body === 'true' });
   }
 
-  async setTracks(ctx: Context) {
-    const playlist: Playlist = await this.service.update(ctx.prisma, ctx.params.id, { tracks: ctx.request.body.map(track => ({ id: track })) }, { tracks: true });
-    if (playlist === null) ctx.status = 404;
-    else ctx.body = playlist;
+  @Authorize(Role.USER)
+  @Validate(Valid.idObject, Valid.idArray)
+  @NotFound
+  async updateTracks(ctx: Context) {
+    return await this.service.update(ctx.prisma, ctx.params.id, { tracks: ctx.request.body.map(track => ({ id: track })) }, { tracks: true });
   }
 
-  async setFavorite(ctx: Context) {
-    const playlist: Playlist = await this.service.update(ctx.prisma, ctx.params.id, { favorite: ctx.request.body === 'true' }, { favorites: true });
-    if (playlist === null) ctx.status = 404;
-    else ctx.body = playlist;
+  @Authorize(Role.USER)
+  @Validate(Valid.idObject, Valid.bool)
+  @NotFound
+  async updateFavorite(ctx: Context) {
+    return await this.service.update(ctx.prisma, ctx.params.id, { favorite: ctx.request.body === 'true' }, { favorites: true });
   }
 
-  async setAllowedUsers(ctx: Context) {
-    const playlist: Playlist = await this.service.update(ctx.prisma, ctx.params.id, { users: ctx.request.body.map(user => ({ id: user })) }, { users: true });
-    if (playlist === null) ctx.status = 404;
-    else ctx.body = playlist;
+  @Authorize(Role.USER)
+  @Validate(Valid.idObject, Valid.idArray)
+  @NotFound
+  async updateAllowedUsers(ctx: Context) {
+    return await this.service.update(ctx.prisma, ctx.params.id, { users: ctx.request.body.map(user => ({ id: user })) }, { users: true });
   }
 }
 
@@ -51,9 +63,9 @@ const playlists = new Playlists(playlistService);
 export default new Router<DefaultState, Context>()
   .get('/', playlists.getAll.bind(playlists))
   .get('/count', playlists.count.bind(playlists))
-  .get('/:id', validate(Valid.idObject), playlists.getById.bind(playlists))
-  .post('/', validate(null, Playlists.validCreate), playlists.create.bind(playlists))
+  .get('/:id', playlists.getById.bind(playlists))
+  .post('/', playlists.create.bind(playlists))
   // .put('/:id', validate(Playlists.validId, Playlists.validUpdate), playlists.update.bind(playlists))
-  .del('/:id', validate(Valid.idObject), playlists.del.bind(playlists))
-  .patch('/:id/name', validate(Valid.idObject, Playlists.validName), playlists.updateName.bind(playlists))
-  .patch('/:id/public', validate(Valid.idObject, Valid.bool), playlists.updateName.bind(playlists));
+  .del('/:id', playlists.del.bind(playlists))
+  .patch('/:id/name', playlists.updateName.bind(playlists))
+  .patch('/:id/public', playlists.updateName.bind(playlists));

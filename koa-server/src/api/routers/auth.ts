@@ -1,8 +1,8 @@
 import Router from '@koa/router';
 import Joi from 'joi';
 import { Context, DefaultState } from 'koa';
+import { Validate } from '../decorators';
 import authService, { AuthService } from '../services/auth-service';
-import validate from '../validator';
 
 class Auth {
   constructor(
@@ -19,6 +19,7 @@ class Auth {
 
   static readonly validLogin = this.validRegister;
 
+  @Validate(null, Auth.validRegister)
   async register(ctx: Context) {
     const username: string = ctx.request.body.username;
     const password: string = ctx.request.body.password;
@@ -28,6 +29,7 @@ class Auth {
     else ctx.body = user;
   }
 
+  @Validate(null, Auth.validLogin)
   async login(ctx: Context) {
     const username: string = ctx.request.body.username;
     const password: string = ctx.request.body.password;
@@ -41,8 +43,8 @@ class Auth {
 const auth = new Auth(authService);
 
 export default new Router<DefaultState, Context>()
-  .post('/register', validate(null, Auth.validRegister), auth.register.bind(auth))
-  .post('/login', validate(null, Auth.validLogin), auth.login.bind(auth));
+  .post('/register', auth.register.bind(auth))
+  .post('/login', auth.login.bind(auth));
 
 // import Router from '@koa/router';
 // import { Context } from '../../koa/types';

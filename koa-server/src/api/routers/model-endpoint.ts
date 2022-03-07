@@ -1,61 +1,50 @@
+import Joi from 'joi';
 import { Context } from 'koa';
+import { NotFound, Ok, Validate } from '../decorators';
 import Service from '../services/service';
+import { Valid } from '../validator';
 
 export default class ModelEndpoint<Model, ModelService extends Service<Model>> {
   constructor(
     protected readonly service: ModelService
   ) { }
 
-  getAll = async (ctx: Context) => {
-    const models = await this.service.getAll(ctx.prisma);
-    ctx.body = models;
+  @Ok
+  async getAll(ctx: Context) {
+    return await this.service.getAll(ctx.prisma);
   }
 
-  getPage = async (ctx: Context) => {
-    const page: number = ctx.params.page;
-    const size: number = ctx.params.size;
-    const models = await this.service.getPage(ctx.prisma, page, size);
-    ctx.body = models;
+  @Validate(Joi.object({ id: Valid.id, page: Valid.uint, size: Valid.uint }))
+  @Ok
+  async getPage(ctx: Context) {
+    return await this.service.getPage(ctx.prisma, ctx.params.page, ctx.params.size);
   }
 
-  getById = async (ctx: Context) => {
-    const id: string = ctx.params.id;
-    const model = await this.service.getById(ctx.prisma, id);
-    if (model === null) {
-      ctx.status = 404;
-    } else {
-      ctx.body = model;
-    }
+  @Validate(Valid.idObject)
+  @NotFound
+  async getById(ctx: Context) {
+    return await this.service.getById(ctx.prisma, ctx.params.id);
   }
 
-  create = async (ctx: Context) => {
-    const data: Model = ctx.request.body;
-    const model = await this.service.create(ctx.prisma, data);
-    ctx.body = model;
+  @Ok
+  async create(ctx: Context) {
+    return await this.service.create(ctx.prisma, ctx.request.body);
   }
 
-  update = async (ctx: Context) => {
-    const id: string = ctx.params.id;
-    const data: Model = ctx.request.body;
-    const model = await this.service.update(ctx.prisma, id, data);
-    if (model == null) {
-      ctx.status = 404;
-    } else {
-      ctx.body = model;
-    }
+  @Validate(Valid.idObject)
+  @NotFound
+  async update(ctx: Context) {
+    return await this.service.update(ctx.prisma, ctx.params.id, ctx.request.body);
   }
 
-  del = async (ctx: Context) => {
-    const id: string = ctx.params.id;
-    const model = await this.service.delete(ctx.prisma, id);
-    if (model == null) {
-      ctx.status = 404;
-    } else {
-      ctx.body = model;
-    }
+  @Validate(Valid.idObject)
+  @NotFound
+  async del(ctx: Context) {
+    return await this.service.delete(ctx.prisma, ctx.params.id);
   }
 
-  count = async (ctx: Context) => {
-    ctx.body = await this.service.count(ctx.prisma);
+  @Ok
+  async count(ctx: Context) {
+    return await this.service.count(ctx.prisma);
   }
 }

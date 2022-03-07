@@ -1,12 +1,11 @@
-import Joi, { Schema } from 'joi';
-import { Context, Next } from 'koa';
+import Joi from 'joi';
 
-export default (paramsSchema?: Schema, bodySchema?: Schema) => async (ctx: Context, next: Next): Promise<void> => {
-  const error = paramsSchema?.validate(ctx.params).error ?? bodySchema?.validate(ctx.request.body).error;
-  if (!error) return await next();
-  ctx.status = 400;
-  ctx.body = error.message;
-};
+// export default (paramsSchema?: Schema, bodySchema?: Schema) => async (ctx: Context, next: Next): Promise<void> => {
+//   const error = paramsSchema?.validate(ctx.params).error ?? bodySchema?.validate(ctx.request.body).error;
+//   if (!error) return await next();
+//   ctx.status = 400;
+//   ctx.body = error.message;
+// };
 
 const id = Joi.string().uuid().required();
 const idObject = Joi.object({ id });

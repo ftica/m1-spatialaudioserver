@@ -1,4 +1,5 @@
 import { Role } from '@prisma/client';
+import { Schema } from 'joi';
 import { Context, Next } from 'koa';
 
 export namespace Security {
@@ -61,11 +62,49 @@ export namespace Security {
   }
 }
 
-export function NotFound(target: any, _methodName: string, descriptor: PropertyDescriptor) {
+export function Authorize(...roles: Role[]) {
+  return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (ctx: Context) {
+      // TODO: Current user has one of the roles in roles[]
+      return await originalMethod.call(this, ctx);
+    };
+
+    return descriptor;
+  };
+}
+
+export function Validate(paramsSchema?: Schema, bodySchema?: Schema) {
+  return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (ctx: Context) {
+      const error = paramsSchema?.validate(ctx.params).error ?? bodySchema?.validate(ctx.request.body).error;
+      if (!error) return await originalMethod.call(this, ctx);
+      ctx.status = 400;
+      ctx.body = error.message;
+    };
+
+    return descriptor;
+  };
+}
+
+export function Ok(_target: any, _methodName: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value;
 
-  descriptor.value = (ctx: Context) => {
-    const result = originalMethod.call(this, ctx);
+  descriptor.value = async function (ctx: Context) {
+    ctx.body = await originalMethod.call(this, ctx);
+  };
+
+  return descriptor;
+};
+
+export function NotFound(_target: any, _methodName: string, descriptor: PropertyDescriptor) {
+  const originalMethod = descriptor.value;
+
+  descriptor.value = async function (ctx: Context) {
+    const result = await originalMethod.call(this, ctx);
     if (result) ctx.body = result;
     else ctx.status = 404;
   };
