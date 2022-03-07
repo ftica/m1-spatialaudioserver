@@ -15,16 +15,6 @@ declare module 'koa' {
   }
 }
 
-const app = new Koa();
-
-app.keys = ['test'];
-app.proxy = true;
-
-app.use(middleware());
-
-app.use(router.routes());
-app.use(router.allowedMethods());
-
 if (process.env.NODE_ENV === 'development') {
   router.get('/', ctx => {
     ctx.body = router.stack
@@ -32,5 +22,19 @@ if (process.env.NODE_ENV === 'development') {
       .map(route => `${route.methods} ${route.path}`);
   });
 }
+
+const app = new Koa();
+
+app.proxy = true;
+app.keys = [
+  'mach1-cookie-key-1',
+  'mach1-cookie-key-2',
+  'mach1-cookie-key-3'
+];
+
+app.use(middleware());
+
+app.use(router.routes());
+app.use(router.allowedMethods());
 
 export default app;
