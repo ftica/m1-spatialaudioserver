@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-export default class Service<Model> {
+export default class ModelService<Model> {
   constructor(
     protected readonly table: string
   ) { }

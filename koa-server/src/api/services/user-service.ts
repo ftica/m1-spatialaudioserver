@@ -1,7 +1,7 @@
 import { PrismaClient, User } from '@prisma/client';
-import Service from './service';
+import ModelService from './model-service';
 
-export class UserService extends Service<User> {
+export class UserService extends ModelService<User> {
   async getByUsername(prisma: PrismaClient, username: string): Promise<User> {
     return await prisma[this.table].findUnique({ where: { id: undefined, username } });
   }

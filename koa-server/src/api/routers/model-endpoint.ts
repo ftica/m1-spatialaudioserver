@@ -1,12 +1,12 @@
 import Joi from 'joi';
 import { Context } from 'koa';
 import { NotFound, Ok, Validate } from '../decorators';
-import Service from '../services/service';
+import ModelService from '../services/model-service';
 import { Valid } from '../validator';
 
-export default class ModelEndpoint<Model, ModelService extends Service<Model>> {
+export default class ModelEndpoint<Model, Service extends ModelService<Model>> {
   constructor(
-    protected readonly service: ModelService
+    protected readonly service: Service
   ) { }
 
   @Ok
