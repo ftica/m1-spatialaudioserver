@@ -16,7 +16,7 @@ class Playlists extends ModelEndpoint<Playlist, PlaylistService> {
     ownerId: Valid.id
   });
 
-  @AuthorizeRole(Role.ADMIN)
+  @AuthorizeRole(Role.USER)
   @Validate(null, Playlists.validCreate)
   override async create(ctx: Context) {
     return super.create(ctx);

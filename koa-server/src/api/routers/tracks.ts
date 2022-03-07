@@ -16,6 +16,11 @@ export class Tracks extends ModelEndpoint<Track, TrackService> {
     playlistId: Valid.id
   });
 
+  @AuthorizeRole(Role.ADMIN)
+  override async create(ctx: Context) {
+    return super.create(ctx);
+  }
+
   @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Tracks.validName)
   @NotFound
