@@ -8,8 +8,8 @@ import serve from 'koa-static';
 
 // import cors from './cors';
 import errors from './errors';
-import tokenParser from './token-parser';
 import database from './database';
+import tokenParser from './token-parser';
 
 const staticDir = path.join(__dirname, '../../..', 'public');
 
