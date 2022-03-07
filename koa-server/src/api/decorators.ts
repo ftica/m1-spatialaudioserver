@@ -1,4 +1,4 @@
-import { Role, User } from '@prisma/client';
+import { Role } from '@prisma/client';
 import { Schema } from 'joi';
 import { Context } from 'koa';
 
@@ -75,12 +75,12 @@ export function AuthorizeRole(...roles: Role[]) {
   };
 }
 
-export function Authorize(authFun: (user: User) => boolean) {
+export function Authorize(authFun: (ctx: Context) => boolean) {
   return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (ctx: Context) {
-      if (authFun(ctx.session.user)) return await originalMethod.call(this, ctx);
+      if (authFun(ctx)) return await originalMethod.call(this, ctx);
       else ctx.status = 401;
     };
 

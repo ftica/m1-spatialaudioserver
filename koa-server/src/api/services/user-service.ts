@@ -7,19 +7,11 @@ export class UserService extends Service<User> {
   }
 
   override async update(prisma: PrismaClient, username: string, data): Promise<User> {
-    try {
-      return await prisma[this.table].update({ where: { username }, data });
-    } catch (err) {
-      return null;
-    }
+    return await prisma[this.table].update({ where: { username }, data });
   }
 
   override async delete(prisma: PrismaClient, username: string): Promise<User> {
-    try {
-      return await prisma[this.table].delete({ where: { username } });
-    } catch (err) {
-      return null;
-    }
+    return await prisma[this.table].delete({ where: { username } });
   }
 }
 
