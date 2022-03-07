@@ -5,7 +5,7 @@ import ModelEndpoint from './model-endpoint';
 import playlistService, { PlaylistService } from '../services/playlist-service';
 import { Valid } from '../validator';
 import Joi from 'joi';
-import { Authorize, NotFound, Validate } from '../decorators';
+import { AuthorizeRole, NotFound, Validate } from '../decorators';
 
 class Playlists extends ModelEndpoint<Playlist, PlaylistService> {
   static readonly validName = Joi.string().min(3).max(100).required();
@@ -16,41 +16,41 @@ class Playlists extends ModelEndpoint<Playlist, PlaylistService> {
     ownerId: Valid.id
   });
 
-  @Authorize(Role.ADMIN)
+  @AuthorizeRole(Role.ADMIN)
   @Validate(null, Playlists.validCreate)
   override async create(ctx: Context) {
     return super.create(ctx);
   }
 
-  @Authorize(Role.USER)
+  @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Playlists.validName)
   @NotFound
   async updateName(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { name: ctx.params.body });
   }
 
-  @Authorize(Role.USER)
+  @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Valid.bool)
   @NotFound
   async updatePublic(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { public: ctx.params.body === 'true' });
   }
 
-  @Authorize(Role.USER)
+  @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Valid.idArray)
   @NotFound
   async updateTracks(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { tracks: ctx.request.body.map(track => ({ id: track })) }, { tracks: true });
   }
 
-  @Authorize(Role.USER)
+  @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Valid.bool)
   @NotFound
   async updateFavorite(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { favorite: ctx.request.body === 'true' }, { favorites: true });
   }
 
-  @Authorize(Role.USER)
+  @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Valid.idArray)
   @NotFound
   async updateAllowedUsers(ctx: Context) {

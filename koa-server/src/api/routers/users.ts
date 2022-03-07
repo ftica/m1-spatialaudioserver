@@ -5,7 +5,7 @@ import ModelEndpoint from './model-endpoint';
 import userService, { UserService } from '../services/user-service';
 import { Valid } from '../validator';
 import Joi from 'joi';
-import { Authorize, NotFound, Validate } from '../decorators';
+import { AuthorizeRole, NotFound, Validate } from '../decorators';
 
 class Users extends ModelEndpoint<User, UserService> {
   static readonly validUsername = Joi.string().min(4).max(20).required();
@@ -13,40 +13,40 @@ class Users extends ModelEndpoint<User, UserService> {
 
   static readonly validUsernameParam = Joi.object({ username: this.validUsername });
 
-  @Authorize(Role.USER)
+  @AuthorizeRole(Role.USER)
   @Validate(Users.validUsernameParam)
   @NotFound
   async getByUsername(ctx: Context) {
     return await this.service.getByUsername(ctx.prisma, ctx.params.username);
   }
 
-  @Authorize(Role.ADMIN)
+  @AuthorizeRole(Role.ADMIN)
   @Validate(Users.validUsernameParam)
   @NotFound
   async del(ctx: Context) {
     return await this.service.delete(ctx.prisma, ctx.params.username);
   }
 
-  @Authorize(Role.USER)
+  @AuthorizeRole(Role.USER)
   async profile(ctx: Context) {
     ctx.body = 'Profile of current session user';
   }
 
-  @Authorize(Role.USER)
+  @AuthorizeRole(Role.USER)
   @Validate(Users.validUsernameParam, Users.validUsername)
   @NotFound
   async updateUsername(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.username, { username: ctx.request.body });
   }
 
-  @Authorize(Role.ADMIN)
+  @AuthorizeRole(Role.ADMIN)
   @Validate(Users.validUsernameParam, Users.validRole)
   @NotFound
   async updateRole(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.username, { role: ctx.request.body });
   }
 
-  @Authorize(Role.USER)
+  @AuthorizeRole(Role.USER)
   @Validate(Users.validUsernameParam, Valid.bool)
   @NotFound
   async updateActive(ctx: Context) {

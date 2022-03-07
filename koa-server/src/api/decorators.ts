@@ -1,74 +1,87 @@
-import { Role } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { Schema } from 'joi';
-import { Context, Next } from 'koa';
+import { Context } from 'koa';
 
-export namespace Security {
-  type AsyncHandler = (ctx: Context, next?: Next) => Promise<any>;
+// export namespace Security {
+//   type AsyncHandler = (ctx: Context, next?: Next) => Promise<any>;
 
-  const getAuthenticatedHandler = (original: AsyncHandler): AsyncHandler =>
-    async (ctx: Context, next?: Next) => {
-      if (!ctx.token) {
-        ctx.throw(400, 'Failed to authenticate user');
-      }
+//   const getAuthenticatedHandler = (original: AsyncHandler): AsyncHandler =>
+//     async (ctx: Context, next?: Next) => {
+//       if (!ctx.token) {
+//         ctx.throw(400, 'Failed to authenticate user');
+//       }
 
-      return await original(ctx, next);
-    };
+//       return await original(ctx, next);
+//     };
 
-  const getAuthorizedHandler = (original: AsyncHandler, roles: Role[]): AsyncHandler =>
-    async (ctx: Context, next?: Next) => {
-      if (!ctx.token.role) {
-        ctx.throw(400, 'Failed to authorize user');
-      }
+//   const getAuthorizedHandler = (original: AsyncHandler, roles: Role[]): AsyncHandler =>
+//     async (ctx: Context, next?: Next) => {
+//       if (!ctx.token.role) {
+//         ctx.throw(400, 'Failed to authorize user');
+//       }
 
-      if (!roles.includes(ctx.token.role)) {
-        ctx.throw(403, 'Unauthorized');
-      }
+//       if (!roles.includes(ctx.token.role)) {
+//         ctx.throw(403, 'Unauthorized');
+//       }
 
-      return await original(ctx, next);
-    };
+//       return await original(ctx, next);
+//     };
 
-  const getValidBodyHandler = (original: AsyncHandler, valid: any): AsyncHandler =>
-    async (ctx: Context, next?: Next) => {
-      if (!ctx.validate) {
-        ctx.throw(500, 'Validator not present');
-      }
+//   const getValidBodyHandler = (original: AsyncHandler, valid: any): AsyncHandler =>
+//     async (ctx: Context, next?: Next) => {
+//       if (!ctx.validate) {
+//         ctx.throw(500, 'Validator not present');
+//       }
 
-      await ctx.validate(valid);
+//       await ctx.validate(valid);
 
-      return await original(ctx, next);
-    };
+//       return await original(ctx, next);
+//     };
 
-  export const Authenticated: MethodDecorator = (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
-    const original: AsyncHandler = descriptor.value!;
+//   export const Authenticated: MethodDecorator = (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
+//     const original: AsyncHandler = descriptor.value!;
 
-    descriptor.value = getAuthenticatedHandler(original);
-  };
+//     descriptor.value = getAuthenticatedHandler(original);
+//   };
 
-  export function Authorized(...roles: Role[]): MethodDecorator {
-    return (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
-      const original: AsyncHandler = descriptor.value!;
-      const authenticated: AsyncHandler = getAuthenticatedHandler(original);
+//   export function Authorized(...roles: Role[]): MethodDecorator {
+//     return (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
+//       const original: AsyncHandler = descriptor.value!;
+//       const authenticated: AsyncHandler = getAuthenticatedHandler(original);
 
-      descriptor.value = getAuthorizedHandler(authenticated, roles);
-    };
-  }
+//       descriptor.value = getAuthorizedHandler(authenticated, roles);
+//     };
+//   }
 
-  export function ValidBody(valid: any): MethodDecorator {
-    return (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
-      const original: AsyncHandler = descriptor.value!;
+//   export function ValidBody(valid: any): MethodDecorator {
+//     return (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
+//       const original: AsyncHandler = descriptor.value!;
 
-      descriptor.value = getValidBodyHandler(original, valid);
-    };
-  }
-}
+//       descriptor.value = getValidBodyHandler(original, valid);
+//     };
+//   }
+// }
 
-export function Authorize(...roles: Role[]) {
+export function AuthorizeRole(...roles: Role[]) {
   return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (ctx: Context) {
       // TODO: Current user has one of the roles in roles[]
       return await originalMethod.call(this, ctx);
+    };
+
+    return descriptor;
+  };
+}
+
+export function Authorize(authFun: (user: User) => boolean) {
+  return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (ctx: Context) {
+      if (authFun(ctx.session.user)) return await originalMethod.call(this, ctx);
+      else ctx.status = 401;
     };
 
     return descriptor;

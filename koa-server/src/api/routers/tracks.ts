@@ -5,7 +5,7 @@ import ModelEndpoint from './model-endpoint';
 import trackService, { TrackService } from '../services/track-service';
 import { Valid } from '../validator';
 import Joi from 'joi';
-import { Authorize, NotFound, Validate } from '../decorators';
+import { AuthorizeRole, NotFound, Validate } from '../decorators';
 
 export class Tracks extends ModelEndpoint<Track, TrackService> {
   static readonly validName = Joi.string().min(3).max(100).required();
@@ -16,21 +16,21 @@ export class Tracks extends ModelEndpoint<Track, TrackService> {
     playlistId: Valid.id
   });
 
-  @Authorize(Role.USER)
+  @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Tracks.validName)
   @NotFound
   async updateName(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { name: ctx.request.body });
   }
 
-  @Authorize(Role.USER)
+  @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Valid.uint)
   @NotFound
   async updatePosition(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { position: parseInt(ctx.request.body) });
   }
 
-  @Authorize(Role.USER)
+  @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Valid.id)
   @NotFound
   async updatePlaylist(ctx: Context) {
