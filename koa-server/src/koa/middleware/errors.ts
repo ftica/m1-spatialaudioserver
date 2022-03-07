@@ -5,9 +5,7 @@ export default () => async (ctx: Context, next: Next) => {
     await next();
   } catch (error) {
     console.error(error);
-    const { statusCode = 500, message = 'Unknown error' } = error;
-
-    ctx.status = statusCode;
-    ctx.body = { message };
+    ctx.status = error.statusCode ?? 500;
+    ctx.body = error.message ?? 'Unknown error';
   }
 };

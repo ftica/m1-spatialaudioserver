@@ -21,10 +21,7 @@ export default () => compose([
   tokenParser(),
   bodyParser({
     enableTypes: ['json', 'text'],
-    onerror: (err, ctx) => {
-      ctx.status = 400;
-      ctx.body = err.message;
-    }
+    onerror: (err, ctx) => ctx.throw(400, err.message)
   }),
   serve(staticDir)
 ]);
