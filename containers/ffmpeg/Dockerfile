@@ -1,6 +1,7 @@
-FROM alpine:3.15.0 as ffmpeg-build
-
 ARG FFMPEG_VER=4.4
+
+FROM alpine:3.15.0 as ffmpeg-build
+ARG FFMPEG_VER
 ARG MAKEFLAGS="-j4"
 
 ENV TZ=america/new_york
@@ -53,9 +54,9 @@ RUN apk add --no-cache --virtual .build-deps \
     --enable-small \
     --enable-version3 \
     --extra-libs="-lpthread -lm" \
-    --prefix=/user/local && \
+    --prefix=/usr/local && \
     make && \
     make install && \
     make distclean && \
     apk del .build-deps && \
-    rm -rf /var/cache/apk/* /tmp/*
+    rm -rf /var/cache/* /tmp/*
