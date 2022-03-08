@@ -5,7 +5,7 @@ import ModelEndpoint from './model-endpoint';
 import userService, { UserService } from '../services/user-service';
 import { Valid } from '../valid';
 import Joi from 'joi';
-import { AuthorizeRole, NotFound, Validate } from '../decorators';
+import { AuthorizeRole, NotFound, Ok, Validate } from '../decorators';
 
 class Users extends ModelEndpoint<User, UserService> {
   static readonly validUsername = Joi.string().min(4).max(20).required();
@@ -33,8 +33,9 @@ class Users extends ModelEndpoint<User, UserService> {
   }
 
   @AuthorizeRole(Role.USER)
+  @Ok
   async profile(ctx: Context) {
-    ctx.body = 'Profile of current session user';
+    return await this.service.getById(ctx.prisma, ctx.token.userId);
   }
 
   @AuthorizeRole(Role.USER)
