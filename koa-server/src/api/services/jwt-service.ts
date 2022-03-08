@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { AccessToken, Role } from '@prisma/client';
 import jwt, { Secret, SignOptions, VerifyOptions, Jwt } from 'jsonwebtoken';
 
-export type Payload = { 'username': string, 'role': Role }
+export type Payload = { username: string, role: Role }
 export type Token = AccessToken & Payload;
 
 export class JwtService {
@@ -19,14 +19,14 @@ export class JwtService {
     };
   }
 
-  private static readonly signJwt: (payload: Payload, secret: Secret, options?: SignOptions) => string =
+  private static readonly signJwt: (token: Token, secret: Secret, options?: SignOptions) => string =
     jwt.sign;
 
   private static readonly verifyToken: (token: string, secret: Secret, options?: VerifyOptions) => Jwt =
     jwt.verify;
 
-  sign(payload: Payload): string {
-    return JwtService.signJwt(payload, this.secret, this.signOptions);
+  sign(token: Token): string {
+    return JwtService.signJwt(token, this.secret, this.signOptions);
   }
 
   verify(token: string): Jwt {

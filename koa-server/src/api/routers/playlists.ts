@@ -24,35 +24,35 @@ class Playlists extends ModelEndpoint<Playlist, PlaylistService> {
 
   @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Playlists.validName)
-  @NotFound
+  @NotFound()
   async updateName(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { name: ctx.params.body });
   }
 
   @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Valid.bool)
-  @NotFound
+  @NotFound()
   async updatePublic(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { public: ctx.params.body === 'true' });
   }
 
   @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Valid.idArray)
-  @NotFound
+  @NotFound()
   async updateTracks(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { tracks: ctx.request.body.map(track => ({ id: track })) }, { tracks: true });
   }
 
   @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Valid.bool)
-  @NotFound
+  @NotFound()
   async updateFavorite(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { favorite: ctx.request.body === 'true' }, { favorites: true });
   }
 
   @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Valid.idArray)
-  @NotFound
+  @NotFound()
   async updateAllowedUsers(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { users: ctx.request.body.map(user => ({ id: user })) }, { users: true });
   }

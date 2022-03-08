@@ -21,7 +21,7 @@ export default class ModelEndpoint<Model, Service extends ModelService<Model>> {
   }
 
   @Validate(Valid.idObject)
-  @NotFound
+  @NotFound()
   async getById(ctx: Context) {
     return await this.service.getById(ctx.prisma, ctx.params.id);
   }
@@ -32,13 +32,13 @@ export default class ModelEndpoint<Model, Service extends ModelService<Model>> {
   }
 
   @Validate(Valid.idObject)
-  @NotFound
+  @NotFound()
   async update(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, ctx.request.body);
   }
 
   @Validate(Valid.idObject)
-  @NotFound
+  @NotFound()
   async del(ctx: Context) {
     return await this.service.delete(ctx.prisma, ctx.params.id);
   }

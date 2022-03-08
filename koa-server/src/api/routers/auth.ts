@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 import Joi from 'joi';
 import { Context, DefaultState } from 'koa';
-import { Validate } from '../decorators';
+import { NotFound, Validate } from '../decorators';
 import authService, { AuthService } from '../services/auth-service';
 
 class Auth {
@@ -17,26 +17,27 @@ class Auth {
     password: this.validPassword
   });
 
-  static readonly validLogin = this.validRegister;
+  static readonly validLogin = Joi.object({
+    username: this.validUsername,
+    password: this.validPassword
+  });
 
   @Validate(null, Auth.validRegister)
+  @NotFound()
   async register(ctx: Context) {
-    const username: string = ctx.request.body.username;
-    const password: string = ctx.request.body.password;
-
-    const user = await this.service.register(ctx.prisma, { username, password });
-    if (user === null) ctx.status = 404;
-    else ctx.body = user;
+    return await this.service.register(ctx.prisma, {
+      username: ctx.request.body.username,
+      password: ctx.request.body.password
+    });
   }
 
   @Validate(null, Auth.validLogin)
+  @NotFound(401)
   async login(ctx: Context) {
-    const username: string = ctx.request.body.username;
-    const password: string = ctx.request.body.password;
-
-    const token = await authService.login(ctx.prisma, { username, password });
-    if (token == null) ctx.status = 400;
-    else ctx.body = token;
+    return await authService.login(ctx.prisma, {
+      username: ctx.request.body.username,
+      password: ctx.request.body.password
+    });
   }
 }
 

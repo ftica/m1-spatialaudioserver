@@ -24,21 +24,21 @@ export class Tracks extends ModelEndpoint<Track, TrackService> {
 
   @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Tracks.validName)
-  @NotFound
+  @NotFound()
   async updateName(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { name: ctx.request.body });
   }
 
   @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Valid.uint)
-  @NotFound
+  @NotFound()
   async updatePosition(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { position: parseInt(ctx.request.body) });
   }
 
   @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Valid.id)
-  @NotFound
+  @NotFound()
   async updatePlaylist(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.id, { playlistId: ctx.request.body });
   }

@@ -13,16 +13,21 @@ class Users extends ModelEndpoint<User, UserService> {
 
   static readonly validUsernameParam = Joi.object({ username: this.validUsername });
 
+  @AuthorizeRole(Role.ADMIN)
+  override getAll(ctx: Context) {
+    return super.getAll(ctx);
+  }
+
   @AuthorizeRole(Role.USER)
   @Validate(Users.validUsernameParam)
-  @NotFound
+  @NotFound()
   async getByUsername(ctx: Context) {
     return await this.service.getByUsername(ctx.prisma, ctx.params.username);
   }
 
   @AuthorizeRole(Role.ADMIN)
   @Validate(Users.validUsernameParam)
-  @NotFound
+  @NotFound()
   async del(ctx: Context) {
     return await this.service.delete(ctx.prisma, ctx.params.username);
   }
@@ -34,21 +39,21 @@ class Users extends ModelEndpoint<User, UserService> {
 
   @AuthorizeRole(Role.USER)
   @Validate(Users.validUsernameParam, Users.validUsername)
-  @NotFound
+  @NotFound()
   async updateUsername(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.username, { username: ctx.request.body });
   }
 
   @AuthorizeRole(Role.ADMIN)
   @Validate(Users.validUsernameParam, Users.validRole)
-  @NotFound
+  @NotFound()
   async updateRole(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.username, { role: ctx.request.body });
   }
 
   @AuthorizeRole(Role.USER)
   @Validate(Users.validUsernameParam, Valid.bool)
-  @NotFound
+  @NotFound()
   async updateActive(ctx: Context) {
     return await this.service.update(ctx.prisma, ctx.params.username, { active: ctx.request.body === 'true' });
   }

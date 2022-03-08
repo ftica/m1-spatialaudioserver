@@ -34,9 +34,7 @@ export class AuthService {
 
   async login(prisma: PrismaClient, input: UserLoginInput): Promise<string> {
     const user: User = await userService.getByUsername(prisma, input.username);
-    if (user) {
-      return null;
-    }
+    if (!user) return null;
 
     const passwordCorrect: boolean = await this.encryptionService.verifyPassword(input.password, user.password);
     if (!passwordCorrect) {

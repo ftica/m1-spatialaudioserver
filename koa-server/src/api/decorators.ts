@@ -67,8 +67,8 @@ export function AuthorizeRole(...roles: Role[]) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (ctx: Context) {
-      // TODO: Current user has one of the roles in roles[]
-      return await originalMethod.call(this, ctx);
+      if (roles.includes(ctx.token?.role)) return await originalMethod.call(this, ctx);
+      ctx.status = 401;
     };
 
     return descriptor;
@@ -81,7 +81,7 @@ export function Authorize(authFun: (ctx: Context) => boolean) {
 
     descriptor.value = async function (ctx: Context) {
       if (authFun(ctx)) return await originalMethod.call(this, ctx);
-      else ctx.status = 401;
+      ctx.status = 401;
     };
 
     return descriptor;
@@ -113,14 +113,16 @@ export function Ok(_target: any, _methodName: string, descriptor: PropertyDescri
   return descriptor;
 };
 
-export function NotFound(_target: any, _methodName: string, descriptor: PropertyDescriptor) {
-  const originalMethod = descriptor.value;
+export function NotFound(status: number = 404) {
+  return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
 
-  descriptor.value = async function (ctx: Context) {
-    const result = await originalMethod.call(this, ctx);
-    if (result) ctx.body = result;
-    else ctx.status = 404;
+    descriptor.value = async function (ctx: Context) {
+      const result = await originalMethod.call(this, ctx);
+      if (result) ctx.body = result;
+      else ctx.status = status;
+    };
+
+    return descriptor;
   };
-
-  return descriptor;
-};
+}
