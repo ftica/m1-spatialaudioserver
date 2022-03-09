@@ -31,14 +31,14 @@ class Playlists extends ModelEndpoint<Playlist, PlaylistService> {
   @Validate(Valid.idObject, Playlists.validName)
   @NotFound()
   async updateName(ctx: Context) {
-    return await this.service.update(ctx.prisma, ctx.params.id, { name: ctx.params.body });
+    return await this.service.update(ctx.prisma, ctx.params.id, { name: ctx.request.body });
   }
 
   @AuthorizeRole(Role.USER)
   @Validate(Valid.idObject, Valid.bool)
   @NotFound()
   async updatePublic(ctx: Context) {
-    return await this.service.update(ctx.prisma, ctx.params.id, { public: ctx.params.body === 'true' });
+    return await this.service.update(ctx.prisma, ctx.params.id, { public: ctx.request.body === 'true' });
   }
 
   @AuthorizeRole(Role.USER)
@@ -73,4 +73,7 @@ export default new Router<DefaultState, Context>()
   // .put('/:id', validate(Playlists.validId, Playlists.validUpdate), playlists.update.bind(playlists))
   .del('/:id', playlists.del.bind(playlists))
   .patch('/:id/name', playlists.updateName.bind(playlists))
-  .patch('/:id/public', playlists.updateName.bind(playlists));
+  .patch('/:id/public', playlists.updatePublic.bind(playlists))
+  .patch('/:id/tracks', playlists.updateTracks.bind(playlists))
+  .patch('/:id/favorite', playlists.updateFavorite.bind(playlists))
+  .patch('/:id/allowed-users', playlists.updateAllowedUsers.bind(playlists));

@@ -21,7 +21,7 @@ export default class ModelService<Model> {
     return await prisma[this.table].create({ data });
   }
 
-  async update(prisma: PrismaClient, id: string, data, include = undefined): Promise<Model> {
+  async update(prisma: PrismaClient, id: string, data: any, include = undefined): Promise<Model> {
     return await prisma[this.table].update({ where: { id }, data }, include);
   }
 
