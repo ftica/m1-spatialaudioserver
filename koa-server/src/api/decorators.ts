@@ -62,19 +62,6 @@ import { Context } from 'koa';
 //   }
 // }
 
-export function AuthorizeRole(...roles: Role[]) {
-  return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
-    const originalMethod = descriptor.value;
-
-    descriptor.value = async function (ctx: Context) {
-      if (roles.includes(ctx.token?.role)) return await originalMethod.call(this, ctx);
-      ctx.status = 401;
-    };
-
-    return descriptor;
-  };
-}
-
 export function Authorize(authFun: (ctx: Context) => boolean) {
   return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
@@ -86,6 +73,10 @@ export function Authorize(authFun: (ctx: Context) => boolean) {
 
     return descriptor;
   };
+}
+
+export function AuthorizeRole(...roles: Role[]) {
+  return Authorize((ctx: Context) => roles.includes(ctx.token?.role));
 }
 
 export function Validate(paramsSchema?: Schema, bodySchema?: Schema) {

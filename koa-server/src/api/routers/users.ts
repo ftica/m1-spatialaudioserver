@@ -45,7 +45,7 @@ class Users extends ModelEndpoint<User, UserService> {
     return await this.service.update(ctx.prisma, ctx.params.username, { username: ctx.request.body });
   }
 
-  @AuthorizeRole(Role.ADMIN)
+  @AuthorizeRole(Role.USER)
   @Validate(Users.validUsernameParam, Users.validRole)
   @NotFound()
   async updateRole(ctx: Context) {

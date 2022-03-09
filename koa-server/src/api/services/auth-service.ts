@@ -1,4 +1,5 @@
 import { AccessToken, PrismaClient, Role, User } from '@prisma/client';
+import { addHours, now } from '../time';
 import encryptionService, { EncryptionService } from './encryption-service';
 import jwtService, { JwtService, Token } from './jwt-service';
 import userService from './user-service';
@@ -14,14 +15,16 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) { }
 
-  private get validUntil() {
-    return new Date(Date.now() + (60 * 60));
-  }
-
   private async getOrCreateToken(prisma: PrismaClient, user: User): Promise<Token> {
-    const token: AccessToken =
-      await prisma.accessToken.findUnique({ where: { id: undefined, userId: user.id } }) ??
-      await prisma.accessToken.create({ data: { userId: user.id, validUntil: this.validUntil } });
+    let token: AccessToken = await prisma.accessToken.findUnique({ where: { id: undefined, userId: user.id } });
+
+    if (token && token.validUntil < now()) {
+      await prisma.accessToken.delete({ where: { id: token.id } });
+      token = null;
+    }
+    if (!token) {
+      token = await prisma.accessToken.create({ data: { userId: user.id, validUntil: addHours(now(), 2) } });
+    }
 
     return {
       id: token.id,
