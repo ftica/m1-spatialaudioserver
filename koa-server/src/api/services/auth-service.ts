@@ -1,5 +1,5 @@
 import { AccessToken, PrismaClient, Role, User } from '@prisma/client';
-import { addHours, now } from '../time';
+import { addHours, now } from '../util/time';
 import encryptionService, { EncryptionService } from './encryption-service';
 import jwtService, { JwtService, Token } from './jwt-service';
 import userService from './user-service';

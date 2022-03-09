@@ -3,9 +3,9 @@ import { Context, DefaultState } from 'koa';
 import { Role, User } from '@prisma/client';
 import ModelEndpoint from './model-endpoint';
 import userService, { UserService } from '../services/user-service';
-import { Valid } from '../valid';
+import { Valid } from '../util/valid';
 import Joi from 'joi';
-import { AuthorizeRole, NotFound, Ok, Validate } from '../decorators';
+import { AuthorizeRole, NotFound, Ok, Validate } from '../util/decorators';
 
 class Users extends ModelEndpoint<User, UserService> {
   static readonly validUsername = Joi.string().min(4).max(20).required();

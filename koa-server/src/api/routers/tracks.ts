@@ -3,9 +3,9 @@ import { Context, DefaultState } from 'koa';
 import { Role, Track } from '@prisma/client';
 import ModelEndpoint from './model-endpoint';
 import trackService, { TrackService } from '../services/track-service';
-import { Valid } from '../valid';
+import { Valid } from '../util/valid';
 import Joi from 'joi';
-import { AuthorizeRole, NotFound, Validate } from '../decorators';
+import { AuthorizeRole, NotFound, Validate } from '../util/decorators';
 
 export class Tracks extends ModelEndpoint<Track, TrackService> {
   static readonly validName = Joi.string().min(3).max(100).required();

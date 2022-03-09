@@ -1,9 +1,9 @@
 import { Role } from '@prisma/client';
 import Joi from 'joi';
 import { Context } from 'koa';
-import { AuthorizeRole, NotFound, Ok, Validate } from '../decorators';
+import { AuthorizeRole, NotFound, Ok, Validate } from '../util/decorators';
 import ModelService from '../services/model-service';
-import { Valid } from '../valid';
+import { Valid } from '../util/valid';
 
 export default class ModelEndpoint<Model, Service extends ModelService<Model>> {
   constructor(

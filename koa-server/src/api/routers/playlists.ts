@@ -3,23 +3,28 @@ import { Context, DefaultState } from 'koa';
 import { Playlist, Role } from '@prisma/client';
 import ModelEndpoint from './model-endpoint';
 import playlistService, { PlaylistService } from '../services/playlist-service';
-import { Valid } from '../valid';
+import { Valid } from '../util/valid';
 import Joi from 'joi';
-import { AuthorizeRole, NotFound, Validate } from '../decorators';
+import { AuthorizeRole, NotFound, Ok, Validate } from '../util/decorators';
 
 class Playlists extends ModelEndpoint<Playlist, PlaylistService> {
   static readonly validName = Joi.string().min(3).max(100).required();
 
   static readonly validCreate = Joi.object({
     name: this.validName,
-    public: Valid.bool,
-    ownerId: Valid.id
+    public: Valid.bool
   });
 
   @AuthorizeRole(Role.USER)
   @Validate(null, Playlists.validCreate)
+  @Ok
   override async create(ctx: Context) {
-    return super.create(ctx);
+    return this.service.create(ctx.prisma, {
+      id: undefined,
+      name: ctx.request.body.name,
+      public: ctx.request.body.public,
+      ownerId: ctx.token.userId
+    });
   }
 
   @AuthorizeRole(Role.USER)

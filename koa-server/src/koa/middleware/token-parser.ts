@@ -1,7 +1,7 @@
 import { Jwt } from 'jsonwebtoken';
 import { Context, Next } from 'koa';
 import jwtService, { Token } from '../../api/services/jwt-service';
-import { now } from '../../api/time';
+import { now } from '../../api/util/time';
 
 export default () => async (ctx: Context, next: Next) => {
   if (ctx.headers.authorization != null) {
