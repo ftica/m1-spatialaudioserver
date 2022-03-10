@@ -20,7 +20,7 @@ export default () => compose([
   database(),
   tokenParser(),
   bodyParser({
-    enableTypes: ['json', 'text'],
+    enableTypes: ['json', 'text', 'form'],
     onerror: (err, ctx) => ctx.throw(400, err.message)
   }),
   serve(staticDir)
