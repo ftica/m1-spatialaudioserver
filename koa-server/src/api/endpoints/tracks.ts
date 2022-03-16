@@ -7,7 +7,7 @@ import { AuthorizeAdmin, AuthorizeLogged, NotFound, Ok, Validate } from '../util
 
 export class Tracks {
   constructor(
-    protected readonly service: TrackService
+    protected readonly trackService: TrackService
   ) { }
 
   static readonly validName = Joi.string().min(3).max(100).required();
@@ -21,7 +21,7 @@ export class Tracks {
   @Validate(null, null, Joi.object({ page: Valid.uint, size: Valid.uint }))
   @Ok
   async getAllPage(ctx: Context): Promise<any[]> {
-    return await this.service.findPage(ctx, ctx.params.page, ctx.params.size, undefined, {
+    return await this.trackService.findPage(ctx, ctx.params.page, ctx.params.size, undefined, {
       id: true,
       name: true,
       playlist: {
@@ -46,7 +46,7 @@ export class Tracks {
   @Validate(Valid.idParam, Tracks.validName)
   @NotFound()
   async updateName(ctx: Context) {
-    return await this.service.updateOne(ctx, {
+    return await this.trackService.updateOne(ctx, {
       id: ctx.params.id,
       playlist: ctx.admin ? undefined : { ownerId: ctx.token.userId }
     }, {
