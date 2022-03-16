@@ -1,79 +1,87 @@
 import Router from '@koa/router';
 import { Context, DefaultState } from 'koa';
-import { Playlist, Role } from '@prisma/client';
-import ModelEndpoint from './model-endpoint';
-import playlistService, { PlaylistService } from '../services/playlist-service';
-import { Valid } from '../util/valid';
 import Joi from 'joi';
-import { AuthorizeRole, NotFound, Ok, Validate } from '../util/decorators';
+import { Valid } from '../util/valid';
+import { AuthorizeLogged, NotFound, Ok, Validate } from '../util/decorators';
+import playlistService, { PlaylistService } from '../services/playlist-service';
 
-class Playlists extends ModelEndpoint<Playlist, PlaylistService> {
+class Playlists {
+  constructor(
+    protected readonly playlistService: PlaylistService
+  ) { }
+
   static readonly validName = Joi.string().min(3).max(100).required();
-
   static readonly validCreate = Joi.object({
     name: this.validName,
     public: Valid.bool
   });
 
-  @AuthorizeRole(Role.USER)
-  @Validate(null, Playlists.validCreate)
+  @AuthorizeLogged
+  @Validate(null, null, Joi.object({ page: Valid.uint, size: Valid.uint.max(100) }))
   @Ok
-  override async create(ctx: Context) {
-    return this.service.create(ctx.prisma, {
-      id: undefined,
-      name: ctx.request.body.name,
-      public: ctx.request.body.public,
-      ownerId: ctx.token.userId
-    });
+  async getAllPage(ctx: Context): Promise<any> {
+    return await this.playlistService.findPage(ctx, parseInt(ctx.query.page as string), parseInt(ctx.query.size as string),
+      ctx.admin ? undefined : { public: true },
+      {
+        id: true,
+        name: true,
+        public: ctx.admin,
+        owner: {
+          username: true
+        }
+      }
+    );
   }
 
-  @AuthorizeRole(Role.USER)
-  @Validate(Valid.idObject, Playlists.validName)
-  @NotFound()
-  async updateName(ctx: Context) {
-    return await this.service.update(ctx.prisma, ctx.params.id, { name: ctx.request.body });
-  }
+  // @AuthorizeRole(Role.ADMIN, Role.USER)
+  // @Validate(null, Playlists.validCreate)
+  // @Ok
+  // override async create(ctx: Context) {
+  //   return await this.service.create(ctx, {
+  //     id: undefined,
+  //     name: ctx.request.body.name,
+  //     public: ctx.request.body.public,
+  //     ownerId: ctx.token.userId
+  //   });
+  // }
 
-  @AuthorizeRole(Role.USER)
-  @Validate(Valid.idObject, Valid.bool)
-  @NotFound()
-  async updatePublic(ctx: Context) {
-    return await this.service.update(ctx.prisma, ctx.params.id, { public: ctx.request.body === 'true' });
-  }
+  // @AuthorizeRole(Role.ADMIN, Role.USER)
+  // @Validate(Valid.idObject, Playlists.validName)
+  // @NotFound()
+  // async updateName(ctx: Context) {
+  //   return await this.service.update(ctx, ctx.params.id, { name: ctx.request.body });
+  // }
 
-  @AuthorizeRole(Role.USER)
-  @Validate(Valid.idObject, Valid.idArray)
-  @NotFound()
-  async updateTracks(ctx: Context) {
-    return await this.service.update(ctx.prisma, ctx.params.id, { tracks: ctx.request.body.map(track => ({ id: track })) }, { tracks: true });
-  }
+  // @AuthorizeRole(Role.ADMIN, Role.USER)
+  // @Validate(Valid.idObject, Valid.bool)
+  // @NotFound()
+  // async updatePublic(ctx: Context) {
+  //   return await this.service.update(ctx, ctx.params.id, { public: ctx.request.body === 'true' });
+  // }
 
-  @AuthorizeRole(Role.USER)
-  @Validate(Valid.idObject, Valid.bool)
+  // @AuthorizeRole(Role.ADMIN, Role.USER)
+  // @Validate(Valid.idObject, Valid.idArray)
+  // @NotFound()
+  // async updateTracks(ctx: Context) {
+  //   return await this.service.update(ctx, ctx.params.id, { tracks: ctx.request.body.map(track => ({ id: track })) });
+  // }
+
+  @AuthorizeLogged
+  @Validate(Valid.idParam, Valid.bool)
   @NotFound()
   async updateFavorite(ctx: Context) {
-    return await this.service.update(ctx.prisma, ctx.params.id, { favorite: ctx.request.body === 'true' }, { favorites: true });
+    return await this.playlistService.updateOne(ctx, ctx.params.id, { favorite: ctx.request.body === 'true' });
   }
 
-  @AuthorizeRole(Role.USER)
-  @Validate(Valid.idObject, Valid.idArray)
-  @NotFound()
-  async updateAllowedUsers(ctx: Context) {
-    return await this.service.update(ctx.prisma, ctx.params.id, { users: ctx.request.body.map(user => ({ id: user })) }, { users: true });
-  }
+  // @AuthorizeRole(Role.ADMIN, Role.USER)
+  // @Validate(Valid.idObject, Valid.idArray)
+  // @NotFound()
+  // async updateAllowedUsers(ctx: Context) {
+  //   return await this.service.update(ctx, ctx.params.id, { users: ctx.request.body.map(user => ({ id: user })) });
+  // }
 }
 
 const playlists = new Playlists(playlistService);
 
 export default new Router<DefaultState, Context>()
-  .get('/', playlists.getAll.bind(playlists))
-  .get('/count', playlists.count.bind(playlists))
-  .get('/:id', playlists.getById.bind(playlists))
-  .post('/', playlists.create.bind(playlists))
-  // .put('/:id', validate(Playlists.validId, Playlists.validUpdate), playlists.update.bind(playlists))
-  .del('/:id', playlists.del.bind(playlists))
-  .patch('/:id/name', playlists.updateName.bind(playlists))
-  .patch('/:id/public', playlists.updatePublic.bind(playlists))
-  .patch('/:id/tracks', playlists.updateTracks.bind(playlists))
-  .patch('/:id/favorite', playlists.updateFavorite.bind(playlists))
-  .patch('/:id/allowed-users', playlists.updateAllowedUsers.bind(playlists));
+  .get('/', playlists.getAllPage.bind(playlists));

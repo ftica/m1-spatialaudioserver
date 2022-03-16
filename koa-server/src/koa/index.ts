@@ -12,6 +12,7 @@ declare module 'koa' {
     request: Koa.Request;
     params: any;
     token?: Token;
+    admin: boolean;
   }
 }
 

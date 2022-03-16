@@ -8,15 +8,17 @@ import Joi from 'joi';
 // };
 
 const id = Joi.string().uuid().required();
-const idObject = Joi.object({ id });
+const idParam = Joi.object({ id });
 const idArray = Joi.array().items(id).min(0).required();
 const uint = Joi.number().integer().min(0).required();
 const bool = Joi.bool().required();
+const pageQuery = Joi.object({ page: uint, size: uint.max(100) });
 
 export const Valid = {
   uint,
   bool,
   id,
-  idObject,
-  idArray
+  idParam,
+  idArray,
+  pageQuery
 };

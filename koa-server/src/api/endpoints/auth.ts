@@ -31,7 +31,7 @@ class Auth {
   @Validate(null, Auth.validRegister)
   @NotFound()
   async register(ctx: Context) {
-    return await this.service.register(ctx.prisma, {
+    return await this.service.register(ctx, {
       username: ctx.request.body.username,
       password: ctx.request.body.password
     });
@@ -40,7 +40,7 @@ class Auth {
   @Validate(null, Auth.validLogin)
   @NotFound(401)
   async login(ctx: Context) {
-    return await authService.login(ctx.prisma, {
+    return await this.service.login(ctx, {
       username: ctx.request.body.username,
       password: ctx.request.body.password
     });
@@ -51,7 +51,7 @@ class Auth {
   async loginOAuth(ctx: Context) {
     return {
       token_type: 'bearer',
-      access_token: await authService.login(ctx.prisma, {
+      access_token: await this.service.login(ctx, {
         username: ctx.request.body.client_id,
         password: ctx.request.body.client_secret
       }),

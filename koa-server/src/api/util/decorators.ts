@@ -75,16 +75,29 @@ export function Authorize(authFun: (ctx: Context) => boolean) {
   };
 }
 
+export const AuthorizeLogged =
+  Authorize((ctx: Context) => ctx.token !== null);
+
+export const AuthorizeAdmin =
+  Authorize((ctx: Context) => ctx.admin === true);
+
 export function AuthorizeRole(...roles: Role[]) {
   return Authorize((ctx: Context) => roles.includes(ctx.token?.role));
 }
 
-export function Validate(paramsSchema?: Schema, bodySchema?: Schema) {
+export const AuthorizeMine =
+  Authorize((ctx: Context) => ctx.token && (ctx.admin || ctx.token.username === ctx.params.username));
+
+export function Validate(paramsSchema?: Schema, bodySchema?: Schema, querySchema?: Schema) {
   return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (ctx: Context) {
-      const error = paramsSchema?.validate(ctx.params).error ?? bodySchema?.validate(ctx.request.body).error;
+      console.log(ctx.query);
+      const error =
+        paramsSchema?.validate(ctx.params).error ??
+        bodySchema?.validate(ctx.request.body).error ??
+        querySchema?.validate(ctx.query).error;
       if (!error) return await originalMethod.call(this, ctx);
       ctx.status = 400;
       ctx.body = error.message;

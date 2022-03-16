@@ -1,35 +1,59 @@
-import { PrismaClient } from '@prisma/client';
+import { Context } from 'koa';
 
 export default class ModelService<Model> {
   constructor(
     protected readonly table: string
   ) { }
 
-  async getAll(prisma: PrismaClient): Promise<Model[]> {
-    return await prisma[this.table].findMany();
+  async findOne(ctx: Context, where: any, select: any = undefined): Promise<any> {
+    return await ctx.prisma[this.table].findUnique({ where, select });
   }
 
-  async getPage(prisma: PrismaClient, page: number, size: number): Promise<Model[]> {
-    return await prisma[this.table].findMany({ skip: page * size, take: size });
+  async findMany(ctx: Context, where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
+    return await ctx.prisma[this.table].findMany({ where, select, orderBy });
   }
 
-  async getById(prisma: PrismaClient, id: string, include: any = undefined): Promise<Model> {
-    return await prisma[this.table].findUnique({ where: { id } }, { include });
+  async findPage(ctx: Context, page: number, size: number, where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
+    return await ctx.prisma[this.table].findMany({ skip: page * size, take: size, where, select, orderBy });
   }
 
-  async create(prisma: PrismaClient, data: Model): Promise<Model> {
-    return await prisma[this.table].create({ data });
+  async findById(ctx: Context, id: string, select: any = undefined): Promise<any> {
+    return await ctx.prisma[this.table].findUnique({ where: { id }, select });
   }
 
-  async update(prisma: PrismaClient, id: string, data: any, include = undefined): Promise<Model> {
-    return await prisma[this.table].update({ where: { id }, data }, include);
+  async createOne(ctx: Context, data: Model, select: any = undefined): Promise<any> {
+    return await ctx.prisma[this.table].create({ data, select });
   }
 
-  async delete(prisma: PrismaClient, id: string): Promise<Model> {
-    return await prisma[this.table].delete({ where: { id } });
+  async createMany(ctx: Context, data: Model, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
+    return await ctx.prisma[this.table].createMany({ data, select, orderBy });
   }
 
-  async count(prisma: PrismaClient): Promise<number> {
-    return await prisma[this.table].count();
+  async updateOne(ctx: Context, where: any, data: any, select: any = undefined): Promise<any> {
+    return await ctx.prisma[this.table].update({ where, data, select });
+  }
+
+  async updateMany(ctx: Context, data: any, where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
+    return await ctx.prisma[this.table].updateMany({ where, data, select, orderBy });
+  }
+
+  async updateById(ctx: Context, id: string, data: any, select: any = undefined): Promise<any> {
+    return await ctx.prisma[this.table].update({ where: { id }, data, select });
+  }
+
+  async deleteOne(ctx: Context, where: any, select: any = undefined): Promise<any> {
+    return await ctx.prisma[this.table].delete({ where, select });
+  }
+
+  async deleteMany(ctx: Context, where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
+    return await ctx.prisma[this.table].deleteMany({ where, select, orderBy });
+  }
+
+  async deleteById(ctx: Context, id: string, select: any = undefined): Promise<any> {
+    return await ctx.prisma[this.table].delete({ where: { id }, select });
+  }
+
+  async count(ctx: Context, where: any = undefined): Promise<number> {
+    return await ctx.prisma[this.table].count({ where });
   }
 }
