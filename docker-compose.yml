@@ -7,9 +7,9 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      DB_USER: eis
-      DB_PASSWORD: eis
-      DB_NAME: eiscc
+      DB_USER: mach1
+      DB_PASSWORD: mach1
+      DB_NAME: mach1
     volumes:
       - db-vol:/var/lib/postgresql/data
     networks:
@@ -18,16 +18,39 @@ services:
     build:
       dockerfile: containers/koa/Dockerfile
       context: .
+    environment:
+      DATABASE_URL: postgresql://mach1:mach1@database:5432/mach1
+    ports:
+      - "3000:3000"
     networks:
       db-net:
       service-net:
     depends_on:
       - database
+  webapp:
+    build:
+      dockerfile: containers/frontend/Dockerfile
+      context: .
+    environment:
+      VUE_APP_API_URL: http://localhost:8080
+      VUE_APP_API_PATH: /api
+      VUE_APP_STREAM_URL: http://localhost:8080
+    volumes:
+      - webapp-vol:/share/sound
+    ports:
+      - "8080:8080"
+    networks:
+      service-net:
+    depends_on:
+      - api
 
 
 volumes:
   db-vol:
     name: m1-spatial-postgres-vol
+    external: true
+  webapp-vol:
+    name: m1-spatial-webapp-vol
     external: true
 
 networks:

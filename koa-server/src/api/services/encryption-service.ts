@@ -32,14 +32,16 @@ export class EncryptionService {
   private static readonly pbkdf2: (password: BinaryLike, salt: BinaryLike, iterations: number, keyLength: number, digest: string) => Promise<Buffer> =
     promisify(crypto.pbkdf2);
 
+  private readonly config: EncryptionConfig;
+
   constructor(
-    private readonly config?: EncryptionConfig
+    config?: EncryptionConfig
   ) {
-    this.config ??= {
+    this.config = config ?? {
       algorithm: process.env.PASS_HASH_ALGORITHM || EncryptionService.DEFAULT_CONFIG.algorithm,
-      iterations: parseInt(process.env.PASS_HASH_ITERATIONS) || EncryptionService.DEFAULT_CONFIG.iterations,
-      hashLength: parseInt(process.env.PASS_HASH_LENGTH) || EncryptionService.DEFAULT_CONFIG.hashLength,
-      saltBytes: parseInt(process.env.PASS_SALT_BYTES) || EncryptionService.DEFAULT_CONFIG.saltBytes,
+      iterations: process.env.PASS_HASH_ITERATIONS ? parseInt(process.env.PASS_HASH_ITERATIONS) : EncryptionService.DEFAULT_CONFIG.iterations,
+      hashLength: process.env.PASS_HASH_LENGTH ? parseInt(process.env.PASS_HASH_LENGTH) : EncryptionService.DEFAULT_CONFIG.hashLength,
+      saltBytes: process.env.PASS_SALT_BYTES ? parseInt(process.env.PASS_SALT_BYTES) : EncryptionService.DEFAULT_CONFIG.saltBytes,
       encoding: EncryptionService.DEFAULT_CONFIG.encoding
     };
   }
@@ -48,7 +50,7 @@ export class EncryptionService {
     return `${algorithm}:${iterations}:${length}:${hash}:${salt}`;
   }
 
-  passwordObject(password: string): PasswordObject {
+  passwordObject(password: string): PasswordObject | null {
     const parts = password.split(':');
 
     if (parts.length !== 5) {
@@ -79,8 +81,8 @@ export class EncryptionService {
     return await this.verifyPasswordObject(input, this.passwordObject(savedPassword));
   }
 
-  private async verifyPasswordObject(input: string, savedPassword: PasswordObject): Promise<boolean> {
-    return await EncryptionService
+  private async verifyPasswordObject(input: string, savedPassword: PasswordObject | null): Promise<boolean> {
+    return savedPassword != null && await EncryptionService
       .pbkdf2(input, savedPassword.salt, savedPassword.iterations, savedPassword.length, savedPassword.algorithm)
       .then(bytes => bytes.toString(this.config.encoding))
       .then(newHash => newHash === savedPassword.hash);

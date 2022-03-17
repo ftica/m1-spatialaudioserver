@@ -18,13 +18,15 @@ declare module 'koa' {
   }
 }
 
-if (process.env.NODE_ENV === 'development') {
+// if (process.env.NODE_ENV === 'development') {
   router.get('/', ctx => {
     ctx.body = router.stack
       .filter(route => route.opts.end)
       .map(route => `${route.methods} ${route.path}`);
   });
-}
+// }
+
+
 
 const app = new Koa();
 

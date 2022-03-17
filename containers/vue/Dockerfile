@@ -10,7 +10,7 @@ FROM node:14.16-alpine3.13 as vue-build
 WORKDIR /app/build
 COPY ./vue-front/package*.json ./
 
-RUN npm install
+RUN ["npm", "install"]
 
 COPY ./vue-front .
 

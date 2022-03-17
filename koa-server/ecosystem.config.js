@@ -2,7 +2,7 @@ module.exports = {
   apps: [{
     // Main property
     name: 'koa-server',
-    script: 'build/index.js',
+    script: 'build/src/index.js',
 
     node_args: '-r esm',
 

@@ -5,10 +5,11 @@
   "main": "src/index.js",
   "scripts": {
     "clean": "rimraf build/",
-    "copy-keys": "copyfiles -f ./src/auth/dev.key ./src/auth/dev.key.pub build/auth",
+    "copy-keys": "copyfiles -f ./src/auth/dev.key ./src/auth/dev.key.pub build/src/auth",
     "lint": "eslint --ext .js --ext .json . test/*",
     "dev": "pm2-dev src/index.js --node-args=\\\"-r esm\\\"",
-    "local": "npm run clean && tsc && npm run copy-keys && pm2-dev ecosystem.config.js",
+    "build": "prisma generate && tsc && npm run copy-keys",
+    "local": "npm run clean && npm run build && pm2-dev ecosystem.config.js",
     "make": "npm i && npm run dev"
   },
   "author": "Mach1 <whatsup@mach1.tech>",

@@ -9,8 +9,7 @@ RUN npm ci
 
 COPY ./koa-server .
 
-RUN npx tsc && \
-    npm run copy-keys
+RUN ["npm", "run", "build"]
 
 EXPOSE 3000
 CMD ["pm2-runtime", "ecosystem.config.js", "--env", "production"]

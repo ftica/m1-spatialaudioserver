@@ -17,17 +17,17 @@ export function Authorize(authFun: (ctx: Context) => boolean) {
 }
 
 export const AuthorizeLogged =
-  Authorize((ctx: Context) => ctx.token !== null);
+  Authorize((ctx: Context) => ctx.token != null);
 
 export const AuthorizeAdmin =
-  Authorize((ctx: Context) => ctx.admin === true);
+  Authorize((ctx: Context) => ctx.admin);
 
 export function AuthorizeRole(...roles: Role[]) {
-  return Authorize((ctx: Context) => roles.includes(ctx.token?.role));
+  return Authorize((ctx: Context) => roles.includes(ctx.token?.role!!));
 }
 
 export const AuthorizeMe =
-  Authorize((ctx: Context) => ctx.token && (ctx.admin || ctx.token.username === ctx.params.username));
+  Authorize((ctx: Context) => ctx.token != null && (ctx.admin || ctx.token.username === ctx.params.username));
 
 export function Validate({ params, body, query }: { params?: Schema, body?: Schema, query?: Schema } = {}) {
   return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {

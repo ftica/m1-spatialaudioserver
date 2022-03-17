@@ -17,7 +17,7 @@ class Users {
   @Validate({ params: Users.validUsernameParam })
   @NotFound()
   async findByUsername(ctx: Context) {
-    const meOrAdmin = ctx.admin || ctx.params.username === ctx.token.username;
+    const meOrAdmin = ctx.admin || ctx.params.username === ctx.token!!.username;
     return await this.userService.findByUsername(ctx, ctx.params.username, {
       username: true,
       role: ctx.admin,
@@ -47,7 +47,7 @@ class Users {
   async findPlaylistsByUsername(ctx: Context) {
     return (await this.userService.findByUsername(ctx, ctx.params.username, {
       playlists: {
-        skip: ctx.page * ctx.size,
+        skip: ctx.page!! * ctx.size!!,
         take: ctx.size,
         select: {
           id: true,
@@ -64,7 +64,7 @@ class Users {
   async findFavoritesByUsername(ctx: Context) {
     return (await this.userService.findByUsername(ctx, ctx.params.username, {
       favorites: {
-        skip: ctx.page * ctx.size,
+        skip: ctx.page!! * ctx.size!!,
         take: ctx.size,
         select: {
           playlist: {
@@ -82,7 +82,7 @@ class Users {
   @Paginate()
   @Ok
   async getAllPage(ctx: Context): Promise<any[]> {
-    return await this.userService.findPage(ctx, ctx.page, ctx.size, undefined, {
+    return await this.userService.findPage(ctx, ctx.page!!, ctx.size!!, undefined, {
       id: true,
       username: true,
       role: true

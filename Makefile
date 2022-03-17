@@ -41,6 +41,12 @@ remove-service-network:
 create-service-network: remove-service-network
 	docker network create m1-spatial-service-net
 
+remove-webapp-volume:
+	docker volume rm m1-spatial-webapp-vol
+
+create-webapp-volume: remove-webapp-volume
+	docker volume create m1-spatial-webapp-vol
+
 build-postgres:
 	docker buildx bake -t mach1-spatial/m1-postgres:latest . -f ./docker-compose.yml database --no-cache
 
@@ -49,6 +55,9 @@ build-api:
 
 run-api: create-db-volume create-db-network create-service-network
 	docker compose up api
+
+run-webapp: run-api create-webapp-volume
+	docker compose up webapp
 
 build-ffmpeg:
 	docker buildx build -t mach1-spatial/m1-ffmpeg:4.4-build . -f ./containers/ffmpeg/Dockerfile --no-cache

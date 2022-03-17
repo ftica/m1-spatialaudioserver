@@ -7,13 +7,16 @@ export type Payload = { username: string, role: Role }
 export type Token = AccessToken & Payload;
 
 export class JwtService {
+
+  private readonly secret: Secret;
+
   constructor(
     private readonly privateKey: Buffer,
     private readonly publicKey: Buffer,
-    private readonly secret?: Secret,
+    secret?: Secret,
     private readonly signOptions: SignOptions = { algorithm: 'RS256' }
   ) {
-    this.secret ??= {
+    this.secret = secret ?? {
       key: privateKey,
       passphrase: process.env.PRIV_KEY_PASSPHRASE || 'mach1'
     };

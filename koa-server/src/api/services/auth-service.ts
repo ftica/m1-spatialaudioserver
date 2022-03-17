@@ -1,4 +1,4 @@
-import { AccessToken, Role, User } from '@prisma/client';
+import { AccessToken, Prisma, PrismaClient, Role, User } from '@prisma/client';
 import { Context } from 'koa';
 import { addHours, now } from '../util/time';
 import encryptionService, { EncryptionService } from './encryption-service';
@@ -17,16 +17,11 @@ export class AuthService {
     private readonly userService: UserService
   ) { }
 
-  private async getOrCreateToken(ctx: Context, user: User): Promise<Token> {
-    let token: AccessToken = await ctx.prisma.accessToken.findUnique({ where: { id: undefined, userId: user.id } });
+  private static async getOrCreateToken(ctx: Context, user: User): Promise<Token> {
+    await ctx.prisma.accessToken.deleteMany({ where: { userId: user.id, validUntil: { lt: now() } } });
 
-    if (token && token.validUntil < now()) {
-      await ctx.prisma.accessToken.delete({ where: { id: token.id } });
-      token = null;
-    }
-    if (!token) {
-      token = await ctx.prisma.accessToken.create({ data: { userId: user.id, validUntil: addHours(now(), 2) } });
-    }
+    let token: AccessToken = await ctx.prisma.accessToken.findUnique({ where: { id: undefined, userId: user.id } })
+      ?? await ctx.prisma.accessToken.create({ data: { userId: user.id, validUntil: addHours(now(), 2) } });
 
     return {
       id: token.id,
@@ -37,7 +32,7 @@ export class AuthService {
     };
   }
 
-  async login(ctx: Context, input: UserLoginInput): Promise<string> {
+  async login(ctx: Context, input: UserLoginInput): Promise<string | null> {
     const user: User = await this.userService.findByUsername(ctx, input.username);
     if (!user) return null;
 
@@ -47,8 +42,8 @@ export class AuthService {
       return null;
     }
 
-    const token: Token = await this.getOrCreateToken(ctx, user);
-    return await this.jwtService.sign(token);
+    const token: Token = await AuthService.getOrCreateToken(ctx, user);
+    return this.jwtService.sign(token);
   }
 
   async register(ctx: Context, input: UserRegisterInput): Promise<User> {

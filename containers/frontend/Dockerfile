@@ -59,4 +59,6 @@ ENV PATH=/usr/local/nginx/sbin:$PATH \
 
 EXPOSE $RTMP_PORT $HTTP_PORT $HTTPS_PORT
 
-CMD nginx
+STOPSIGNAL SIGQUIT
+
+CMD ["nginx", "-g", "daemon off;"]

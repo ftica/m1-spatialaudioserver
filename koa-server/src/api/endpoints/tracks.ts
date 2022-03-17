@@ -21,7 +21,7 @@ export class Tracks {
   @Paginate()
   @Ok
   async getAllPage(ctx: Context): Promise<any[]> {
-    return await this.trackService.findPage(ctx, ctx.page, ctx.size, undefined, {
+    return await this.trackService.findPage(ctx, ctx.page!!, ctx.size!!, undefined, {
       id: true,
       name: true,
       playlist: {
@@ -50,7 +50,7 @@ export class Tracks {
   async updateName(ctx: Context) {
     return await this.trackService.updateOne(ctx, {
       id: ctx.params.id,
-      playlist: ctx.admin ? undefined : { ownerId: ctx.token.userId }
+      playlist: ctx.admin ? undefined : { ownerId: ctx.token!!.userId }
     }, {
       name: ctx.request.body
     });

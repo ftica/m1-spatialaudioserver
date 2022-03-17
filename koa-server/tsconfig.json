@@ -8,7 +8,7 @@
     "diagnostics": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
-    "exactOptionalPropertyTypes": true,
+//    "exactOptionalPropertyTypes": true,
     "experimentalDecorators": true,
     "extendedDiagnostics": true,
     "noEmitOnError": true,
