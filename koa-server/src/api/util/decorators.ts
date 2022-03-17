@@ -1,66 +1,7 @@
 import { Role } from '@prisma/client';
-import { Schema } from 'joi';
+import Joi, { Schema } from 'joi';
 import { Context } from 'koa';
-
-// export namespace Security {
-//   type AsyncHandler = (ctx: Context, next?: Next) => Promise<any>;
-
-//   const getAuthenticatedHandler = (original: AsyncHandler): AsyncHandler =>
-//     async (ctx: Context, next?: Next) => {
-//       if (!ctx.token) {
-//         ctx.throw(400, 'Failed to authenticate user');
-//       }
-
-//       return await original(ctx, next);
-//     };
-
-//   const getAuthorizedHandler = (original: AsyncHandler, roles: Role[]): AsyncHandler =>
-//     async (ctx: Context, next?: Next) => {
-//       if (!ctx.token.role) {
-//         ctx.throw(400, 'Failed to authorize user');
-//       }
-
-//       if (!roles.includes(ctx.token.role)) {
-//         ctx.throw(403, 'Unauthorized');
-//       }
-
-//       return await original(ctx, next);
-//     };
-
-//   const getValidBodyHandler = (original: AsyncHandler, valid: any): AsyncHandler =>
-//     async (ctx: Context, next?: Next) => {
-//       if (!ctx.validate) {
-//         ctx.throw(500, 'Validator not present');
-//       }
-
-//       await ctx.validate(valid);
-
-//       return await original(ctx, next);
-//     };
-
-//   export const Authenticated: MethodDecorator = (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
-//     const original: AsyncHandler = descriptor.value!;
-
-//     descriptor.value = getAuthenticatedHandler(original);
-//   };
-
-//   export function Authorized(...roles: Role[]): MethodDecorator {
-//     return (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
-//       const original: AsyncHandler = descriptor.value!;
-//       const authenticated: AsyncHandler = getAuthenticatedHandler(original);
-
-//       descriptor.value = getAuthorizedHandler(authenticated, roles);
-//     };
-//   }
-
-//   export function ValidBody(valid: any): MethodDecorator {
-//     return (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
-//       const original: AsyncHandler = descriptor.value!;
-
-//       descriptor.value = getValidBodyHandler(original, valid);
-//     };
-//   }
-// }
+import { Valid } from './valid';
 
 export function Authorize(authFun: (ctx: Context) => boolean) {
   return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
@@ -85,22 +26,27 @@ export function AuthorizeRole(...roles: Role[]) {
   return Authorize((ctx: Context) => roles.includes(ctx.token?.role));
 }
 
-export const AuthorizeMine =
+export const AuthorizeMe =
   Authorize((ctx: Context) => ctx.token && (ctx.admin || ctx.token.username === ctx.params.username));
 
-export function Validate(paramsSchema?: Schema, bodySchema?: Schema, querySchema?: Schema) {
+export function Validate({ params, body, query }: { params?: Schema, body?: Schema, query?: Schema } = {}) {
   return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (ctx: Context) {
-      console.log(ctx.query);
-      const error =
-        paramsSchema?.validate(ctx.params).error ??
-        bodySchema?.validate(ctx.request.body).error ??
-        querySchema?.validate(ctx.query).error;
-      if (!error) return await originalMethod.call(this, ctx);
-      ctx.status = 400;
-      ctx.body = error.message;
+      let res = params?.validate(ctx.params);
+      if (res?.error) return ctx.throw(400, res.error.message);
+      if (res?.value) ctx.params = res.value;
+
+      res = body?.validate(ctx.request.body);
+      if (res?.error) return ctx.throw(400, res.error.message);
+      if (res?.value) ctx.request.body = res.value;
+
+      res = query?.validate(ctx.query);
+      if (res?.error) return ctx.throw(400, res.error.message);
+      if (res?.value) ctx.query = res.value;
+
+      return await originalMethod.call(this, ctx);
     };
 
     return descriptor;
@@ -125,6 +71,30 @@ export function NotFound(status: number = 404) {
       const result = await originalMethod.call(this, ctx);
       if (result) ctx.body = result;
       else ctx.status = status;
+    };
+
+    return descriptor;
+  };
+}
+
+export function Paginate(defaultPageSize: number = 50, maxPageSize: number = 100) {
+  return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (ctx: Context) {
+      const { error, value } = Joi.object({
+        page: Valid.uint.default(0),
+        size: Valid.uint.max(maxPageSize).default(defaultPageSize)
+      }).validate({
+        page: ctx.query.page,
+        size: ctx.query.size
+      });
+
+      if (error) return ctx.throw(400, error.message);
+
+      ctx.page = parseInt(value.page);
+      ctx.size = parseInt(value.size);
+      return await originalMethod.call(this, ctx);
     };
 
     return descriptor;

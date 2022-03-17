@@ -1,44 +1,54 @@
 import Router from '@koa/router';
 import { Context, DefaultState } from 'koa';
 import Joi from 'joi';
-import { Role } from '@prisma/client';
 import userService, { UserService } from '../services/user-service';
-import { AuthorizeAdmin, AuthorizeLogged, AuthorizeMine, NotFound, Ok, Validate } from '../util/decorators';
+import { AuthorizeAdmin, AuthorizeLogged, AuthorizeMe, NotFound, Ok, Paginate, Validate } from '../util/decorators';
 import { Valid } from '../util/valid';
-import playlistService, { PlaylistService } from '../services/playlist-service';
-import trackService, { TrackService } from '../services/track-service';
 
 class Users {
   constructor(
-    protected readonly userService: UserService,
-    protected readonly trackService: TrackService,
-    protected readonly playlistService: PlaylistService
+    protected readonly userService: UserService
   ) { }
 
   static readonly validUsername = Joi.string().min(4).max(20).required();
-  static readonly validRole = Joi.string().valid(Role.USER, Role.ADMIN).required();
   static readonly validUsernameParam = Joi.object({ username: this.validUsername });
 
   @AuthorizeLogged
-  @Validate(Users.validUsernameParam)
+  @Validate({ params: Users.validUsernameParam })
   @NotFound()
   async findByUsername(ctx: Context) {
+    const meOrAdmin = ctx.admin || ctx.params.username === ctx.token.username;
     return await this.userService.findByUsername(ctx, ctx.params.username, {
       username: true,
-      role: ctx.admin
+      role: ctx.admin,
+      playlists: {
+        select: {
+          id: true,
+          name: true
+        }
+      },
+      favorites: meOrAdmin && {
+        select: {
+          playlist: {
+            select: {
+              id: true,
+              name: true
+            }
+          }
+        }
+      }
     });
   }
 
   @AuthorizeLogged
-  @Validate(Users.validUsernameParam, null, Valid.pageQuery)
+  @Validate({ params: Users.validUsernameParam })
+  @Paginate()
   @NotFound()
   async findPlaylistsByUsername(ctx: Context) {
-    const page = parseInt(ctx.query.page as string);
-    const size = parseInt(ctx.query.size as string);
     return (await this.userService.findByUsername(ctx, ctx.params.username, {
       playlists: {
-        skip: page * size,
-        take: size,
+        skip: ctx.page * ctx.size,
+        take: ctx.size,
         select: {
           id: true,
           name: true
@@ -47,16 +57,15 @@ class Users {
     })).playlists;
   }
 
-  @AuthorizeMine
-  @Validate(Users.validUsernameParam, null, Valid.pageQuery)
+  @AuthorizeMe
+  @Validate({ params: Users.validUsernameParam })
+  @Paginate()
   @NotFound()
   async findFavoritesByUsername(ctx: Context) {
-    const page = parseInt(ctx.query.page as string);
-    const size = parseInt(ctx.query.size as string);
     return (await this.userService.findByUsername(ctx, ctx.params.username, {
       favorites: {
-        skip: page * size,
-        take: size,
+        skip: ctx.page * ctx.size,
+        take: ctx.size,
         select: {
           playlist: {
             select: {
@@ -70,39 +79,39 @@ class Users {
   }
 
   @AuthorizeAdmin
-  @Validate(null, null, Valid.pageQuery)
+  @Paginate()
   @Ok
   async getAllPage(ctx: Context): Promise<any[]> {
-    return await this.userService.findPage(ctx, parseInt(ctx.query.page as string), parseInt(ctx.query.size as string), undefined, {
+    return await this.userService.findPage(ctx, ctx.page, ctx.size, undefined, {
       id: true,
       username: true,
       role: true
     });
   }
 
-  @AuthorizeMine
-  @Validate(Users.validUsernameParam)
+  @AuthorizeMe
+  @Validate({ params: Users.validUsernameParam })
   @NotFound()
   async deleteByUsername(ctx: Context): Promise<any> {
     return await this.userService.deleteByUsername(ctx, ctx.params.username);
   }
 
-  @AuthorizeMine
-  @Validate(Users.validUsernameParam, Users.validUsername)
+  @AuthorizeMe
+  @Validate({ params: Users.validUsernameParam, body: Users.validUsername })
   @NotFound()
   async updateUsername(ctx: Context) {
     return await this.userService.updateByUsername(ctx, ctx.params.username, { username: ctx.request.body });
   }
 
   @AuthorizeAdmin
-  @Validate(Users.validUsernameParam, Users.validRole)
+  @Validate({ params: Users.validUsernameParam, body: Valid.role.required() })
   @NotFound()
   async updateRole(ctx: Context) {
     return await this.userService.updateByUsername(ctx, ctx.params.username, { role: ctx.request.body });
   }
 }
 
-const users = new Users(userService, trackService, playlistService);
+const users = new Users(userService);
 
 export default new Router<DefaultState, Context>()
   .get('/', users.getAllPage.bind(users))
@@ -112,9 +121,3 @@ export default new Router<DefaultState, Context>()
   .get('/:username/favorites', users.findFavoritesByUsername.bind(users))
   .patch('/:username/username', users.updateUsername.bind(users))
   .patch('/:username/role', users.updateRole.bind(users));
-
-// .get('/count', users.countAll.bind(users))
-// .get('/profile', users.profile.bind(users))
-// .del('/:username', users.deleteByUsername.bind(users))
-// .patch('/:username/username', users.updateUsername.bind(users))
-// .patch('/:username/role', users.updateRole.bind(users));

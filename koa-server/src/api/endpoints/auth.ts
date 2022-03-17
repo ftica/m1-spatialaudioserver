@@ -28,7 +28,7 @@ class Auth {
     client_secret: this.validPassword
   });
 
-  @Validate(null, Auth.validRegister)
+  @Validate({ body: Auth.validRegister })
   @NotFound()
   async register(ctx: Context) {
     return await this.authService.register(ctx, {
@@ -37,7 +37,7 @@ class Auth {
     });
   }
 
-  @Validate(null, Auth.validLogin)
+  @Validate({ body: Auth.validLogin })
   @NotFound(401)
   async login(ctx: Context) {
     return await this.authService.login(ctx, {
@@ -46,7 +46,7 @@ class Auth {
     });
   }
 
-  @Validate(null, Auth.validLoginOAuth)
+  @Validate({ body: Auth.validLoginOAuth })
   @NotFound(401)
   async loginOAuth(ctx: Context) {
     return {

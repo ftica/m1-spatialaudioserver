@@ -2,7 +2,7 @@ import Router from '@koa/router';
 import { Context, DefaultState } from 'koa';
 import Joi from 'joi';
 import { Valid } from '../util/valid';
-import { AuthorizeLogged, NotFound, Ok, Validate } from '../util/decorators';
+import { AuthorizeLogged, NotFound, Ok, Paginate, Validate } from '../util/decorators';
 import playlistService, { PlaylistService } from '../services/playlist-service';
 
 class Playlists {
@@ -17,7 +17,7 @@ class Playlists {
   });
 
   @AuthorizeLogged
-  @Validate(null, null, Joi.object({ page: Valid.uint, size: Valid.uint.max(100) }))
+  @Paginate()
   @Ok
   async getAllPage(ctx: Context): Promise<any> {
     return await this.playlistService.findPage(ctx, parseInt(ctx.query.page as string), parseInt(ctx.query.size as string),
@@ -67,7 +67,7 @@ class Playlists {
   // }
 
   @AuthorizeLogged
-  @Validate(Valid.idParam, Valid.bool)
+  @Validate({ params: Valid.idParam, body: Valid.bool })
   @NotFound()
   async updateFavorite(ctx: Context) {
     return await this.playlistService.updateOne(ctx, ctx.params.id, { favorite: ctx.request.body === 'true' });

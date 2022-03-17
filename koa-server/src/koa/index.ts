@@ -13,6 +13,8 @@ declare module 'koa' {
     params: any;
     token?: Token;
     admin: boolean;
+    page?: number;
+    size?: number;
   }
 }
 

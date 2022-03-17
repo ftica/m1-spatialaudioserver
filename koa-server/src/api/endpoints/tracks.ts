@@ -3,7 +3,7 @@ import { Context, DefaultState } from 'koa';
 import trackService, { TrackService } from '../services/track-service';
 import { Valid } from '../util/valid';
 import Joi from 'joi';
-import { AuthorizeAdmin, AuthorizeLogged, NotFound, Ok, Validate } from '../util/decorators';
+import { AuthorizeAdmin, AuthorizeLogged, NotFound, Ok, Paginate, Validate } from '../util/decorators';
 
 export class Tracks {
   constructor(
@@ -13,24 +13,26 @@ export class Tracks {
   static readonly validName = Joi.string().min(3).max(100).required();
   static readonly validCreate = Joi.object({
     name: this.validName,
-    position: Valid.uint,
-    playlistId: Valid.id
+    position: Valid.uint.required(),
+    playlistId: Valid.id.required()
   });
 
   @AuthorizeAdmin
-  @Validate(null, null, Joi.object({ page: Valid.uint, size: Valid.uint }))
+  @Paginate()
   @Ok
   async getAllPage(ctx: Context): Promise<any[]> {
-    return await this.trackService.findPage(ctx, ctx.params.page, ctx.params.size, undefined, {
+    return await this.trackService.findPage(ctx, ctx.page, ctx.size, undefined, {
       id: true,
       name: true,
       playlist: {
-        id: true,
-        name: true,
-        public: true,
-        owner: {
+        select: {
           id: true,
-          username: true
+          name: true,
+          public: true,
+          owner: {
+            id: true,
+            username: true
+          }
         }
       }
     });
@@ -43,7 +45,7 @@ export class Tracks {
   // }
 
   @AuthorizeLogged
-  @Validate(Valid.idParam, Tracks.validName)
+  @Validate({ params: Valid.idParam.required(), body: Tracks.validName })
   @NotFound()
   async updateName(ctx: Context) {
     return await this.trackService.updateOne(ctx, {
@@ -74,10 +76,10 @@ const tracks = new Tracks(trackService);
 export default new Router<DefaultState, Context>()
   .get('/', tracks.getAllPage.bind(tracks))
 
-// .get('/count', tracks.count.bind(tracks))
-// .get('/:id', tracks.getById.bind(tracks))
-// .post('/', tracks.create.bind(tracks))
-// .del('/:id', tracks.del.bind(tracks))
+  // .get('/count', tracks.count.bind(tracks))
+  // .get('/:id', tracks.getById.bind(tracks))
+  // .post('/', tracks.create.bind(tracks))
+  // .del('/:id', tracks.del.bind(tracks))
   .patch('/:id/name', tracks.updateName.bind(tracks));
 // .patch('/:id/position', tracks.updatePosition.bind(tracks))
 // .patch('/:id/playlist', tracks.updatePlaylist.bind(tracks));
