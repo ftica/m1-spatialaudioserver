@@ -23,6 +23,33 @@ stop:
 #	docker container stop $(shell docker ps -q --filter name="m1*")
 #endif
 
+remove-db-volume:
+	docker volume rm m1-spatial-postgres-vol
+
+create-db-volume: remove-db-volume
+	docker volume create m1-spatial-postgres-vol
+
+remove-db-network:
+	docker network rm m1-spatial-postgres-net
+
+create-db-network: remove-db-network
+	docker network create m1-spatial-postgres-net
+
+remove-service-network:
+	docker network rm m1-spatial-service-net
+
+create-service-network: remove-service-network
+	docker network create m1-spatial-service-net
+
+build-postgres:
+	docker buildx bake -t mach1-spatial/m1-postgres:latest . -f ./docker-compose.yml database --no-cache
+
+build-api:
+	docker buildx bake -f ./docker-compose.yml api --no-cache
+
+run-api: create-db-volume create-db-network create-service-network
+	docker compose up api
+
 build-ffmpeg:
 	docker buildx build -t mach1-spatial/m1-ffmpeg:4.4-build . -f ./containers/ffmpeg/Dockerfile --no-cache
 

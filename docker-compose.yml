@@ -1,0 +1,39 @@
+services:
+  database:
+    build:
+      dockerfile: containers/postgres/Dockerfile
+      context: .
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_USER: eis
+      DB_PASSWORD: eis
+      DB_NAME: eiscc
+    volumes:
+      - db-vol:/var/lib/postgresql/data
+    networks:
+      db-net:
+  api:
+    build:
+      dockerfile: containers/koa/Dockerfile
+      context: .
+    networks:
+      db-net:
+      service-net:
+    depends_on:
+      - database
+
+
+volumes:
+  db-vol:
+    name: m1-spatial-postgres-vol
+    external: true
+
+networks:
+  db-net:
+    name: m1-spatial-postgres-net
+    external: true
+  service-net:
+    name: m1-spatial-service-net
+    external: true

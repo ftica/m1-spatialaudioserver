@@ -16,6 +16,7 @@
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
+    "strictNullChecks": true,
     "outDir": "./build",
     "target": "es5"
   },
