@@ -1,7 +1,4 @@
-/* eslint-disable consistent-return */
-// import _ from 'lodash';
-import { Next } from 'koa';
-import { CustomContext } from '../types';
+import { Context, Next } from 'koa';
 
 export default () => {
   const defaultOptions = {
@@ -9,11 +6,14 @@ export default () => {
     allowHeaders: ['Content-Type', 'Set-Cookie', 'Cookie']
   };
 
-  return async (ctx: CustomContext, next: Next) => {
+  return async (ctx: Context, next: Next) => {
     const origin = ctx.get('Origin');
     ctx.vary('Origin');
 
-    if (!origin) return next();
+    if (!origin) {
+      await next();
+      return;
+    }
 
     ctx.set('Access-Control-Allow-Origin', origin);
     ctx.set('Access-Control-Allow-Credentials', 'true');

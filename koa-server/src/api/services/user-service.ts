@@ -1,25 +1,18 @@
-import { PrismaClient, User } from '@prisma/client';
-import Service from './service';
+import { User } from '@prisma/client';
+import { Context } from 'koa';
+import ModelService from './model-service';
 
-export class UserService extends Service<User> {
-  async getByUsername(prisma: PrismaClient, username: string): Promise<User> {
-    return await prisma[this.table].findUnique({ where: { id: undefined, username } });
+export class UserService extends ModelService<User> {
+  async findByUsername(ctx: Context, username: string, select: any = undefined): Promise<any> {
+    return await super.findOne(ctx, { id: undefined, username }, select);
   }
 
-  override async update(prisma: PrismaClient, username: string, data): Promise<User> {
-    try {
-      return await prisma[this.table].update({ where: { username }, data });
-    } catch (err) {
-      return null;
-    }
+  async updateByUsername(ctx: Context, username: string, data: any, select: any = undefined): Promise<any> {
+    return await super.updateOne(ctx, { id: undefined, username }, data, select);
   }
 
-  override async delete(prisma: PrismaClient, username: string): Promise<User> {
-    try {
-      return await prisma[this.table].delete({ where: { username } });
-    } catch (err) {
-      return null;
-    }
+  async deleteByUsername(ctx: Context, username: string, select: any = undefined): Promise<any> {
+    return await super.deleteOne(ctx, { id: undefined, username }, select);
   }
 }
 

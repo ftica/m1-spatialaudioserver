@@ -1,17 +1,22 @@
 import Koa from 'koa';
 
 import middleware from './middleware';
-import router from '../api/router';
+import router from '../api';
+import { PrismaClient } from '@prisma/client';
+import { Token } from '../api/services/jwt-service';
 
-const app = new Koa();
-
-app.keys = ['test'];
-app.proxy = true;
-
-app.use(middleware(app));
-
-app.use(router.routes());
-app.use(router.allowedMethods());
+declare module 'koa' {
+  // eslint-disable-next-line no-unused-vars
+  interface Context {
+    prisma: PrismaClient;
+    request: Koa.Request;
+    params: any;
+    token?: Token;
+    admin: boolean;
+    page?: number;
+    size?: number;
+  }
+}
 
 if (process.env.NODE_ENV === 'development') {
   router.get('/', ctx => {
@@ -20,5 +25,19 @@ if (process.env.NODE_ENV === 'development') {
       .map(route => `${route.methods} ${route.path}`);
   });
 }
+
+const app = new Koa();
+
+app.proxy = true;
+app.keys = [
+  'mach1-cookie-key-1',
+  'mach1-cookie-key-2',
+  'mach1-cookie-key-3'
+];
+
+app.use(middleware());
+
+app.use(router.routes());
+app.use(router.allowedMethods());
 
 export default app;

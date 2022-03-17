@@ -2,26 +2,26 @@ import path from 'path';
 
 import compose from 'koa-compose';
 import logger from 'koa-logger';
-import bodyparser from 'koa-bodyparser';
+import bodyParser from 'koa-bodyparser';
 import serve from 'koa-static';
 // import session from 'koa-session';
-import { koa as validator } from 'node-input-validator';
 
 // import cors from './cors';
 import errors from './errors';
-import tokenParser from './token-parser';
 import database from './database';
+import tokenParser from './token-parser';
 
-const dir = path.join(__dirname, '../..', 'www');
+const staticDir = path.join(__dirname, '../../..', 'public');
 
-export default _app => compose([
+export default () => compose([
   logger(),
   // cors(),
   errors(),
   database(),
   tokenParser(),
-  bodyparser(),
-  // @ts-ignore
-  validator(),
-  serve(dir)
+  bodyParser({
+    enableTypes: ['json', 'text', 'form'],
+    onerror: (err, ctx) => ctx.throw(400, err.message)
+  }),
+  serve(staticDir)
 ]);
