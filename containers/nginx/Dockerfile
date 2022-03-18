@@ -12,22 +12,22 @@ ARG MAKEFLAGS="-j4"
 
 # install dependencies
 RUN apk add --no-cache \
-  build-base \
-  ca-certificates \
-  curl \
-  gcc \
-  libc-dev \
-  libgcc \
-  linux-headers \
-  make \
-  musl-dev \
-  openssl \
-  openssl-dev \
-  pcre \
-  pcre-dev \
-  pkgconf \
-  pkgconfig \
-  zlib-dev
+    build-base \
+    ca-certificates \
+    curl \
+    gcc \
+    libc-dev \
+    libgcc \
+    linux-headers \
+    make \
+    musl-dev \
+    openssl \
+    openssl-dev \
+    pcre \
+    pcre-dev \
+    pkgconf \
+    pkgconfig \
+    zlib-dev
 
 WORKDIR /tmp
 
@@ -40,22 +40,39 @@ RUN wget -qO- https://nginx.org/download/nginx-${NGINX_VER}.tar.gz | tar zxf - &
     wget -qO- https://github.com/kaltura/nginx-vod-module/archive/${NGINX_VOD_VER}.tar.gz | tar zxf - && \
     # nginx-devel-kit
     wget -qO- https://github.com/vision5/ngx_devel_kit/archive/refs/tags/v${NGINX_DEV_KIT_VER}.tar.gz | tar zxf - && \
-    # luajit
-    wget -qO- https://github.com/openresty/luajit2/archive/refs/tags/v${LUA_JIT_VER}.tar.gz | tar zxf - && \
     # lua-nginx-module
     wget -qO- https://github.com/openresty/lua-nginx-module/archive/refs/tags/v${LUA_NGINGX_MODULE_VER}.tar.gz | tar zxf - && \
+    # luajit
+    wget -qO- https://github.com/openresty/luajit2/archive/refs/tags/v${LUA_JIT_VER}.tar.gz | tar zxf - && \
     # lua-resty-core
     wget -qO- https://github.com/openresty/lua-resty-core/archive/refs/tags/v${LUA_RESTY_CORE_VER}.tar.gz | tar zxf - && \
     # lua-resty-cache
     wget -qO- https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v${LUA_RESTY_CACHE_VER}.tar.gz | tar zxf -
 
+
 # build luajit
-RUN make -C ./luajit2-${LUA_JIT_VER} prefix=/usr/local/luajit && \
-    make install -C ./luajit2-${LUA_JIT_VER} prefix=/usr/local/luajit && \
-    make -C ./lua-resty-core-${LUA_RESTY_CORE_VER} prefix=/usr/local/luajit && \
-    make install -C ./lua-resty-core-${LUA_RESTY_CORE_VER} prefix=/usr/local/luajit && \
-    make -C ./lua-resty-lrucache-${LUA_RESTY_CACHE_VER} prefix=/usr/local/luajit && \
-    make install -C ./lua-resty-lrucache-${LUA_RESTY_CACHE_VER} prefix=/usr/local/luajit
+WORKDIR /tmp/luajit2-${LUA_JIT_VER}
+
+RUN make PREFIX=/usr/local/luajit && \
+    make install PREFIX=/usr/local/luajit
+
+WORKDIR /tmp/lua-resty-core-${LUA_RESTY_CORE_VER}
+
+RUN make PREFIX=/usr/local/luajit && \
+    make install PREFIX=/usr/local/luajit
+
+WORKDIR /tmp/lua-resty-lrucache-${LUA_RESTY_CACHE_VER}
+
+RUN make PREFIX=/usr/local/luajit && \
+    make install PREFIX=/usr/local/luajit
+
+
+#RUN #make -C ./luajit2-${LUA_JIT_VER} && \
+#    make install -C ./luajit2-${LUA_JIT_VER} && \
+#    make -C ./lua-resty-core-${LUA_RESTY_CORE_VER} && \
+#    make install -C ./lua-resty-core-${LUA_RESTY_CORE_VER} && \
+#    make -C ./lua-resty-lrucache-${LUA_RESTY_CACHE_VER} && \
+#    make install -C ./lua-resty-lrucache-${LUA_RESTY_CACHE_VER}
 
 # compile nginx with rtmp module
 WORKDIR /tmp/nginx-${NGINX_VER}

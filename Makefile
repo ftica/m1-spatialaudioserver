@@ -47,6 +47,12 @@ remove-webapp-volume:
 create-webapp-volume: remove-webapp-volume
 	docker volume create m1-spatial-webapp-vol
 
+remove-upload-volume:
+	docker volume rm m1-spatial-upload-vol
+
+create-upload-volume: remove-upload-volume
+	docker volume create m1-spatial-upload-vol
+
 build-postgres:
 	docker buildx bake -t mach1-spatial/m1-postgres:latest . -f ./docker-compose.yml database --no-cache
 
@@ -56,7 +62,7 @@ build-api:
 run-api: create-db-volume create-db-network create-service-network
 	docker compose up api
 
-run-webapp: run-api create-webapp-volume
+run-webapp: run-api create-webapp-volume create-upload-volume
 	docker compose up webapp
 
 build-ffmpeg:

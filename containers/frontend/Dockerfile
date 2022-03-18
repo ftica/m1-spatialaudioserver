@@ -27,27 +27,29 @@ RUN apk add --no-cache \
     x264 \
     zlib
 
-RUN adduser \
+RUN addgroup nginx && \
+    adduser \
     --system \
     --no-create-home \
     --shell /bin/false \
     --disabled-password \
+    -G nginx \
     nginx
 
-# copy build artifacts
-COPY --from=nginx --chown=nginx /usr/local/luajit /usr/local/luajit
-COPY --from=nginx --chown=nginx /usr/local/nginx /usr/local/nginx
-COPY --from=nginx --chown=nginx /etc/nginx /etc/nginx
-COPY --from=ffmpeg --chown=nginx /usr/local /usr/local
-COPY --from=vue --chown=nginx /app/runtime /www
-
+VOLUME /www
 VOLUME /share/sound
+
+COPY --from=nginx --chown=nginx:nginx /usr/local/luajit /usr/local/luajit
+COPY --from=nginx --chown=nginx:nginx /usr/local/nginx /usr/local/nginx
+COPY --from=nginx --chown=nginx:nginx /etc/nginx /etc/nginx
+COPY --from=ffmpeg --chown=nginx:nginx /usr/local /usr/local
+COPY --from=vue --chown=nginx:nginx /app/runtime /www
 
 COPY ./containers/frontend/nginx.conf /etc/nginx/nginx.conf.template
 
 RUN mkdir -p /opt/data && \
     mkdir -p -m 777 /opt/data/dash && \
-    chown nginx /opt/data/dash && \
+    chown nginx:nginx /opt/data/dash && \
     touch /opt/data/dash/play.mpd && \
     mkdir -p /share/sound && \
     chmod -R 777 /share/sound && \
@@ -59,6 +61,5 @@ ENV PATH=/usr/local/nginx/sbin:$PATH \
 
 EXPOSE $RTMP_PORT $HTTP_PORT $HTTPS_PORT
 
-STOPSIGNAL SIGQUIT
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["nginx"]

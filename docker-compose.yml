@@ -36,9 +36,12 @@ services:
       VUE_APP_API_PATH: /api
       VUE_APP_STREAM_URL: http://localhost:8080
     volumes:
-      - webapp-vol:/share/sound
+      - webapp-vol:/www
+      - upload-vol:/share/sound
     ports:
-      - "8080:8080"
+      - "8080:80"
+      - "443:443"
+      - "1935:1935"
     networks:
       service-net:
     depends_on:
@@ -51,6 +54,9 @@ volumes:
     external: true
   webapp-vol:
     name: m1-spatial-webapp-vol
+    external: true
+  upload-vol:
+    name: m1-spatial-upload-vol
     external: true
 
 networks:
