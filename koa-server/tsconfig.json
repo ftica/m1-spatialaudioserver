@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
-    "outDir": "./build",
-    "target": "es5",
+    "outDir": "build",
+    "module": "commonjs",
+    "target": "es6",
     "esModuleInterop": true,
     "experimentalDecorators": true
   },
-  "include": ["./src/**/*"]
+  "include": ["./src/**/*"],
+  "lib": ["es2015"]
 }

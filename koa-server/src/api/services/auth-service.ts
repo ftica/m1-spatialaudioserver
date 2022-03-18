@@ -43,7 +43,7 @@ export class AuthService {
 
     const passwordCorrect: boolean = await this.encryptionService.verifyPassword(input.password, user.password);
     if (!passwordCorrect) {
-      console.log(`${new Date()} Failed login for user ${user.username}#${user.id}`);
+      console.log(`${now()} Failed login for user ${user.username}#${user.id}`);
       return null;
     }
 
