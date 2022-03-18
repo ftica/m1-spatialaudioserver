@@ -1,5 +1,6 @@
 {
-  "name": "M1-SpatialAudioWebServer",
+  "name": "m1sa-vue-front",
+  "description": "mach1 Spatial Audio Vue frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
