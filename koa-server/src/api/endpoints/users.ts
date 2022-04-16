@@ -10,7 +10,7 @@ class Users {
     protected readonly userService: UserService
   ) { }
 
-  static readonly validUsername = Joi.string().min(4).max(20).required();
+  static readonly validUsername = Joi.string().min(4).max(60).required();
   static readonly validUsernameParam = Joi.object({ username: this.validUsername });
 
   @AuthorizeLogged
