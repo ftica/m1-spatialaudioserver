@@ -1,6 +1,6 @@
 {
   "name": "m1sa-koa-server",
-  "description": "mach1 Spatial Audio Koa backend",
+  "description": "Mach1 Spatial Audio Koa backend",
   "version": "2.0.0",
   "author": "Mach1 <whatsup@mach1.tech>",
   "license": "MIT",
