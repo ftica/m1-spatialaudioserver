@@ -2,8 +2,8 @@
   <div class="no-margin" :class="paddingSize">
     <div @click="open">
       <slot name="button">
-        <button class="round border transparent-border default-modal-btn" :class="buttonClasses">
-          <i v-show="icon" class="material-icons">{{icon}}</i>
+        <button class="round border transparent-border default-mdl-btn" :class="buttonClasses">
+          <i v-if="icon" class="material-icons">{{icon}}</i>
           <span class="small-text">{{button || title}}</span>
         </button>
       </slot>
@@ -11,7 +11,7 @@
 
     <div v-show="currentPosition.active" class="active dark overlay" @click="close"></div>
 
-    <div v-show="currentPosition.active" class="modal round large-width" :class="currentPosition">
+    <div v-show="currentPosition.active" class="modal round large-width no-scroll" :class="currentPosition">
       <nav>
         <button class="transparent round absolute right close" @click="close">
           <i class="material-icons">highlight_off</i>
@@ -39,16 +39,17 @@ export default {
   props: {
     button: String,
     buttonClasses: String,
-    icon: String,
+    icon: {
+      type: String,
+      required: false,
+    },
     padding: String,
     position: String,
     title: String,
     titleClasses: String,
   },
   computed: {
-    ...mapState({
-      active: (state) => state.modalVisibility,
-    }),
+    ...mapState({ active: (state) => state.modalVisibility }),
     currentPosition() {
       const { active, position } = this;
       return {
@@ -58,9 +59,7 @@ export default {
     },
     paddingSize() {
       const { padding = 'no-padding' } = this;
-      return {
-        [padding]: true,
-      };
+      return { [padding]: true };
     },
   },
   methods: {
@@ -76,25 +75,19 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  // .active {
-  //   opacity: 1;
-  //   visibility: visible;
-  // }
-  // .modal{
-  //   opacity: 1;
-  //   visibility: visible;
-  // }
   .title {
     font-style: normal;
     font-weight: bold;
+    color: #ffffff;
 
     line-height: 1.17;
     letter-spacing: -0.5px;
     text-transform: uppercase;
   }
 
-  .default-modal-btn {
+  .default-mdl-btn {
     max-width: fill-available;
+
     i {
       font-size: 16px;
       color: #4d4d4d;
@@ -103,19 +96,14 @@ export default {
       color: #1c1c1c;
       font-size: 14px;
     }
-    &:hover {
-      i {
-        color: #1c1c1c;
-        font-size: 20px;
-      }
-    }
   }
 
   .close {
     padding-top: 16px;
     padding-right: 0;
     i {
-      color: #1c1c1c;
+      font-size: 20px;
+      color: #ffffff;
     }
   }
 
@@ -125,5 +113,37 @@ export default {
   }
   button.border::after {
     background-image: none;
+  }
+
+  .active {
+    animation: none;
+  }
+
+  nav {
+    button:hover {
+      background-color: transparent;
+
+      i {
+        color: #ffffff;
+        font-size: 20px;
+      }
+    }
+  }
+  .modal.left {
+    // height: calc(100vh - 2 * var(--height) - 50px - 6em);
+    max-height: calc(100vh - var(--height) - 50px - 3em);
+    margin-top: 6em;
+    background-color: #252526;
+  }
+  .modal {
+    background-color: #252526;
+  }
+  .button:focus::after, .button:hover::after, button:focus::after, button:hover::after {
+    background: none;
+  }
+  @media screen and (orientation: portrait) {
+    .modal.left {
+      max-height: calc(100vh - var(--height) - 50px - 6em);
+    }
   }
 </style>

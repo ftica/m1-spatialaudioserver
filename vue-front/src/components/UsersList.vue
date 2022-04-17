@@ -1,75 +1,78 @@
 <template>
-  <table class="table user-list-table border large center-align">
-    <thead>
-      <tr>
-        <th><abbr title="#">#</abbr></th>
-        <th><abbr title="NICKNAME">NICKNAME</abbr></th>
-        <th><abbr title="E-MAIL">E-MAIL</abbr></th>
-        <th><abbr title="ROLE">ROLE</abbr></th>
-        <th><abbr title="LAST SEEN">LAST SEEN</abbr></th>
-        <!-- <th><abbr title="EDIT">EDIT</abbr></th> -->
-        <th><abbr title="REMOVE"></abbr></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="item in users" :key="item">
-        <td>
-          <p class="medium-text">{{item.number}}</p>
-        </td>
-        <td>
-          <p class="medium-text">{{item.nickname}}</p>
-        </td>
-        <td>
-          <p class="medium-text">{{item.email}}</p>
-        </td>
-        <td>
-          <p class="medium-text">{{item.role}}</p>
-        </td>
-        <td>
-          <p class="medium-text">{{item.lastSeen}}</p>
-        </td>
-        <!-- <td>
-          <Modal
-            title="Edit user"
-            button=" "
-            icon="edit"
-            position="center"
-            padding="no-padding"
-            buttonClasses="small absolute center middle"
-            titleClasses="large-width"
-            :userId="item.id"
-          >
-            <UsersAddForm/>
-          </Modal>
-        </td> -->
-        <td>
-          <button class="border round transparent-border black-text" @click="remove(item.id)">
-            <i class="material-icons">delete</i>
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="user-list">
+    <table class="table-user-list large center-align">
+      <thead>
+        <tr>
+          <th><abbr title="#">#</abbr></th>
+          <th><abbr title="NICKNAME">NICKNAME</abbr></th>
+          <th><abbr title="E-MAIL">E-MAIL</abbr></th>
+          <th><abbr title="ROLE">ROLE</abbr></th>
+          <th><abbr title="LAST SEEN">LAST SEEN</abbr></th>
+          <!-- <th><abbr title="EDIT"></abbr></th>
+          <th><abbr title="REMOVE"></abbr></th> -->
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in users" :key="item">
+          <td>
+            <p class="medium-text">{{ index + 1 }}</p>
+          </td>
+          <td>
+            <p class="medium-text">{{item.nickname}}</p>
+          </td>
+          <td>
+            <p class="medium-text mobile">{{item.email}}</p>
+          </td>
+          <td>
+            <p class="medium-text">{{item.role}}</p>
+          </td>
+          <td>
+            <p class="medium-text">{{item.lastSeen}}</p>
+          </td>
+          <td>
+            <Modal
+              title="Update user"
+              button=" "
+              icon="edit"
+              position="center"
+              padding="no-padding"
+              buttonClasses="small responsive"
+              titleClasses="large-width"
+            >
+              <UsersAddForm
+                icon="save"
+                title="Save"
+                :item="item"
+
+                :action="update"
+              />
+            </Modal>
+          </td>
+          <td>
+            <button class="border round transparent-border black-text" @click="remove(item.id)">
+              <i class="material-icons">delete</i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script>
 import { mapState, mapActions } from 'vuex';
-// import Modal from './Modal.vue';
-// import UsersAddForm from './UsersAddForm.vue';
+import Modal from './Base/Modal.vue';
+import UsersAddForm from './UsersAddForm.vue';
 
 export default {
   name: 'UsersList',
   props: { admin: Boolean },
-  // components: {
-  //   Modal,
-  //   UsersAddForm,
-  // },
-  computed: mapState({
-    users: (state) => state.users.items,
-  }),
-  methods: {
-    ...mapActions('users', ['remove']),
+  components: {
+    Modal,
+    UsersAddForm,
   },
+  computed: mapState({ users: (state) => state.users.items }),
+  methods: { ...mapActions('users', ['update', 'remove']) },
   created() {
     this.$store.dispatch('users/getAll');
   },
@@ -77,9 +80,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .table {
+  .table-user-list {
+    button {
+     i {
+       font-size: 16px;
+     }
+     &:hover {
+       i {
+         font-size: 20px;
+         color: #ffffff;
+       }
+     }
+    }
+    abbr {
+      color: #ffffff;
+    }
     p {
-      color: #1c1c1c;
+      color: #ffffff;
     }
     i {
       color: #4d4d4d;
@@ -94,6 +111,7 @@ export default {
       letter-spacing: -0.5px;
     }
     td {
+      border-bottom: 1px #212121 solid;
       vertical-align: middle;
       cursor: pointer;
     }
@@ -102,14 +120,16 @@ export default {
     }
   }
 
-  .user-list-table button {
-    i {
-      font-size: 16px;
-    }
+  .button:focus::after, .button:hover::after, button:focus::after, button:hover::after {
+    background: none;
   }
-  .user-list-table button:hover {
-    i {
-      font-size: 20px;
+
+  @media screen and (orientation: portrait) {
+    .user-list {
+      overflow-x: scroll;
+    }
+    .user-list-table {
+      width: 200vw;
     }
   }
 </style>
