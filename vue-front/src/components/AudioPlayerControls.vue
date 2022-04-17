@@ -29,7 +29,7 @@ import hexRgb from 'hex-rgb';
 
 import { mapActions, mapGetters, mapState } from 'vuex';
 
-import AudioPlayerSineWave from './AudioPlayerSineWave.vue';
+import AudioPlayerSineWave from './AudioPlayer/AudioPlayerSineWave.vue';
 
 const wait = (sec) => new Promise((resolve) => {
   setTimeout(resolve, sec * 1000);
