@@ -21,7 +21,9 @@ model User {
   id        String                 @db.Uuid @id @default(uuid())
   username  String                 @unique
   password  String                 @db.VarChar(255)
+  email     String                 @unique
   role      Role                   @default(USER)
+  lastSeen  DateTime?
   token     AccessToken?
   playlists Playlist[]
   favorites Favorite[]

@@ -3,29 +3,29 @@ import Joi from 'joi';
 import { Context, DefaultState } from 'koa';
 import { NotFound, Validate } from '../util/decorators';
 import authService, { AuthService } from '../services/auth-service';
+import { Valid } from '../util/valid';
+import { Users } from './users';
 
-class Auth {
+export class Auth {
   constructor(
     private readonly authService: AuthService
   ) { }
 
-  static readonly validUsername = Joi.string().min(4).max(30).required();
-  static readonly validPassword = Joi.string().min(8).required();
-
   static readonly validRegister = Joi.object({
-    username: this.validUsername,
-    password: this.validPassword
+    username: Users.validUsername,
+    email: Valid.email,
+    password: Users.validPassword
   });
 
   static readonly validLogin = Joi.object({
-    username: this.validUsername,
-    password: this.validPassword
+    login: Valid.email,
+    password: Users.validPassword
   });
 
   static readonly validLoginOAuth = Joi.object({
     grant_type: Joi.string(),
-    client_id: this.validUsername,
-    client_secret: this.validPassword
+    client_id: Valid.email,
+    client_secret: Users.validPassword
   });
 
   @Validate({ body: Auth.validRegister })
@@ -33,6 +33,7 @@ class Auth {
   async register(ctx: Context) {
     return await this.authService.register(ctx, {
       username: ctx.request.body.username,
+      email: ctx.request.body.email,
       password: ctx.request.body.password
     });
   }
@@ -41,7 +42,7 @@ class Auth {
   @NotFound(401)
   async login(ctx: Context) {
     return await this.authService.login(ctx, {
-      username: ctx.request.body.username,
+      email: ctx.request.body.login,
       password: ctx.request.body.password
     });
   }
@@ -52,7 +53,7 @@ class Auth {
     return {
       token_type: 'bearer',
       access_token: await this.authService.login(ctx, {
-        username: ctx.request.body.client_id,
+        email: ctx.request.body.client_id,
         password: ctx.request.body.client_secret
       }),
       expires_in: 60 * 60 * 2

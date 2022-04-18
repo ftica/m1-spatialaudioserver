@@ -19,9 +19,9 @@ export class Tracks {
 
   @AuthorizeAdmin
   @Paginate()
-  @Ok
+  @Ok()
   async getAllPage(ctx: Context): Promise<any[]> {
-    return await this.trackService.findPage(ctx, ctx.page, ctx.size, undefined, {
+    return await this.trackService.findPage(ctx, undefined, {
       id: true,
       name: true,
       playlist: {
@@ -30,8 +30,10 @@ export class Tracks {
           name: true,
           public: true,
           owner: {
-            id: true,
-            username: true
+            select: {
+              id: true,
+              username: true
+            }
           }
         }
       }

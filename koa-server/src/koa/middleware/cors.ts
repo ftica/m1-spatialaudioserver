@@ -2,8 +2,8 @@ import { Context, Next } from 'koa';
 
 export default () => {
   const defaultOptions = {
-    allowMethods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowHeaders: ['Content-Type', 'Set-Cookie', 'Cookie']
+    allowMethods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Set-Cookie', 'Cookie', 'Authorization']
   };
 
   return async (ctx: Context, next: Next) => {

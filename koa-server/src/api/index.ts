@@ -7,7 +7,7 @@ import tracks from './endpoints/tracks';
 import playlists from './endpoints/playlists';
 // import upload from './routers/upload';
 
-export default new Router<DefaultState, Context>({ prefix: '/api/v1' })
+export default new Router<DefaultState, Context>({ prefix: '/api' })
   .use('/auth', auth.routes(), auth.allowedMethods())
   .use('/users', users.routes(), users.allowedMethods())
   .use('/tracks', tracks.routes(), tracks.allowedMethods())

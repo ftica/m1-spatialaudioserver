@@ -68,26 +68,60 @@ export default class FetchHelper {
 
   async #request({ itemId, method, body }) {
     this.path = itemId;
-    this.options.method = method ?? 'GET';
-    if (_.isObject(body) && !(body instanceof FormData)) {
-      _.set(this.options, 'headers.Accept', 'application/json');
-      _.set(this.options, 'headers.Content-Type', 'application/json');
 
-      try {
-        this.options.body = JSON.stringify(body);
-      } catch (e) {
-        throw new Error('Broken request payload');
-      }
-    } else {
-      this.options.body = body;
-    }
+    const response = await fetch(this.url, {
+      ...this.options,
+      method,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': _.isObject(body) ? 'application/json' : 'text/plain',
+      },
+      body: _.isObject(body) ? JSON.stringify(body) : body,
+    });
 
-    const response = await fetch(this.url, this.options);
     if (response.status === 204) return null;
 
-    const payload = await response.json();
-    if (response.ok) return payload;
+    try {
+      const payload = response.headers.get('Content-Type')?.includes('text/plain') ? await response.text() : await response.json();
+      if (response.ok) return payload;
 
-    throw payload;
+      throw payload;
+    } catch (err) {
+      console.log(err);
+
+      throw err;
+    }
+
+    // this.path = itemId;
+    // this.options.method = method ?? 'GET';
+    // _.set(this.options, 'headers.Accept', 'text/plain, application/json');
+    // console.log('Checking token...');
+    // if (localStorage.getItem('token')) {
+    //   console.log('exists');
+    //   _.set(this.options, 'Authorization', `Bearer ${localStorage.getItem('token')}`);
+    // } else {
+    //   console.log('undefined');
+    // }
+
+    // if (_.isObject(body) && !(body instanceof FormData)) {
+    //   _.set(this.options, 'headers.Content-Type', 'application/json');
+
+    //   try {
+    //     this.options.body = JSON.stringify(body);
+    //   } catch (e) {
+    //     throw new Error('Broken request payload');
+    //   }
+    // } else {
+    //   this.options.body = body;
+    // }
+
+    // const response = await fetch(this.url, this.options);
+    // if (response.status === 204) return null;
+
+    // const payload = (response.type === 'text/plain') ? await response.text() : await response.json();
+    // if (response.ok) return payload;
+
+    // throw payload;
+  // }
   }
 }

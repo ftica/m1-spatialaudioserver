@@ -13,8 +13,8 @@ export default class ModelService<Model> {
     return await ctx.prisma[this.table].findMany({ where, select, orderBy });
   }
 
-  async findPage(ctx: Context, page: number, size: number, where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
-    return await ctx.prisma[this.table].findMany({ skip: page * size, take: size, where, select, orderBy });
+  async findPage(ctx: Context, where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
+    return await ctx.prisma[this.table].findMany({ skip: ctx.page * ctx.size, take: ctx.size, where, select, orderBy });
   }
 
   async findById(ctx: Context, id: string, select: any = undefined): Promise<any> {

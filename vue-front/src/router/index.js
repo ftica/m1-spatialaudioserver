@@ -47,7 +47,7 @@ router.beforeEach(async (to) => {
     await Store.dispatch('auth/restore');
 
     if (to.meta.requiresAdmin) {
-      if (!Store.getters['auth/userId']) {
+      if (!Store.getters['auth/user']) {
         return {
           path: '/',
         };

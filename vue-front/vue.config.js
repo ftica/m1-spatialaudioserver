@@ -13,7 +13,7 @@ module.exports = {
           // proxy the Webpack Dev Server endpoint
           // (which should be serving on http://localhost:3100/)
           // through BrowserSync
-          proxy: 'http://localhost:8081/',
+          proxy: 'http://localhost:8080/',
         },
         // plugin options
         {

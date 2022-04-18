@@ -2,11 +2,11 @@
   <div>
     <form class="user-profile">
       <h4 class="title large-text upper">User name</h4>
-      <FormInput name="nickname" placeholder="Nickname" type="text" v-model="user.nickname"/>
+      <FormInput name="username" placeholder="Username" type="text" v-model="user.username"/>
       <FormButton title="change username" icon="check" @click="click"/>
       <h4 class="title large-text upper">Change password</h4>
       <FormInput
-        v-if="!user.id"
+        v-if="!user.username"
         v-model="user.password"
 
         autocomplete="new-password"
@@ -15,7 +15,7 @@
         type="password"
       />
       <FormInput
-        v-if="!user.id"
+        v-if="!user.username"
         v-model="user.password"
 
         autocomplete="new-password"
@@ -24,7 +24,7 @@
         type="password"
       />
       <FormInput
-        v-if="!user.id"
+        v-if="!user.username"
         v-model="user.password"
 
         autocomplete="new-password"

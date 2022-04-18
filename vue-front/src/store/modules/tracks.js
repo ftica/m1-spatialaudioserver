@@ -145,13 +145,13 @@ const mutations = {
     store.items = [...tracks];
   },
   removeTrack(store, id) {
-    store.items = _.filter(store.items, (item) => item.id !== id);
+    store.items = store.items.filter((item) => item.id !== id);
   },
   setPlayingTrack(store, track = defaultTrackState) {
     store.track = { ...track };
   },
   updateTrackName(store, { id, name }) {
-    const index = _.findIndex(store.items, (item) => item.id === id);
+    const index = store.items.findIndex((item) => item.id === id);
     const item = store.items[index];
 
     store.items[index] = { ...item, name };

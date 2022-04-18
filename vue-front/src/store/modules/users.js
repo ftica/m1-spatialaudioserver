@@ -1,12 +1,11 @@
 import _ from 'lodash';
-import { validate as isUuid } from 'uuid';
 
 import FetchHelper from '../utils';
 
 const defaultState = () => ({
   // user: {
   //   id: undefined,
-  //   nickname: undefined,
+  //   username: undefined,
   //   email: undefined,
   //   role: undefined,
   //   lastSeen: undefined,
@@ -27,21 +26,15 @@ const actions = {
     commit('createUser', user);
   },
 
-  // async update({ commit }, data) {
-  //   if (!_.has(data, 'id')) return;
-  //
-  //   // const { nickname, email, role } = data;
-  //
-  //   // NOTE: update user nickname
-  //   // if (_.get(data, 'nickname')) {
-  //   //   await api.put(data);
-  //   //   commit('updateUserNickname', data);
-  //   // }
-  // },
-  async remove({ commit }, data) {
-    const id = !isUuid(data) ? _.get(data, 'id') : data;
-    await api.del(id);
-    commit('removeUser', id);
+  async update({ commit }, user) {
+    if (!user?.username) return;
+
+    const updatedUser = await api.put(user, { itemId: user.username });
+    commit('updateUser', updatedUser);
+  },
+  async remove({ commit }, username) {
+    await api.del(username);
+    commit('removeUser', username);
   },
 };
 
@@ -58,14 +51,18 @@ const mutations = {
   createUser(store, user) {
     store.items = [...store.items, user];
   },
-  updateUserNickname(store, { id, name }) {
-    const index = _.findIndex(store.items, (item) => item.id === id);
+  updateUser(store, user) {
+    const index = _.findIndex(store.items, (item) => item.username === user.username);
+    store.items[index] = user;
+  },
+  updateUserUsername(store, { username }) {
+    const index = _.findIndex(store.items, (item) => item.username === username);
     const item = store.items[index];
 
-    store.items[index] = { ...item, name };
+    store.items[index] = { ...item, username };
   },
-  removeUser(store, id) {
-    store.items = _.remove(store.items, (item) => item.id !== id);
+  removeUser(store, username) {
+    store.items = store.items.filter((item) => item.username !== username);
   },
 };
 

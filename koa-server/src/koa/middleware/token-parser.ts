@@ -2,6 +2,7 @@ import { Role } from '@prisma/client';
 import { Jwt } from 'jsonwebtoken';
 import { Context, Next } from 'koa';
 import jwtService, { Token } from '../../api/services/jwt-service';
+import userService from '../../api/services/user-service';
 import { now } from '../../api/util/time';
 
 export default () => async (ctx: Context, next: Next) => {
@@ -16,6 +17,8 @@ export default () => async (ctx: Context, next: Next) => {
       else {
         ctx.token = token;
         ctx.admin = token?.role === Role.ADMIN;
+
+        userService.updateByUsername(ctx, ctx.token.username, { lastSeen: now() });
       }
     } catch (err) { }
   }

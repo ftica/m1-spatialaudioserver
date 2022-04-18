@@ -1,16 +1,8 @@
 <template>
   <form class="add-user" @submit.prevent="click">
-    <FormInput name="nickname" placeholder="Nickname" type="text" v-model="user.nickname"/>
+    <FormInput name="username" placeholder="Username" type="text" v-model="user.username"/>
     <FormInput name="email" placeholder="E-mail" type="text" v-model="user.email"/>
-    <FormInput
-      v-if="!user.id"
-      v-model="user.password"
-
-      autocomplete="new-password"
-      name="password"
-      placeholder="Password"
-      type="password"
-    />
+    <FormInput name="password" placeholder="Password" type="password" autocomplete="new-password" v-model="user.password"/>
     <FormSelect name="users" placeholder="Role" defaultClass="role" :options="roles" v-model="user.role"/>
     <FormButton :icon="icon" :title="title" @click="click"/>
   </form>
@@ -43,8 +35,8 @@ export default {
   data() {
     return {
       roles: [
-        { id: 'user', name: 'user' },
-        { id: 'admin', name: 'admin' },
+        { id: 'USER', name: 'user' },
+        { id: 'ADMIN', name: 'admin' },
       ],
       user: {},
       focused: {},
@@ -72,7 +64,7 @@ export default {
   },
   created() {
     const { item } = this;
-    if (item && item.id) {
+    if (item && item.lastSeen) {
       this.user = { ...item };
     }
   },

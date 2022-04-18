@@ -30,7 +30,7 @@
                 </div>
                 <div class="col">
                   <nav v-if="controls" class="right-align">
-                    <button class="border round transparent-border" @click="update({ id: item.id, visibility: 'change' })">
+                    <button class="border round transparent-border" @click="update({ id: item.id, visibility: !item.visibility })">
                       <i class="material-icons">{{item.visibility ? 'visibility' : 'visibility_off'}}</i>
                     </button>
                     <Modal

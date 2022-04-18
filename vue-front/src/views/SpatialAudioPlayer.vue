@@ -72,7 +72,7 @@ export default {
     ...mapState('auth', ['profile']),
 
     isAdmin() {
-      return _.get(this, 'profile.user.role') === 'admin';
+      return _.get(this, 'profile.user.role') === 'ADMIN';
     },
   },
   mounted() {

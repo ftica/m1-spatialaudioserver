@@ -4,7 +4,7 @@
       <thead>
         <tr>
           <th><abbr title="#">#</abbr></th>
-          <th><abbr title="NICKNAME">NICKNAME</abbr></th>
+          <th><abbr title="USERNAME">USERNAME</abbr></th>
           <th><abbr title="E-MAIL">E-MAIL</abbr></th>
           <th><abbr title="ROLE">ROLE</abbr></th>
           <th><abbr title="LAST SEEN">LAST SEEN</abbr></th>
@@ -18,7 +18,7 @@
             <p class="medium-text">{{ index + 1 }}</p>
           </td>
           <td>
-            <p class="medium-text">{{item.nickname}}</p>
+            <p class="medium-text">{{item.username}}</p>
           </td>
           <td>
             <p class="medium-text mobile">{{item.email}}</p>
@@ -27,7 +27,7 @@
             <p class="medium-text">{{item.role}}</p>
           </td>
           <td>
-            <p class="medium-text">{{item.lastSeen}}</p>
+            <p class="medium-text">{{item.lastSeen ? new Date(item.lastSeen).toLocaleString() : ''}}</p>
           </td>
           <td>
             <Modal
@@ -49,7 +49,7 @@
             </Modal>
           </td>
           <td>
-            <button class="border round transparent-border black-text" @click="remove(item.id)">
+            <button class="border round transparent-border black-text" @click="remove(item.username)">
               <i class="material-icons">delete</i>
             </button>
           </td>
