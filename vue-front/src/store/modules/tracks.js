@@ -50,7 +50,7 @@ const actions = {
    * @param  {Object}   data     File from new FormData()
    */
   async upload({ commit, dispatch }, data) {
-    const endpoint = _.get(new FetchHelper('upload'), 'url.href');
+    const endpoint = _.get(new FetchHelper('tracks'), 'url.href');
     const options = {
       endpoint,
       retryDelays: [0, 1000, 3000, 5000, 10000, 20000],
@@ -59,14 +59,17 @@ const actions = {
         filename: data.file.name,
         filetype: data.file.type,
       },
+      headers: localStorage.getItem('token') !== undefined
+        ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        : undefined,
     };
 
-    const inputFormat = _.get(data, 'inputFormat');
+    const inputFormat = data?.inputFormat;
     if (inputFormat) {
       _.set(options, 'metadata.input_format', inputFormat);
     }
 
-    const outputFormat = _.get(data, 'outputFormat');
+    const outputFormat = data?.outputFormat;
     if (outputFormat) {
       _.set(options, 'metadata.output_format', outputFormat);
     }
@@ -122,16 +125,15 @@ const actions = {
   },
   async update({ commit }, data) {
     // NOTE: update track name
-    if (_.get(data, 'name')) {
-      await api.put(data);
+    if (data?.name !== undefined) {
+      await api.put({ name: data.name }, { itemId: data.id });
       commit('updateTrackName', data);
     }
   },
   async remove({ commit, dispatch }, id) {
     try {
-      await Promise.all([
-        api.del(id), commit('removeTrack', id),
-      ]);
+      await api.del(id);
+      commit('removeTrack', id);
       dispatch('toast', { event: { message: 'File deleted' } }, { root: true });
     } catch (e) {
       // NOTE: try to sync files from api

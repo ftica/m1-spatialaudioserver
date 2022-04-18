@@ -3,7 +3,14 @@ import { Context, Next } from 'koa';
 export default () => {
   const defaultOptions = {
     allowMethods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Set-Cookie', 'Cookie', 'Authorization']
+    allowHeaders: ['Content-Type', 'Set-Cookie', 'Cookie', 'Authorization',
+      // 'Sec-Fetch-Dest',
+      // 'Sec-Fetch-Mode',
+      // 'Sec-Fetch-Site',
+      'Tus-Resumable',
+      'Upload-Length',
+      'Upload-Metadata'
+    ]
   };
 
   return async (ctx: Context, next: Next) => {

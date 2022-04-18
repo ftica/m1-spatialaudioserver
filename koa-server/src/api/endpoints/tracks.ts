@@ -11,11 +11,6 @@ export class Tracks {
   ) { }
 
   static readonly validName = Joi.string().min(3).max(100).required();
-  static readonly validCreate = Joi.object({
-    name: this.validName,
-    position: Valid.uint.required(),
-    playlistId: Valid.id.required()
-  });
 
   @AuthorizeAdmin
   @Paginate()
@@ -40,11 +35,34 @@ export class Tracks {
     });
   }
 
-  // @AuthorizeRole(Role.ADMIN, Role.USER)
-  // @Validate(null, Tracks.validCreate)
-  // override async createOne(ctx: Context) {
-  //   return super.createOne(ctx);
-  // }
+  @AuthorizeAdmin
+  @Ok(201)
+  async create(ctx: Context) {
+    console.log('request.files: ', ctx.request.files);
+    console.log('files: ', ctx.files);
+    console.log('body: ', ctx.request.body);
+    // return await Promise.all(ctx.request.files.map(async (file) => {
+    //   return await this.trackService.createOne(ctx, file, {
+    //     id: true,
+    //     name: true
+    //   });
+    // }));
+    // return await this.trackService.createOne(ctx, ctx.request.body, {
+    //   id: true,
+    //   name: true
+    // });
+    return ctx;
+  }
+
+  @AuthorizeAdmin
+  @Validate({ params: Valid.idParam })
+  @NotFound()
+  async delete(ctx: Context) {
+    return await this.trackService.deleteById(ctx, ctx.params.id, {
+      id: true,
+      name: true
+    });
+  }
 
   @AuthorizeLogged
   @Validate({ params: Valid.idParam.required(), body: Tracks.validName })
@@ -77,11 +95,9 @@ const tracks = new Tracks(trackService);
 
 export default new Router<DefaultState, Context>()
   .get('/', tracks.getAllPage.bind(tracks))
-
-  // .get('/count', tracks.count.bind(tracks))
   // .get('/:id', tracks.getById.bind(tracks))
-  // .post('/', tracks.create.bind(tracks))
-  // .del('/:id', tracks.del.bind(tracks))
+  .post('/', tracks.create.bind(tracks))
+  .del('/:id', tracks.delete.bind(tracks))
   .patch('/:id/name', tracks.updateName.bind(tracks));
 // .patch('/:id/position', tracks.updatePosition.bind(tracks))
 // .patch('/:id/playlist', tracks.updatePlaylist.bind(tracks));

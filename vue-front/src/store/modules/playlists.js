@@ -17,7 +17,11 @@ const api = new FetchHelper('playlists');
 const actions = {
   async getAll({ commit }) {
     const playlists = await api.get();
-    commit('setPlaylists', playlists.map((playlist, index) => ({ number: index + 1, ...playlist })));
+    commit('setPlaylists', playlists.map((playlist, index) => ({
+      number: index + 1,
+      ...playlist,
+      visibility: playlist.public,
+    })));
   },
   async create({ commit }, { name }) {
     const playlist = await api.post({ name });
