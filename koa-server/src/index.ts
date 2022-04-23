@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import server from './koa';
 
 const port = process.env.PORT || 3000;
