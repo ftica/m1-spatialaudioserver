@@ -10,7 +10,7 @@ import cors from './cors';
 import errors from './errors';
 import database from './database';
 import tokenParser from './token-parser';
-import uploader from './uploader';
+import multipartParser from './multipart-parser';
 
 const staticDir = path.join(__dirname, '../../..', 'public');
 
@@ -20,9 +20,9 @@ export default () => compose([
   errors(),
   database(),
   tokenParser(),
-  uploader(),
+  multipartParser(),
   bodyParser({
-    enableTypes: ['json', 'text', 'form'],
+    enableTypes: ['json', 'text', 'form', 'multipart-form'],
     onerror: (err, ctx) => ctx.throw(400, err.message)
   }),
   serve(staticDir)

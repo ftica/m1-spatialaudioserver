@@ -5,6 +5,14 @@ import jwtService, { Token } from '../../api/services/jwt-service';
 import userService from '../../api/services/user-service';
 import { now } from '../../api/util/time';
 
+declare module 'koa' {
+  // eslint-disable-next-line no-unused-vars
+  interface Context {
+    token?: Token;
+    admin?: boolean;
+  }
+}
+
 export default () => async (ctx: Context, next: Next) => {
   if (ctx.headers.authorization != null) {
     try {

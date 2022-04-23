@@ -2,8 +2,11 @@ import Router from '@koa/router';
 import { Context, DefaultState } from 'koa';
 import Joi from 'joi';
 import { Valid } from '../util/valid';
-import { AuthorizeAdmin, AuthorizeLogged, NotFound, Ok, Paginate, Validate } from '../util/decorators';
 import playlistService, { PlaylistService } from '../services/playlist-service';
+import { AuthorizeAdmin, AuthorizeLogged } from '../util/decorators/authorization';
+import { Paginate } from '../util/decorators/request';
+import { NotFound, Ok } from '../util/decorators/response';
+import { Validate } from '../util/decorators/validation';
 
 export class Playlists {
   constructor(
@@ -16,7 +19,7 @@ export class Playlists {
     public: Valid.bool
   });
 
-  @AuthorizeAdmin
+  @AuthorizeLogged
   @Paginate()
   @Ok()
   async getAllPage(ctx: Context): Promise<any> {

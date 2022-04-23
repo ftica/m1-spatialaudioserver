@@ -50,33 +50,24 @@ const actions = {
    * @param  {Object}   data     File from new FormData()
    */
   async upload({ commit, dispatch }, data) {
-    const endpoint = _.get(new FetchHelper('tracks'), 'url.href');
-    const options = {
-      endpoint,
-      retryDelays: [0, 1000, 3000, 5000, 10000, 20000],
-      chunkSize: 8 * 1000000,
-      metadata: {
-        filename: data.file.name,
-        filetype: data.file.type,
-      },
-      headers: localStorage.getItem('token') !== undefined
-        ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        : undefined,
-    };
-
-    const inputFormat = data?.inputFormat;
-    if (inputFormat) {
-      _.set(options, 'metadata.input_format', inputFormat);
-    }
-
-    const outputFormat = data?.outputFormat;
-    if (outputFormat) {
-      _.set(options, 'metadata.output_format', outputFormat);
-    }
-
     await new Promise((resolve, reject) => {
+      console.log('Uoloading: ', data.file);
+
       const upload = new tus.Upload(data.file, {
-        ...options,
+        endpoint: new FetchHelper('tracks').url.href,
+        retryDelays: [0/* , 1000, 3000, 5000, 10000, 20000 */],
+        chunkSize: 8 * 1000000,
+        metadata: {
+          filename: data.file.name,
+          filetype: data.file.type,
+          input_format: data?.inputFormat,
+          output_format: data?.outputFormat,
+        },
+        headers: {
+          Authorization: localStorage.getItem('token')
+            ? `Bearer ${localStorage.getItem('token')}`
+            : undefined,
+        },
         // NOTE: tus-js using xhr :( and this hook is used for enabling credentials in preflight requests
         onBeforeRequest(req) {
           const xhr = req.getUnderlyingObject();

@@ -2,8 +2,11 @@ import Router from '@koa/router';
 import { Context, DefaultState } from 'koa';
 import Joi from 'joi';
 import userService, { UserService } from '../services/user-service';
-import { AuthorizeAdmin, AuthorizeLogged, AuthorizeMe, NotFound, Ok, Paginate, Validate } from '../util/decorators';
 import { Valid } from '../util/valid';
+import { AuthorizeAdmin, AuthorizeLogged, AuthorizeMe } from '../util/decorators/authorization';
+import { NotFound, Ok } from '../util/decorators/response';
+import { Validate } from '../util/decorators/validation';
+import { Paginate } from '../util/decorators/request';
 
 export class Users {
   constructor(

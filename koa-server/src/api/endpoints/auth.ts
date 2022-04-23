@@ -1,8 +1,9 @@
 import Router from '@koa/router';
 import Joi from 'joi';
 import { Context, DefaultState } from 'koa';
-import { NotFound, Validate } from '../util/decorators';
 import authService, { AuthService } from '../services/auth-service';
+import { NotFound } from '../util/decorators/response';
+import { Validate } from '../util/decorators/validation';
 import { Valid } from '../util/valid';
 import { Users } from './users';
 

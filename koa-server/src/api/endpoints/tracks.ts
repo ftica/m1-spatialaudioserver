@@ -3,7 +3,10 @@ import { Context, DefaultState } from 'koa';
 import trackService, { TrackService } from '../services/track-service';
 import { Valid } from '../util/valid';
 import Joi from 'joi';
-import { AuthorizeAdmin, AuthorizeLogged, NotFound, Ok, Paginate, Validate } from '../util/decorators';
+import { AuthorizeAdmin, AuthorizeLogged } from '../util/decorators/authorization';
+import { Paginate } from '../util/decorators/request';
+import { NotFound, Ok } from '../util/decorators/response';
+import { Validate, Validator } from '../util/decorators/validation';
 
 export class Tracks {
   constructor(
@@ -36,22 +39,12 @@ export class Tracks {
   }
 
   @AuthorizeAdmin
+  @Validator(400, 'No files provided', ctx => ctx.files !== null)
   @Ok(201)
   async create(ctx: Context) {
-    console.log('request.files: ', ctx.request.files);
-    console.log('files: ', ctx.files);
-    console.log('body: ', ctx.request.body);
-    // return await Promise.all(ctx.request.files.map(async (file) => {
-    //   return await this.trackService.createOne(ctx, file, {
-    //     id: true,
-    //     name: true
-    //   });
-    // }));
-    // return await this.trackService.createOne(ctx, ctx.request.body, {
-    //   id: true,
-    //   name: true
-    // });
-    return ctx;
+    // @ts-ignore
+    console.log('tracks', 'create', ctx.files);
+    return 'Hello!!!';
   }
 
   @AuthorizeAdmin
