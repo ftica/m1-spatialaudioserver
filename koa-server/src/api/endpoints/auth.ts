@@ -3,8 +3,7 @@ import Joi from 'joi';
 import { Context, DefaultState } from 'koa';
 import authService, { AuthService } from '../services/auth-service';
 import { NotFound } from '../util/decorators/response';
-import { Validate } from '../util/decorators/validation';
-import { Valid } from '../util/valid';
+import { Valid, Validate } from '../util/decorators/validation';
 import { Users } from './users';
 
 export class Auth {

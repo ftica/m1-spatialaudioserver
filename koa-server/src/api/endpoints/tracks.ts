@@ -1,12 +1,11 @@
 import Router from '@koa/router';
 import { Context, DefaultState } from 'koa';
 import trackService, { TrackService } from '../services/track-service';
-import { Valid } from '../util/valid';
 import Joi from 'joi';
 import { AuthorizeAdmin, AuthorizeLogged } from '../util/decorators/authorization';
 import { Paginate } from '../util/decorators/request';
 import { NotFound, Ok } from '../util/decorators/response';
-import { Validate, Validator } from '../util/decorators/validation';
+import { Valid, Validate, Validator } from '../util/decorators/validation';
 
 export class Tracks {
   constructor(
