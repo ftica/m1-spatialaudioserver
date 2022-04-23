@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import { Context } from 'koa';
-import { Valid } from '../valid';
+import { Valid } from './validation';
 
 declare module 'koa' {
   // eslint-disable-next-line no-unused-vars
