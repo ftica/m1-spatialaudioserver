@@ -2,10 +2,11 @@ import Koa from 'koa';
 import path from 'path';
 
 import logger from 'koa-logger';
+import cors from '@koa/cors';
 import bodyParser from 'koa-bodyparser';
 import serve from 'koa-static';
 
-import cors from './middleware/cors';
+// import cors from './middleware/cors';
 import errors from './middleware/errors';
 import database from './middleware/database';
 import tokenParser from './middleware/token-parser';
@@ -31,11 +32,7 @@ if (process.env.NODE_ENV === 'development') {
 
 export default new Koa({
   proxy: true,
-  keys: [
-    'mach1-cookie-key-1',
-    'mach1-cookie-key-2',
-    'mach1-cookie-key-3'
-  ]
+  keys: ['mach1-cookie-key-1', 'mach1-cookie-key-2', 'mach1-cookie-key-3']
 })
   .use(logger())
   .use(cors())
