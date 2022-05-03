@@ -37,6 +37,28 @@ export class Playlists {
     );
   }
 
+  @AuthorizeLogged
+  @Validate({ params: Valid.idParam })
+  @NotFound()
+  async findById(ctx: Context): Promise<any> {
+    return await this.playlistService.findById(ctx, ctx.params.id, {
+      id: true,
+      name: true,
+      public: ctx.admin,
+      owner: {
+        select: {
+          username: true
+        }
+      },
+      tracks: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    });
+  }
+
   @AuthorizeAdmin
   @Validate({
     body: Joi.object({
@@ -148,6 +170,7 @@ const playlists = new Playlists(playlistService);
 
 export default new Router<DefaultState, Context>()
   .get('/', playlists.getAllPage.bind(playlists))
+  .get('/:id', playlists.findById.bind(playlists))
   .post('/', playlists.create.bind(playlists))
   .put('/:id', playlists.update.bind(playlists))
   .del('/:id', playlists.delete.bind(playlists));
