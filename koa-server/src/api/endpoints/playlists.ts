@@ -41,22 +41,65 @@ export class Playlists {
   @Validate({ params: Valid.idParam })
   @NotFound()
   async findById(ctx: Context): Promise<any> {
-    return await this.playlistService.findById(ctx, ctx.params.id, {
-      id: true,
-      name: true,
-      public: ctx.admin,
-      owner: {
-        select: {
-          username: true
-        }
+    return await ctx.prisma.playlist.findFirst({
+      where: {
+        id: ctx.params.id,
+        OR: [
+          {
+            users: {
+              some: {
+                userId: ctx.token.userId
+              }
+            }
+          },
+          {
+            ownerId: ctx.token.userId
+          },
+          {
+            public: true
+          }
+        ]
       },
-      tracks: {
-        select: {
-          id: true,
-          name: true
+      select: {
+        id: true,
+        name: true,
+        public: ctx.admin,
+        owner: {
+          select: {
+            username: true
+          }
+        },
+        tracks: {
+          select: {
+            id: true,
+            name: true
+          }
         }
       }
     });
+
+    // return await this.playlistService.findOne(ctx, {
+    //   id: ctx.params.id,
+    //   users: {
+
+    //   }
+    //   public: ctx.admin ? undefined : {  }
+    // }, {
+    //   id: true,
+    //   name: true,
+    //   public: ctx.admin,
+    //   owner: {
+    //     select: {
+    //       username: true
+    //     }
+    //   },
+    //   tracks: {
+    //     select: {
+    //       id: true,
+    //       name: true
+    //     }
+    //   }
+    // });
   }
 
   @AuthorizeAdmin
