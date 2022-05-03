@@ -11,10 +11,10 @@ const users = new FetchHelper('users');
 
 const actions = {
   async login({ commit, dispatch }, data) {
-    const { access_token: token } = await api.post(data, { itemId: 'login' });
+    const token = await api.post(data, { itemId: 'login' });
 
-    if (token) {
-      localStorage.setItem('token', token);
+    if (token?.access_token) {
+      localStorage.setItem('token', token.access_token);
       const user = await users.get('me');
       const profile = { user };
       commit('setProfile', profile);
