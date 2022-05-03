@@ -5,7 +5,7 @@ import Joi from 'joi';
 import { AuthorizeAdmin, AuthorizeLogged } from '../util/decorators/authorization';
 import { Paginate } from '../util/decorators/request';
 import { NotFound, Ok } from '../util/decorators/response';
-import { Valid, Validate, Validator } from '../util/decorators/validation';
+import { Valid, Validate } from '../util/decorators/validation';
 
 export class Tracks {
   constructor(
@@ -38,12 +38,11 @@ export class Tracks {
   }
 
   @AuthorizeAdmin
-  @Validator(400, 'No files provided', ctx => ctx.files !== null)
-  @Ok(201)
+  // @Validator(400, 'No files provided', ctx => ctx.files !== null)
+  // @Ok(201)
   async create(ctx: Context) {
     // @ts-ignore
-    console.log('tracks', 'create', ctx.files);
-    return 'Hello!!!';
+    return await this.trackService.createOne(ctx, null);
   }
 
   @AuthorizeAdmin

@@ -25,7 +25,6 @@
 
 <script>
 import { mapActions } from 'vuex';
-import _ from 'lodash';
 
 import FormSelect from './Form/Select.vue';
 
@@ -43,18 +42,14 @@ export default {
   },
   computed: {
     bindedItems() {
-      return _
-        .chain(this.items)
-        .filter(({ id }) => this.playlist[this.path].indexOf(id) !== -1)
-        .map(({ id, name, email }) => ({ id, name: name || email }))
-        .value();
+      return this.items
+        .filter(({ id }) => this.playlist?.[this.path]?.indexOf(id) !== -1)
+        .map(({ id, name, email }) => ({ id, name: name || email }));
     },
     unbindedItems() {
-      return _
-        .chain(this.items)
-        .filter(({ id }) => this.playlist[this.path].indexOf(id) === -1)
-        .map(({ id, name, email }) => ({ id, name: name || email }))
-        .value();
+      return this.items
+        .filter(({ id }) => this.playlist?.[this.path]?.indexOf(id) === -1)
+        .map(({ id, name, email }) => ({ id, name: name || email }));
     },
   },
   data() {
@@ -63,10 +58,20 @@ export default {
   methods: {
     ...mapActions('playlists', ['addItemToPlaylist', 'removeItemFromPlaylist']),
     del(itemId) {
-      this.removeItemFromPlaylist({ id: this.playlist.id, [this.path]: _.xor(this.playlist[this.path], [itemId]) });
+      console.log('this.path', this.path);
+      console.log('itemId', itemId);
+      console.log('this.playlist', this.playlist);
+
+      this.removeItemFromPlaylist({
+        id: this.playlist.id,
+        [this.path]: this.playlist?.[this.path]?.filter(({ id }) => id !== itemId),
+      });
     },
     addItem(event) {
-      this.addItemToPlaylist({ id: this.playlist.id, [this.path]: _.union(this.playlist[this.path], [event.target.value]) });
+      this.addItemToPlaylist({
+        id: this.playlist.id,
+        [this.path]: [...this.playlist?.[this.path], event?.target?.value],
+      });
     },
   },
 };

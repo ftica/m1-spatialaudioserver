@@ -9,7 +9,7 @@ import serve from 'koa-static';
 import errors from './middleware/errors';
 import database from './middleware/database';
 import tokenParser from './middleware/token-parser';
-import multipartParser from './middleware/multipart-parser';
+// import multipartParser from './middleware/multipart-parser';
 
 import router from '../api';
 
@@ -31,11 +31,11 @@ if (process.env.NODE_ENV === 'development') {
 
 export default new Koa({ proxy: true })
   .use(logger())
-  .use(cors())
   .use(errors())
+  .use(cors())
   .use(database())
   .use(tokenParser())
-  .use(multipartParser())
+  // .use(multipartParser())
   .use(bodyParser({
     enableTypes: ['json', 'text', 'form', 'multipart-form'],
     onerror: (err, ctx) => ctx.throw(400, err.message)

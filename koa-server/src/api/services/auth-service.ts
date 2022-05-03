@@ -1,6 +1,6 @@
 import { AccessToken, Role, User } from '@prisma/client';
 import { Context } from 'koa';
-import { addHours, now } from '../util/time';
+import { addSeconds, now } from '../util/time';
 import encryptionService, { EncryptionService } from './encryption-service';
 import jwtService, { JwtService, Token } from './jwt-service';
 import userService, { UserService } from './user-service';
@@ -17,6 +17,8 @@ export class AuthService {
     private readonly userService: UserService
   ) { }
 
+  static readonly expiresInSeconds = 60 * 60 * 2;
+
   private async getOrCreateToken(ctx: Context, user: User): Promise<Token> {
     let token: AccessToken = await ctx.prisma.accessToken.findUnique({ where: { id: undefined, userId: user.id } });
 
@@ -25,7 +27,7 @@ export class AuthService {
       token = null;
     }
     if (!token) {
-      token = await ctx.prisma.accessToken.create({ data: { userId: user.id, validUntil: addHours(now(), 2) } });
+      token = await ctx.prisma.accessToken.create({ data: { userId: user.id, validUntil: addSeconds(now(), AuthService.expiresInSeconds) } });
     }
 
     return {

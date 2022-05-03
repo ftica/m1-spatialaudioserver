@@ -41,22 +41,24 @@ export class Auth {
   @Validate({ body: Auth.validLogin })
   @NotFound(401)
   async login(ctx: Context) {
-    return await this.authService.login(ctx, {
-      email: ctx.request.body.login,
-      password: ctx.request.body.password
-    });
+    return {
+      access_token: await this.authService.login(ctx, {
+        email: ctx.request.body.login,
+        password: ctx.request.body.password
+      })
+    };
   }
 
   @Validate({ body: Auth.validLoginOAuth })
   @NotFound(401)
   async loginOAuth(ctx: Context) {
     return {
-      token_type: 'bearer',
+      token_type: 'Bearer',
       access_token: await this.authService.login(ctx, {
         email: ctx.request.body.client_id,
         password: ctx.request.body.client_secret
       }),
-      expires_in: 60 * 60 * 2
+      expires_in: AuthService.expiresInSeconds
     };
   }
 }

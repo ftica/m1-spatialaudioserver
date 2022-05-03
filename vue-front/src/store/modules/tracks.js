@@ -51,7 +51,7 @@ const actions = {
    */
   async upload({ commit, dispatch }, data) {
     await new Promise((resolve, reject) => {
-      console.log('Uoloading: ', data.file);
+      console.log('Uploading: ', data.file);
 
       const upload = new tus.Upload(data.file, {
         endpoint: new FetchHelper('tracks').url.href,
@@ -69,10 +69,10 @@ const actions = {
             : undefined,
         },
         // NOTE: tus-js using xhr :( and this hook is used for enabling credentials in preflight requests
-        onBeforeRequest(req) {
-          const xhr = req.getUnderlyingObject();
-          xhr.withCredentials = true;
-        },
+        // onBeforeRequest(req) {
+        //   const xhr = req.getUnderlyingObject();
+        //   xhr.withCredentials = true;
+        // },
         onError(err) {
           try {
             const response = err.originalResponse.getBody();
