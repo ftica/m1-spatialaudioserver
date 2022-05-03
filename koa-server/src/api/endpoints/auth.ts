@@ -41,23 +41,29 @@ export class Auth {
   @Validate({ body: Auth.validLogin })
   @NotFound(401)
   async login(ctx: Context) {
-    return {
-      access_token: await this.authService.login(ctx, {
-        email: ctx.request.body.login,
-        password: ctx.request.body.password
-      })
-    };
+    const token = await this.authService.login(ctx, {
+      email: ctx.request.body.login,
+      password: ctx.request.body.password
+    });
+
+    if (!token) return null;
+
+    return { access_token: token };
   }
 
   @Validate({ body: Auth.validLoginOAuth })
   @NotFound(401)
   async loginOAuth(ctx: Context) {
+    const token = await this.authService.login(ctx, {
+      email: ctx.request.body.client_id,
+      password: ctx.request.body.client_secret
+    });
+
+    if (!token) return null;
+
     return {
       token_type: 'Bearer',
-      access_token: await this.authService.login(ctx, {
-        email: ctx.request.body.client_id,
-        password: ctx.request.body.client_secret
-      }),
+      access_token: token,
       expires_in: AuthService.expiresInSeconds
     };
   }
