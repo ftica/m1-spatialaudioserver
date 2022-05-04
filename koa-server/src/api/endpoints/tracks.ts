@@ -37,30 +37,19 @@ export class Tracks {
 
   @AuthorizeLogged
   // @Validator(400, 'No files provided', ctx => ctx.files !== null)
-  @Validate({
-    body: Joi.object({
-      name: Tracks.validName,
-      playlist: Valid.id,
-      position: Valid.uint
-    })
-  })
-  @Ok(201)
-  async create(ctx: Context) {
-    // @ts-ignore
-    return await trackService.createOne({
+  // @Validate({
+  //   body: Joi.object({
+  //     name: Tracks.validName,
+  //     playlist: Valid.id,
+  //     position: Valid.uint
+  //   })
+  // })
+  // @Ok(201)
+  async upload(ctx: Context) {
+    return trackService.upload(ctx, {
       name: ctx.request.body.name,
       playlistId: ctx.request.body.playlist,
       position: ctx.request.body.position
-    }, {
-      id: true,
-      name: true,
-      position: true,
-      playlist: {
-        select: {
-          id: true,
-          name: true
-        }
-      }
     });
   }
 

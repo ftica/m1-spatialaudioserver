@@ -5,7 +5,6 @@ import auth from './endpoints/auth';
 import users from './endpoints/users';
 import tracks from './endpoints/tracks';
 import playlists from './endpoints/playlists';
-// import upload from './routers/upload';
 
 const route = (prefix = undefined) => new Router<DefaultState, Context>({ prefix });
 
@@ -35,7 +34,8 @@ export default route('/api')
   .use('/tracks', route()
     .get('/', tracks.getAll.bind(tracks))
     // .get('/:id', tracks.getById.bind(tracks))
-    .post('/', tracks.create.bind(tracks))
+    // .post('/', tracks..bind(tracks))
+    .post('/upload', tracks.upload.bind(tracks))
     .del('/:id', tracks.delete.bind(tracks))
     .patch('/:id/name', tracks.updateName.bind(tracks))
     .routes())
@@ -48,5 +48,3 @@ export default route('/api')
     .put('/:id', playlists.update.bind(playlists))
     .del('/:id', playlists.delete.bind(playlists))
     .routes());
-
-// .use('/upload', upload.routes(), upload.allowedMethods())

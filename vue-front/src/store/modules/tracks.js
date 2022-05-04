@@ -54,7 +54,7 @@ const actions = {
       console.log('Uploading: ', data.file);
 
       const upload = new tus.Upload(data.file, {
-        endpoint: new FetchHelper('tracks').url.href,
+        endpoint: new FetchHelper('tracks/upload').url.href,
         retryDelays: [0/* , 1000, 3000, 5000, 10000, 20000 */],
         chunkSize: 8 * 1000000,
         metadata: {
