@@ -10,14 +10,9 @@ export class JwtService {
   constructor(
     private readonly privateKey: Buffer,
     private readonly publicKey: Buffer,
-    private readonly secret?: Secret,
+    private readonly secret: Secret = { key: privateKey, passphrase: process.env.PRIV_KEY_PASSPHRASE || 'mach1' },
     private readonly signOptions: SignOptions = { algorithm: 'RS256' }
-  ) {
-    this.secret ??= {
-      key: privateKey,
-      passphrase: process.env.PRIV_KEY_PASSPHRASE || 'mach1'
-    };
-  }
+  ) { }
 
   private static readonly signJwt: (token: Token, secret: Secret, options?: SignOptions) => string =
     jwt.sign;

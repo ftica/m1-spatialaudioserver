@@ -1,4 +1,3 @@
-// import Router from '@koa/router';
 import { Context } from 'koa';
 import trackService from '../services/track-service';
 import Joi from 'joi';
@@ -103,12 +102,3 @@ export class Tracks {
 }
 
 export default new Tracks();
-
-// export default new Router<DefaultState, Context>()
-//   .get('/', tracks.getAll.bind(tracks))
-//   // .get('/:id', tracks.getById.bind(tracks))
-//   .post('/', tracks.create.bind(tracks))
-//   .del('/:id', tracks.delete.bind(tracks))
-// .patch('/:id/name', tracks.updateName.bind(tracks));
-// .patch('/:id/position', tracks.updatePosition.bind(tracks))
-// .patch('/:id/playlist', tracks.updatePlaylist.bind(tracks));

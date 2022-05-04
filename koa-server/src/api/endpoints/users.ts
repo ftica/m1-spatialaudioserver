@@ -215,17 +215,3 @@ export class Users {
 }
 
 export default new Users();
-
-// export default new Router<DefaultState, Context>()
-//   .get('/', users.getAllPage.bind(users))
-//   .get('/me', users.profile.bind(users))
-//   .get('/:username', users.findByUsername.bind(users))
-//   .get('/:username/tracks', users.findPlaylistsByUsername.bind(users))
-//   .get('/:username/playlists', users.findPlaylistsByUsername.bind(users))
-//   .get('/:username/favorites', users.findFavoritesByUsername.bind(users))
-//   .post('/', users.create.bind(users))
-//   .del('/:username', users.deleteByUsername.bind(users))
-//   .put('/:username', users.update.bind(users))
-//   .patch('/:username/username', users.updateUsername.bind(users))
-//   .patch('/:username/email', users.updateEmail.bind(users))
-//   .patch('/:username/role', users.updateRole.bind(users));
