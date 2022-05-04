@@ -20,7 +20,7 @@ const actions = {
     commit('setPlaylists', playlists.map((playlist, index) => ({
       number: index + 1,
       ...playlist,
-      visibility: playlist.public,
+      visibility: playlist.isPublic,
     })));
   },
   async create({ commit }, { name }) {
@@ -36,7 +36,7 @@ const actions = {
       commit('updatePlaylistName', data);
     }
     if (data?.visibility !== undefined) {
-      await api.put({ public: data.visibility }, { itemId: data.id });
+      await api.put({ isPublic: data.visibility }, { itemId: data.id });
       commit('updatePlaylistVisibility', data);
     }
   },

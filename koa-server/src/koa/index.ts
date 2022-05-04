@@ -7,11 +7,11 @@ import bodyParser from 'koa-bodyparser';
 import serve from 'koa-static';
 
 import errors from './middleware/errors';
-import database from './middleware/database';
+// import database from './database';
 import tokenParser from './middleware/token-parser';
 // import multipartParser from './middleware/multipart-parser';
 
-import router from '../api';
+import api from '../api';
 
 declare module 'koa' {
   // eslint-disable-next-line no-unused-vars
@@ -22,8 +22,8 @@ declare module 'koa' {
 }
 
 if (process.env.NODE_ENV === 'development') {
-  router.get('/', ctx => {
-    ctx.body = router.stack
+  api.get('/', ctx => {
+    ctx.body = api.stack
       .filter(route => route.opts.end)
       .map(route => `${route.methods} ${route.path}`);
   });
@@ -33,7 +33,7 @@ export default new Koa({ proxy: true })
   .use(logger())
   .use(errors())
   .use(cors())
-  .use(database())
+  // .use(database())
   .use(tokenParser())
   // .use(multipartParser())
   .use(bodyParser({
@@ -41,5 +41,5 @@ export default new Koa({ proxy: true })
     onerror: (err, ctx) => ctx.throw(400, err.message)
   }))
   .use(serve(path.join(__dirname, '../../public')))
-  .use(router.routes())
-  .use(router.allowedMethods());
+  .use(api.routes())
+  .use(api.allowedMethods());

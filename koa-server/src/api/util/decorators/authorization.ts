@@ -25,4 +25,4 @@ export function AuthorizeRole(...roles: Role[]) {
 }
 
 export const AuthorizeMe =
-  Authorize((ctx: Context) => ctx.token && (ctx.admin || ctx.token.username === ctx.params.username));
+  Authorize((ctx: Context) => ctx.admin || (ctx.token && (ctx.token.username === ctx.params.username)));

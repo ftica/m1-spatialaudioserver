@@ -1,59 +1,63 @@
-import { Context } from 'koa';
+import db from '../../koa/db';
 
 export default class ModelService<Model> {
   constructor(
     protected readonly table: string
   ) { }
 
-  async findOne(ctx: Context, where: any, select: any = undefined): Promise<any> {
-    return await ctx.prisma[this.table].findUnique({ where, select });
+  async findUnique(where: any, select: any = undefined): Promise<any> {
+    return await db[this.table].findUnique({ where, select });
   }
 
-  async findMany(ctx: Context, where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
-    return await ctx.prisma[this.table].findMany({ where, select, orderBy });
+  async findFirst(where: any, select: any = undefined): Promise<any> {
+    return await db[this.table].findFirst({ where, select });
   }
 
-  async findPage(ctx: Context, where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
-    return await ctx.prisma[this.table].findMany({ skip: ctx.page * ctx.size, take: ctx.size, where, select, orderBy });
+  async findById(id: string, select: any = undefined): Promise<any> {
+    return await db[this.table].findUnique({ where: { id }, select });
   }
 
-  async findById(ctx: Context, id: string, select: any = undefined): Promise<any> {
-    return await ctx.prisma[this.table].findUnique({ where: { id }, select });
+  async findMany(where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
+    return await db[this.table].findMany({ where, select, orderBy });
   }
 
-  async createOne(ctx: Context, data: Model, select: any = undefined): Promise<any> {
-    return await ctx.prisma[this.table].create({ data, select });
+  async findPage(page: number, size: number, where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
+    return await db[this.table].findMany({ skip: page * size, take: size, where, select, orderBy });
   }
 
-  async createMany(ctx: Context, data: Model, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
-    return await ctx.prisma[this.table].createMany({ data, select, orderBy });
+  async createOne(data: Model, select: any = undefined): Promise<any> {
+    return await db[this.table].create({ data, select });
   }
 
-  async updateOne(ctx: Context, where: any, data: any, select: any = undefined): Promise<any> {
-    return await ctx.prisma[this.table].update({ where, data, select });
+  async createMany(data: Model, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
+    return await db[this.table].createMany({ data, select, orderBy });
   }
 
-  async updateMany(ctx: Context, data: any, where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
-    return await ctx.prisma[this.table].updateMany({ where, data, select, orderBy });
+  async updateOne(where: any, data: any, select: any = undefined): Promise<any> {
+    return await db[this.table].update({ where, data, select });
   }
 
-  async updateById(ctx: Context, id: string, data: any, select: any = undefined): Promise<any> {
-    return await ctx.prisma[this.table].update({ where: { id }, data, select });
+  async updateMany(data: any, where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
+    return await db[this.table].updateMany({ where, data, select, orderBy });
   }
 
-  async deleteOne(ctx: Context, where: any, select: any = undefined): Promise<any> {
-    return await ctx.prisma[this.table].delete({ where, select });
+  async updateById(id: string, data: any, select: any = undefined): Promise<any> {
+    return await db[this.table].update({ where: { id }, data, select });
   }
 
-  async deleteMany(ctx: Context, where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
-    return await ctx.prisma[this.table].deleteMany({ where, select, orderBy });
+  async deleteOne(where: any, select: any = undefined): Promise<any> {
+    return await db[this.table].delete({ where, select });
   }
 
-  async deleteById(ctx: Context, id: string, select: any = undefined): Promise<any> {
-    return await ctx.prisma[this.table].delete({ where: { id }, select });
+  async deleteMany(where: any = undefined, select: any = undefined, orderBy: any = undefined): Promise<any[]> {
+    return await db[this.table].deleteMany({ where, select, orderBy });
   }
 
-  async count(ctx: Context, where: any = undefined): Promise<number> {
-    return await ctx.prisma[this.table].count({ where });
+  async deleteById(id: string, select: any = undefined): Promise<any> {
+    return await db[this.table].delete({ where: { id }, select });
+  }
+
+  async count(where: any = undefined): Promise<number> {
+    return await db[this.table].count({ where });
   }
 }

@@ -55,7 +55,7 @@ model Track {
 model Playlist {
   id        String                 @db.Uuid @id @default(uuid())
   name      String
-  public    Boolean                @default(false)
+  isPublic  Boolean                @default(false)
   ownerId   String                 @db.Uuid @map("owner")
   owner     User                   @relation(references: [id], onDelete: Cascade, fields: [ownerId], map: "playlist_owner_fkey")
   tracks    Track[]

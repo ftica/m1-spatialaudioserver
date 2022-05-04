@@ -1,9 +1,9 @@
 import { AccessToken, Role, User } from '@prisma/client';
-import { Context } from 'koa';
+import db from '../../koa/db';
 import { addSeconds, now } from '../util/time';
-import encryptionService, { EncryptionService } from './encryption-service';
-import jwtService, { JwtService, Token } from './jwt-service';
-import userService, { UserService } from './user-service';
+import encryptionService from './encryption-service';
+import jwtService, { Token } from './jwt-service';
+import userService from './user-service';
 
 export type UserLoginInput = { email: string, password: string };
 export type UserRegisterInput = { username: string, email: string, password: string };
@@ -11,23 +11,17 @@ export type UserInfo = { username: string, role: string };
 export type TokenData = AccessToken & UserInfo;
 
 export class AuthService {
-  constructor(
-    private readonly encryptionService: EncryptionService,
-    private readonly jwtService: JwtService,
-    private readonly userService: UserService
-  ) { }
-
   static readonly expiresInSeconds = 60 * 60 * 2;
 
-  private async getOrCreateToken(ctx: Context, user: User): Promise<Token> {
-    let token: AccessToken = await ctx.prisma.accessToken.findUnique({ where: { id: undefined, userId: user.id } });
+  private async getOrCreateToken(user: User): Promise<Token> {
+    let token: AccessToken = await db.accessToken.findUnique({ where: { id: undefined, userId: user.id } });
 
     if (token && token.validUntil < now()) {
-      await ctx.prisma.accessToken.delete({ where: { id: token.id } });
+      await db.accessToken.delete({ where: { id: token.id } });
       token = null;
     }
     if (!token) {
-      token = await ctx.prisma.accessToken.create({ data: { userId: user.id, validUntil: addSeconds(now(), AuthService.expiresInSeconds) } });
+      token = await db.accessToken.create({ data: { userId: user.id, validUntil: addSeconds(now(), AuthService.expiresInSeconds) } });
     }
 
     return {
@@ -39,33 +33,33 @@ export class AuthService {
     };
   }
 
-  async login(ctx: Context, input: UserLoginInput): Promise<string> {
-    const user: User = await this.userService.findByEmail(ctx, input.email);
+  async login(input: UserLoginInput): Promise<string> {
+    const user: User = await userService.findByEmail(input.email);
     if (!user) return null;
 
-    const passwordCorrect: boolean = await this.encryptionService.verifyPassword(input.password, user.password);
+    const passwordCorrect: boolean = await encryptionService.verifyPassword(input.password, user.password);
     if (!passwordCorrect) {
       console.log(`${now()} Failed login for user ${user.username}#${user.id}`);
       return null;
     }
 
-    const token: Token = await this.getOrCreateToken(ctx, user);
-    return await this.jwtService.sign(token);
+    const token: Token = await this.getOrCreateToken(user);
+    return await jwtService.sign(token);
   }
 
-  async register(ctx: Context, input: UserRegisterInput): Promise<User> {
-    return await this.userService.createOne(ctx, {
+  async register(input: UserRegisterInput): Promise<User> {
+    return await userService.createOne({
       id: undefined,
       lastSeen: undefined,
       username: input.username,
       email: input.email,
-      password: await this.encryptionService.digest(input.password),
+      password: await encryptionService.digest(input.password),
       role: Role.USER
     });
   }
 }
 
-export default new AuthService(encryptionService, jwtService, userService);
+export default new AuthService();
 
 // // import { verifyPassword, getDigest, fromPasswordString } from '../../auth/auth-utils';
 // import { AccessToken, PrismaClient, Role, User } from '@prisma/client';
@@ -111,7 +105,7 @@ export default new AuthService(encryptionService, jwtService, userService);
 //   }
 
 //   private async createToken(ctx: Context, user: User): Promise<RequestToken> {
-//     return await ctx.prisma.accessToken
+//     return await db.accessToken
 //       .create({
 //         data: { validUntil: this.validUntil, userId: user.id },
 //         include: { user: { select: { username: true, role: true } } }
@@ -120,7 +114,7 @@ export default new AuthService(encryptionService, jwtService, userService);
 //   }
 
 //   public async login(ctx: Context, input: UserLoginInput): Promise<RequestToken> {
-//     const user: User = await ctx.prisma.user.findUnique({ where: { username: input.username } });
+//     const user: User = await db.user.findUnique({ where: { username: input.username } });
 //     // const passwordCorrect: boolean = await verifyPassword(input.password, fromPasswordString(user.password));
 //     const passwordCorrect: boolean = await this.encryption
 //       .then(service => service.verifyPassword(input.password, service.passwordObject(user.password)));
@@ -146,7 +140,7 @@ export default new AuthService(encryptionService, jwtService, userService);
 //     new Date(Date.now() + (60 * 60));
 
 //   const createToken = async (ctx: Context, user: User): Promise<RequestToken> =>
-//     await ctx.prisma.accessToken
+//     await db.accessToken
 //       .create({
 //         data: { validUntil: getValidUntil(), userId: user.id },
 //         include: { user: { select: { username: true, role: true } } }
@@ -160,7 +154,7 @@ export default new AuthService(encryptionService, jwtService, userService);
 //       }));
 
 //   export async function login(ctx: Context, input: UserLoginInput): Promise<string> {
-//     const user: User = await ctx.prisma.user.findUnique({ where: { username: input.username } });
+//     const user: User = await db.user.findUnique({ where: { username: input.username } });
 //     const correctPassword = await verifyPassword(input.password, fromPasswordString(user.password));
 
 //     if (!correctPassword) {
@@ -174,7 +168,7 @@ export default new AuthService(encryptionService, jwtService, userService);
 //   }
 
 //   export async function register(ctx: Context, input: UserRegisterInput): Promise<User> {
-//     return await ctx.prisma.user.create({
+//     return await db.user.create({
 //       data: {
 //         username: input.username,
 //         password: await getDigest(input.password),

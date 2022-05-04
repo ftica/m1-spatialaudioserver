@@ -1,17 +1,13 @@
-import Router from '@koa/router';
-import { Context, DefaultState } from 'koa';
+// import Router from '@koa/router';
+import { Context } from 'koa';
 import Joi from 'joi';
-import userService, { UserService } from '../services/user-service';
+import userService from '../services/user-service';
 import { AuthorizeAdmin, AuthorizeLogged, AuthorizeMe } from '../util/decorators/authorization';
 import { NotFound, Ok } from '../util/decorators/response';
 import { Valid, Validate } from '../util/decorators/validation';
 import { Paginate } from '../util/decorators/request';
 
 export class Users {
-  constructor(
-    protected readonly userService: UserService
-  ) { }
-
   static readonly validUsername = Joi.string().min(4).max(60).required();
   static readonly validUsernameParam = Joi.object({ username: this.validUsername });
   static readonly validPassword = Joi.string().min(8).required();
@@ -19,7 +15,8 @@ export class Users {
   @AuthorizeLogged
   @Ok()
   async profile(ctx: Context) {
-    return this.userService.findById(ctx, ctx.token.userId, {
+    return userService.findById(ctx.token.userId, {
+      id: true,
       username: true,
       email: true,
       role: ctx.admin,
@@ -46,7 +43,7 @@ export class Users {
   @Validate({ params: Users.validUsernameParam })
   @NotFound()
   async findByUsername(ctx: Context) {
-    return await this.userService.findByUsername(ctx, ctx.params.username, {
+    return await userService.findByUsername(ctx.params.username, {
       username: true,
       email: ctx.admin,
       role: ctx.admin,
@@ -57,7 +54,7 @@ export class Users {
           name: true
         },
         where: {
-          public: true
+          isPublic: true
         }
       },
       favorites: ctx.admin && {
@@ -78,7 +75,7 @@ export class Users {
   @Paginate()
   @NotFound()
   async findPlaylistsByUsername(ctx: Context) {
-    return (await this.userService.findByUsername(ctx, ctx.params.username, {
+    return (await userService.findByUsername(ctx.params.username, {
       playlists: {
         skip: ctx.page * ctx.size,
         take: ctx.size,
@@ -95,7 +92,7 @@ export class Users {
   @Paginate()
   @NotFound()
   async findFavoritesByUsername(ctx: Context) {
-    return (await this.userService.findByUsername(ctx, ctx.params.username, {
+    return (await userService.findByUsername(ctx.params.username, {
       favorites: {
         skip: ctx.page * ctx.size,
         take: ctx.size,
@@ -115,7 +112,7 @@ export class Users {
   @Paginate()
   @Ok()
   async getAllPage(ctx: Context): Promise<any[]> {
-    return await this.userService.findPage(ctx, undefined, {
+    return await userService.findPage(ctx.page, ctx.size, undefined, {
       username: true,
       email: true,
       role: true,
@@ -134,7 +131,7 @@ export class Users {
   })
   @Ok(201)
   async create(ctx: Context): Promise<any> {
-    return await this.userService.createOne(ctx, {
+    return await userService.createOne({
       id: undefined,
       lastSeen: undefined,
       username: ctx.request.body.username,
@@ -152,7 +149,7 @@ export class Users {
   @Validate({ params: Users.validUsernameParam })
   @NotFound()
   async deleteByUsername(ctx: Context): Promise<any> {
-    return await this.userService.deleteByUsername(ctx, ctx.params.username);
+    return await userService.deleteByUsername(ctx.params.username);
   }
 
   @AuthorizeAdmin
@@ -166,7 +163,7 @@ export class Users {
   })
   @NotFound()
   async update(ctx: Context) {
-    return await this.userService.updateByUsername(ctx, ctx.params.username, {
+    return await userService.updateByUsername(ctx.params.username, {
       username: ctx.request.body.username,
       email: ctx.request.body.email,
       role: ctx.request.body.role
@@ -177,11 +174,11 @@ export class Users {
     });
   }
 
-  @AuthorizeAdmin
+  @AuthorizeMe
   @Validate({ params: Users.validUsernameParam, body: Users.validUsername })
   @NotFound()
   async updateUsername(ctx: Context) {
-    return await this.userService.updateByUsername(ctx, ctx.params.username, {
+    return await userService.updateByUsername(ctx.params.username, {
       username: ctx.request.body
     }, {
       username: true,
@@ -194,7 +191,7 @@ export class Users {
   @Validate({ params: Users.validUsernameParam, body: Valid.email.required() })
   @NotFound()
   async updateEmail(ctx: Context) {
-    return await this.userService.updateByUsername(ctx, ctx.params.username, {
+    return await userService.updateByUsername(ctx.params.username, {
       email: ctx.request.body
     }, {
       username: true,
@@ -207,7 +204,7 @@ export class Users {
   @Validate({ params: Users.validUsernameParam, body: Valid.role.required() })
   @NotFound()
   async updateRole(ctx: Context) {
-    return await this.userService.updateByUsername(ctx, ctx.params.username, {
+    return await userService.updateByUsername(ctx.params.username, {
       role: ctx.request.body
     }, {
       username: true,
@@ -217,18 +214,18 @@ export class Users {
   }
 }
 
-const users = new Users(userService);
+export default new Users();
 
-export default new Router<DefaultState, Context>()
-  .get('/', users.getAllPage.bind(users))
-  .get('/me', users.profile.bind(users))
-  .get('/:username', users.findByUsername.bind(users))
-  .get('/:username/tracks', users.findPlaylistsByUsername.bind(users))
-  .get('/:username/playlists', users.findPlaylistsByUsername.bind(users))
-  .get('/:username/favorites', users.findFavoritesByUsername.bind(users))
-  .post('/', users.create.bind(users))
-  .del('/:username', users.deleteByUsername.bind(users))
-  .put('/:username', users.update.bind(users))
-  .patch('/:username/username', users.updateUsername.bind(users))
-  .patch('/:username/email', users.updateEmail.bind(users))
-  .patch('/:username/role', users.updateRole.bind(users));
+// export default new Router<DefaultState, Context>()
+//   .get('/', users.getAllPage.bind(users))
+//   .get('/me', users.profile.bind(users))
+//   .get('/:username', users.findByUsername.bind(users))
+//   .get('/:username/tracks', users.findPlaylistsByUsername.bind(users))
+//   .get('/:username/playlists', users.findPlaylistsByUsername.bind(users))
+//   .get('/:username/favorites', users.findFavoritesByUsername.bind(users))
+//   .post('/', users.create.bind(users))
+//   .del('/:username', users.deleteByUsername.bind(users))
+//   .put('/:username', users.update.bind(users))
+//   .patch('/:username/username', users.updateUsername.bind(users))
+//   .patch('/:username/email', users.updateEmail.bind(users))
+//   .patch('/:username/role', users.updateRole.bind(users));
