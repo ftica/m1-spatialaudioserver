@@ -7,7 +7,6 @@ import bodyParser from 'koa-bodyparser';
 import serve from 'koa-static';
 
 import errors from './middleware/errors';
-// import database from './database';
 import tokenParser from './middleware/token-parser';
 // import multipartParser from './middleware/multipart-parser';
 
@@ -33,7 +32,6 @@ export default new Koa({ proxy: true })
   .use(logger())
   .use(errors())
   .use(cors())
-  // .use(database())
   .use(tokenParser())
   // .use(multipartParser())
   .use(bodyParser({
