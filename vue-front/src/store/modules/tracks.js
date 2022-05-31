@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import * as tus from 'tus-js-client';
 
 import FetchHelper from '../utils';
 
@@ -49,59 +48,72 @@ const actions = {
    * @param  {Function} dispatch Dispatch an action. options can have `root: true` that allows to dispatch root actions in namespaced modules
    * @param  {Object}   data     File from new FormData()
    */
-  async upload({ commit, dispatch }, data) {
-    await new Promise((resolve, reject) => {
-      console.log('Uploading: ', data.file);
+  async upload({ dispatch }, data) {
+    console.log('Uploading: ', data.file);
 
-      const upload = new tus.Upload(data.file, {
-        endpoint: new FetchHelper('tracks/upload').url.href,
-        retryDelays: [0/* , 1000, 3000, 5000, 10000, 20000 */],
-        chunkSize: 8 * 1000000,
-        metadata: {
-          filename: data.file.name,
-          filetype: data.file.type,
-          input_format: data?.inputFormat,
-          output_format: data?.outputFormat,
-        },
-        headers: {
-          Authorization: localStorage.getItem('token')
-            ? `Bearer ${localStorage.getItem('token')}`
-            : undefined,
-        },
-        // NOTE: tus-js using xhr :( and this hook is used for enabling credentials in preflight requests
-        // onBeforeRequest(req) {
-        //   const xhr = req.getUnderlyingObject();
-        //   xhr.withCredentials = true;
-        // },
-        onError(err) {
-          try {
-            const response = err.originalResponse.getBody();
-            const error = JSON.parse(response);
+    const formData = new FormData();
+    formData.set('track', data.file);
 
-            dispatch('toast', { error }, { root: true });
-            resolve();
-          } catch (e) {
-            console.error(e);
-            dispatch('toast', { error: { ...e } }, { root: true });
-            reject(err);
-          }
-        },
-        onProgress(bytesUploaded, bytesTotal) {
-          const percentage = (bytesUploaded / bytesTotal) * 100;
-          commit('loader', { enable: true, description: `Uploading Progress: ${percentage.toFixed(2)}%` }, { root: true });
-
-          if (percentage === 100) {
-            commit('loader', { enable: true, description: 'Creating Dash.js manifest' }, { root: true });
-          }
-        },
-        onSuccess() {
-          dispatch('toast', { event: { message: 'File upload successfully!' } }, { root: true });
-          resolve();
-        },
-      });
-
-      upload.start();
+    const uploadResponse = await fetch('http://localhost:3000/api/tracks/upload', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
     });
+    console.log(uploadResponse);
+
+    // await new Promise((resolve, reject) => {
+
+    // const upload = new tus.Upload(data.file, {
+    //   endpoint: new FetchHelper('tracks/upload').url.href,
+    //   retryDelays: [0/* , 1000, 3000, 5000, 10000, 20000 */],
+    //   chunkSize: 8 * 1000000,
+    //   metadata: {
+    //     filename: data.file.name,
+    //     filetype: data.file.type,
+    //     input_format: data?.inputFormat,
+    //     output_format: data?.outputFormat,
+    //   },
+    //   headers: {
+    //     Authorization: localStorage.getItem('token')
+    //       ? `Bearer ${localStorage.getItem('token')}`
+    //       : undefined,
+    //   },
+    //   // NOTE: tus-js using xhr :( and this hook is used for enabling credentials in preflight requests
+    //   // onBeforeRequest(req) {
+    //   //   const xhr = req.getUnderlyingObject();
+    //   //   xhr.withCredentials = true;
+    //   // },
+    //   onError(err) {
+    //     try {
+    //       const response = err.originalResponse.getBody();
+    //       const error = JSON.parse(response);
+
+    //       dispatch('toast', { error }, { root: true });
+    //       resolve();
+    //     } catch (e) {
+    //       console.error(e);
+    //       dispatch('toast', { error: { ...e } }, { root: true });
+    //       reject(err);
+    //     }
+    //   },
+    //   onProgress(bytesUploaded, bytesTotal) {
+    //     const percentage = (bytesUploaded / bytesTotal) * 100;
+    //     commit('loader', { enable: true, description: `Uploading Progress: ${percentage.toFixed(2)}%` }, { root: true });
+
+    //     if (percentage === 100) {
+    //       commit('loader', { enable: true, description: 'Creating Dash.js manifest' }, { root: true });
+    //     }
+    //   },
+    //   onSuccess() {
+    //     dispatch('toast', { event: { message: 'File upload successfully!' } }, { root: true });
+    //     resolve();
+    //   },
+    // });
+
+    // upload.start();
+    // });
 
     // NOTE: flush local state after upload event; should be removed in the feature when we start to have a lot of sound files (more than 50 or maybe 100)
     await dispatch('getAll');

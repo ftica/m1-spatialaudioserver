@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve --port 3001",
+    "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
@@ -15,7 +15,7 @@
     "lodash": "^4.17.21",
     "luxon": "^2.3.1",
     "mach1spatial-decode": "git+https://github.com/snyypi/NodeJS-Mach1Decode.git",
-    "tus-js-client": "^2.3.1",
+    "tus-js-client": "^2.3.2",
     "uuid": "^8.3.2",
     "vue": "^3.2.31",
     "vue-router": "^4.0.13",

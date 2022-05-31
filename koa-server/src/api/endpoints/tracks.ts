@@ -44,7 +44,7 @@ export class Tracks {
   //     position: Valid.uint
   //   })
   // })
-  // @Ok(201)
+  @Ok(201)
   async upload(ctx: Context) {
     return trackService.upload(ctx, {
       name: ctx.request.body.name,
