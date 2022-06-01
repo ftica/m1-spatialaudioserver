@@ -1,6 +1,4 @@
 import _ from 'lodash';
-// eslint-disable-next-line
-import { Store } from './index';
 
 export default class FetchHelper {
   #defaultUrl = new URL(process.env.VUE_APP_API_URL)
@@ -9,20 +7,19 @@ export default class FetchHelper {
 
   #path = ''
 
-  constructor(url) {
+  constructor(url, options = {}) {
     this.options = {
       mode: 'cors',
       referrerPolicy: 'origin-when-cross-origin',
-      credentials: 'include',
+      credentials: 'omit',
+      ...options,
     };
 
     if (url && _.isString(url)) {
       if (url && url !== this.#defaultUrl.origin) {
         try {
-          console.log('here');
           this.#defaultUrl = new URL(url);
         } catch (e) {
-          // if (e.message !== "Failed to construct 'URL': Invalid URL") throw e;
           this.#defaultPath = _.startsWith('/') ? `${this.#defaultPath}${url}` : `${this.#defaultPath}/${url}`;
         }
       }
@@ -71,43 +68,60 @@ export default class FetchHelper {
 
   async #request({ itemId, method, body }) {
     this.path = itemId;
-    this.options.method = method ?? 'GET';
-    if (_.isObject(body) && !(body instanceof FormData)) {
-      _.set(this.options, 'headers.Accept', 'application/json');
-      _.set(this.options, 'headers.Content-Type', 'application/json');
 
-      try {
-        this.options.body = JSON.stringify(body);
-      } catch (e) {
-        throw new Error('Broken request payload');
-      }
-    } else {
-      this.options.body = body;
-    }
+    const response = await fetch(this.url, {
+      ...this.options,
+      method,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': _.isObject(body) ? 'application/json' : 'text/plain',
+      },
+      body: _.isObject(body) ? JSON.stringify(body) : body,
+    });
 
-    // TODO: For next iteration need to create full response method with error handler
+    if (response.status === 204) return null;
+
     try {
-      const response = await fetch(this.url, this.options);
-      if (response.status === 204) return null;
-      try {
-        if (response.ok) return await response.json();
+      const payload = response.headers.get('Content-Type')?.includes('text/plain') ? await response.text() : await response.json();
+      if (response.ok) return payload;
 
-        // FIXME: need review
-        const error = await response.json();
-        Store.dispatch('toast', { error });
-        throw error;
-      } catch (e) {
-        if (response.ok) throw new Error('Wrong JSON response');
-        throw e;
-      }
-    } catch (e) {
-      if (e.message === 'Wrong JSON response') {
-        // NOTE: just skip for this
-      }
+      throw payload;
+    } catch (err) {
+      console.log(err);
 
-      Store.dispatch('toast', { error: { ...e } });
-
-      throw new Error('API error response');
+      throw err;
     }
+
+    // this.path = itemId;
+    // this.options.method = method ?? 'GET';
+    // _.set(this.options, 'headers.Accept', 'text/plain, application/json');
+    // console.log('Checking token...');
+    // if (localStorage.getItem('token')) {
+    //   console.log('exists');
+    //   _.set(this.options, 'Authorization', `Bearer ${localStorage.getItem('token')}`);
+    // } else {
+    //   console.log('undefined');
+    // }
+
+    // if (_.isObject(body) && !(body instanceof FormData)) {
+    //   _.set(this.options, 'headers.Content-Type', 'application/json');
+
+    //   try {
+    //     this.options.body = JSON.stringify(body);
+    //   } catch (e) {
+    //     throw new Error('Broken request payload');
+    //   }
+    // } else {
+    //   this.options.body = body;
+    // }
+
+    // const response = await fetch(this.url, this.options);
+    // if (response.status === 204) return null;
+
+    // const payload = (response.type === 'text/plain') ? await response.text() : await response.json();
+    // if (response.ok) return payload;
+
+    // throw payload;
+  // }
   }
 }

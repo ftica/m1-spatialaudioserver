@@ -1,45 +1,43 @@
 import Koa from 'koa';
+import path from 'path';
 
-import middleware from './middleware';
-import router from '../api';
-import { PrismaClient } from '@prisma/client';
-import { Token } from '../api/services/jwt-service';
+import logger from 'koa-logger';
+import cors from '@koa/cors';
+import bodyParser from 'koa-bodyparser';
+import serve from 'koa-static';
+
+import errors from './middleware/errors';
+import tokenParser from './middleware/token-parser';
+// import multipartParser from './middleware/multipart-parser';
+
+import api from '../api';
 
 declare module 'koa' {
   // eslint-disable-next-line no-unused-vars
   interface Context {
-    prisma: PrismaClient;
     request: Koa.Request;
     params: any;
-    token?: Token;
-    admin: boolean;
-    page?: number;
-    size?: number;
   }
 }
 
-// if (process.env.NODE_ENV === 'development') {
-  router.get('/', ctx => {
-    ctx.body = router.stack
+if (process.env.NODE_ENV === 'development') {
+  api.get('/', ctx => {
+    ctx.body = api.stack
       .filter(route => route.opts.end)
       .map(route => `${route.methods} ${route.path}`);
   });
-// }
+}
 
-
-
-const app = new Koa();
-
-app.proxy = true;
-app.keys = [
-  'mach1-cookie-key-1',
-  'mach1-cookie-key-2',
-  'mach1-cookie-key-3'
-];
-
-app.use(middleware());
-
-app.use(router.routes());
-app.use(router.allowedMethods());
-
-export default app;
+export default new Koa({ proxy: true })
+  .use(logger())
+  .use(errors())
+  .use(cors())
+  .use(tokenParser())
+  // .use(multipartParser())
+  .use(bodyParser({
+    enableTypes: ['json', 'text', 'form', 'multipart-form'],
+    onerror: (err, ctx) => ctx.throw(400, err.message)
+  }))
+  .use(serve(path.join(__dirname, '../../public')))
+  .use(api.routes())
+  .use(api.allowedMethods());

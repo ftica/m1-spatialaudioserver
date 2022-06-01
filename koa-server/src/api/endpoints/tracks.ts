@@ -1,56 +1,75 @@
-import Router from '@koa/router';
-import { Context, DefaultState } from 'koa';
-import trackService, { TrackService } from '../services/track-service';
-import { Valid } from '../util/valid';
+import { Context } from 'koa';
+import trackService from '../services/track-service';
 import Joi from 'joi';
-import { AuthorizeAdmin, AuthorizeLogged, NotFound, Ok, Paginate, Validate } from '../util/decorators';
+import { AuthorizeAdmin, AuthorizeLogged } from '../util/decorators/authorization';
+import { Paginate } from '../util/decorators/request';
+import { NotFound, Ok } from '../util/decorators/response';
+import { Valid, Validate } from '../util/decorators/validation';
 
 export class Tracks {
-  constructor(
-    protected readonly trackService: TrackService
-  ) { }
-
   static readonly validName = Joi.string().min(3).max(100).required();
-  static readonly validCreate = Joi.object({
-    name: this.validName,
-    position: Valid.uint.required(),
-    playlistId: Valid.id.required()
-  });
 
   @AuthorizeAdmin
   @Paginate()
-  @Ok
-  async getAllPage(ctx: Context): Promise<any[]> {
-    return await this.trackService.findPage(ctx, ctx.page!!, ctx.size!!, undefined, {
+  @Ok()
+  async getAll(ctx: Context): Promise<any[]> {
+    return await trackService.findMany(undefined, {
       id: true,
       name: true,
+      position: true,
       playlist: {
         select: {
           id: true,
           name: true,
-          public: true,
+          isPublic: true,
           owner: {
-            id: true,
-            username: true
+            select: {
+              id: true,
+              username: true
+            }
           }
         }
       }
+    }, {
+      position: 'asc'
     });
   }
 
-  // @AuthorizeRole(Role.ADMIN, Role.USER)
-  // @Validate(null, Tracks.validCreate)
-  // override async createOne(ctx: Context) {
-  //   return super.createOne(ctx);
-  // }
+  @AuthorizeLogged
+  // @Validator(400, 'No files provided', ctx => ctx.files !== null)
+  // @Validate({
+  //   body: Joi.object({
+  //     name: Tracks.validName,
+  //     playlist: Valid.id,
+  //     position: Valid.uint
+  //   })
+  // })
+  @Ok(201)
+  async upload(ctx: Context) {
+    return trackService.upload(ctx, {
+      name: ctx.request.body.name,
+      playlistId: ctx.request.body.playlist,
+      position: ctx.request.body.position
+    });
+  }
+
+  @AuthorizeAdmin
+  @Validate({ params: Valid.idParam })
+  @NotFound()
+  async delete(ctx: Context) {
+    return await trackService.deleteById(ctx.params.id, {
+      id: true,
+      name: true
+    });
+  }
 
   @AuthorizeLogged
   @Validate({ params: Valid.idParam.required(), body: Tracks.validName })
   @NotFound()
   async updateName(ctx: Context) {
-    return await this.trackService.updateOne(ctx, {
+    return await trackService.updateOne({
       id: ctx.params.id,
-      playlist: ctx.admin ? undefined : { ownerId: ctx.token!!.userId }
+      playlist: ctx.admin ? undefined : { ownerId: ctx.token.userId }
     }, {
       name: ctx.request.body
     });
@@ -71,15 +90,4 @@ export class Tracks {
   // }
 }
 
-const tracks = new Tracks(trackService);
-
-export default new Router<DefaultState, Context>()
-  .get('/', tracks.getAllPage.bind(tracks))
-
-  // .get('/count', tracks.count.bind(tracks))
-  // .get('/:id', tracks.getById.bind(tracks))
-  // .post('/', tracks.create.bind(tracks))
-  // .del('/:id', tracks.del.bind(tracks))
-  .patch('/:id/name', tracks.updateName.bind(tracks));
-// .patch('/:id/position', tracks.updatePosition.bind(tracks))
-// .patch('/:id/playlist', tracks.updatePlaylist.bind(tracks));
+export default new Tracks();

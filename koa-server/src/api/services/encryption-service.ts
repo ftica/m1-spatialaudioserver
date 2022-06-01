@@ -1,14 +1,6 @@
 import { promisify } from 'util';
 import crypto, { BinaryLike, Encoding } from 'crypto';
 
-export type EncryptionConfig = {
-  algorithm: string,
-  iterations: number,
-  hashLength: number,
-  saltBytes: number,
-  encoding: Encoding
-};
-
 export type PasswordObject = {
   algorithm: string,
   iterations: number,
@@ -18,44 +10,28 @@ export type PasswordObject = {
 };
 
 export class EncryptionService {
-  private static readonly DEFAULT_CONFIG: EncryptionConfig = {
-    algorithm: 'sha256',
-    iterations: 10000,
-    hashLength: 32,
-    saltBytes: 16,
-    encoding: 'base64'
-  };
-
   private static readonly randomBytes: (size: number) => Promise<Buffer> =
     promisify(crypto.randomBytes);
 
   private static readonly pbkdf2: (password: BinaryLike, salt: BinaryLike, iterations: number, keyLength: number, digest: string) => Promise<Buffer> =
     promisify(crypto.pbkdf2);
 
-  private readonly config: EncryptionConfig;
-
   constructor(
-    config?: EncryptionConfig
-  ) {
-    this.config = config ?? {
-      algorithm: process.env.PASS_HASH_ALGORITHM || EncryptionService.DEFAULT_CONFIG.algorithm,
-      iterations: process.env.PASS_HASH_ITERATIONS ? parseInt(process.env.PASS_HASH_ITERATIONS) : EncryptionService.DEFAULT_CONFIG.iterations,
-      hashLength: process.env.PASS_HASH_LENGTH ? parseInt(process.env.PASS_HASH_LENGTH) : EncryptionService.DEFAULT_CONFIG.hashLength,
-      saltBytes: process.env.PASS_SALT_BYTES ? parseInt(process.env.PASS_SALT_BYTES) : EncryptionService.DEFAULT_CONFIG.saltBytes,
-      encoding: EncryptionService.DEFAULT_CONFIG.encoding
-    };
-  }
+    private readonly algorithm = process.env.PASS_HASH_ALGORITHM || 'sha256',
+    private readonly iterations = parseInt(process.env.PASS_HASH_ITERATIONS) || 10000,
+    private readonly hashLength = parseInt(process.env.PASS_HASH_LENGTH) || 32,
+    private readonly saltBytes = parseInt(process.env.PASS_SALT_BYTES) || 16,
+    private readonly encoding = 'base64' as Encoding
+  ) {}
 
   passwordString(algorithm: string, iterations: number, length: number, hash: string, salt: string): string {
     return `${algorithm}:${iterations}:${length}:${hash}:${salt}`;
   }
 
-  passwordObject(password: string): PasswordObject | null {
+  passwordObject(password: string): PasswordObject {
     const parts = password.split(':');
 
-    if (parts.length !== 5) {
-      return null;
-    }
+    if (parts.length !== 5) return null;
 
     return {
       algorithm: parts[0],
@@ -68,23 +44,23 @@ export class EncryptionService {
 
   async digest(input: string): Promise<string> {
     const salt: string = await EncryptionService
-      .randomBytes(this.config.saltBytes)
-      .then(bytes => bytes.toString(this.config.encoding));
+      .randomBytes(this.saltBytes)
+      .then(bytes => bytes.toString(this.encoding));
     const hash = await EncryptionService
-      .pbkdf2(input, salt, this.config.iterations, this.config.hashLength, this.config.algorithm)
-      .then(bytes => bytes.toString(this.config.encoding));
+      .pbkdf2(input, salt, this.iterations, this.hashLength, this.algorithm)
+      .then(bytes => bytes.toString(this.encoding));
 
-    return this.passwordString(this.config.algorithm, this.config.iterations, this.config.hashLength, hash, salt);
+    return this.passwordString(this.algorithm, this.iterations, this.hashLength, hash, salt);
   }
 
   async verifyPassword(input: string, savedPassword: string): Promise<boolean> {
     return await this.verifyPasswordObject(input, this.passwordObject(savedPassword));
   }
 
-  private async verifyPasswordObject(input: string, savedPassword: PasswordObject | null): Promise<boolean> {
-    return savedPassword != null && await EncryptionService
+  private async verifyPasswordObject(input: string, savedPassword: PasswordObject): Promise<boolean> {
+    return await EncryptionService
       .pbkdf2(input, savedPassword.salt, savedPassword.iterations, savedPassword.length, savedPassword.algorithm)
-      .then(bytes => bytes.toString(this.config.encoding))
+      .then(bytes => bytes.toString(this.encoding))
       .then(newHash => newHash === savedPassword.hash);
   }
 }

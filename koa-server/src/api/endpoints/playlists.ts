@@ -1,49 +1,184 @@
-import Router from '@koa/router';
-import { Context, DefaultState } from 'koa';
+import { Context } from 'koa';
 import Joi from 'joi';
-import { Valid } from '../util/valid';
-import { AuthorizeLogged, NotFound, Ok, Paginate, Validate } from '../util/decorators';
-import playlistService, { PlaylistService } from '../services/playlist-service';
+import playlistService from '../services/playlist-service';
+import { AuthorizeAdmin, AuthorizeLogged } from '../util/decorators/authorization';
+import { Paginate } from '../util/decorators/request';
+import { NotFound, Ok } from '../util/decorators/response';
+import { Valid, Validate } from '../util/decorators/validation';
 
-class Playlists {
-  constructor(
-    protected readonly playlistService: PlaylistService
-  ) { }
-
+export class Playlists {
   static readonly validName = Joi.string().min(3).max(100).required();
   static readonly validCreate = Joi.object({
     name: this.validName,
-    public: Valid.bool
+    isPublic: Valid.bool
   });
 
   @AuthorizeLogged
+  @Ok()
+  async getSectioned(ctx: Context) {
+    return [
+      {
+        section: 'mine',
+        items: await playlistService.findMany({
+          ownerId: ctx.token.userId
+        }, {
+          id: true,
+          name: true,
+          isPublic: true
+        })
+      }, {
+        section: 'private',
+        items: await playlistService.findMany({
+          isPublic: false,
+          users: { some: { userId: ctx.token.userId } }
+        }, {
+          id: true,
+          name: true,
+          owner: {
+            select: {
+              username: true
+            }
+          }
+        })
+      }, {
+        section: 'public',
+        items: await playlistService.findMany({
+          isPublic: true,
+          ownerId: { not: ctx.token.userId }
+        }, {
+          id: true,
+          name: true,
+          owner: {
+            select: {
+              username: true
+            }
+          }
+        })
+      }
+    ];
+  }
+
+  @AuthorizeLogged
   @Paginate()
-  @Ok
+  @Ok()
   async getAllPage(ctx: Context): Promise<any> {
-    return await this.playlistService.findPage(ctx, parseInt(ctx.query.page as string), parseInt(ctx.query.size as string),
-      ctx.admin ? undefined : { public: true },
+    return await playlistService.findPage(ctx.page, ctx.size,
+      ctx.admin ? undefined : { isPublic: true },
       {
         id: true,
         name: true,
-        public: ctx.admin,
+        isPublic: ctx.admin,
         owner: {
-          username: true
+          select: {
+            username: true
+          }
         }
       }
     );
   }
 
-  // @AuthorizeRole(Role.ADMIN, Role.USER)
-  // @Validate(null, Playlists.validCreate)
-  // @Ok
-  // override async create(ctx: Context) {
-  //   return await this.service.create(ctx, {
-  //     id: undefined,
-  //     name: ctx.request.body.name,
-  //     public: ctx.request.body.public,
-  //     ownerId: ctx.token.userId
-  //   });
-  // }
+  @AuthorizeLogged
+  @Validate({ params: Valid.idParam })
+  @NotFound()
+  async getById(ctx: Context): Promise<any> {
+    return await playlistService.findFirst({
+      id: ctx.params.id,
+      OR: ctx.admin
+        ? undefined
+        : [
+            { isPublic: true },
+            { ownerId: ctx.token.userId },
+            { users: { some: { userId: ctx.token.userId } } }
+          ]
+    }, {
+      id: true,
+      name: true,
+      isPublic: ctx.admin,
+      owner: {
+        select: {
+          username: true
+        }
+      },
+      tracks: {
+        select: {
+          id: true,
+          name: true,
+          position: true
+        }
+      }
+    });
+  }
+
+  @AuthorizeLogged
+  @Validate({
+    body: Joi.object({
+      name: Playlists.validName,
+      isPublic: Valid.bool.default(false)
+    })
+  })
+  @Ok(201)
+  async create(ctx: Context): Promise<any> {
+    return await playlistService.createOne({
+      id: undefined,
+      ownerId: ctx.token.userId,
+      name: ctx.request.body.name,
+      isPublic: ctx.request.body.isPublic
+    }, {
+      id: true,
+      name: true,
+      isPublic: true,
+      owner: {
+        select: {
+          username: true
+        }
+      }
+    });
+  }
+
+  @AuthorizeLogged
+  @Validate({
+    params: Valid.idParam,
+    body: Joi.object({
+      name: Playlists.validName.optional(),
+      isPublic: Valid.bool,
+      owner: Valid.id
+    })
+  })
+  @NotFound()
+  async update(ctx: Context): Promise<any> {
+    return await playlistService.updateById(ctx.params.id, {
+      name: ctx.request.body.name,
+      isPublic: ctx.request.body.isPublic,
+      owner: ctx.request.body.owner
+        ? { where: { username: ctx.request.body.owner } }
+        : undefined
+    }, {
+      id: true,
+      name: true,
+      isPublic: true,
+      owner: {
+        select: {
+          username: true
+        }
+      }
+    });
+  }
+
+  @AuthorizeAdmin
+  @Validate({ params: Valid.idParam })
+  @NotFound()
+  async delete(ctx: Context): Promise<any> {
+    return await playlistService.deleteById(ctx.params.id, {
+      id: true,
+      name: true,
+      isPublic: true,
+      owner: {
+        select: {
+          username: true
+        }
+      }
+    });
+  }
 
   // @AuthorizeRole(Role.ADMIN, Role.USER)
   // @Validate(Valid.idObject, Playlists.validName)
@@ -56,7 +191,7 @@ class Playlists {
   // @Validate(Valid.idObject, Valid.bool)
   // @NotFound()
   // async updatePublic(ctx: Context) {
-  //   return await this.service.update(ctx, ctx.params.id, { public: ctx.request.body === 'true' });
+  //   return await this.service.update(ctx, ctx.params.id, { isPublic: ctx.request.body === 'true' });
   // }
 
   // @AuthorizeRole(Role.ADMIN, Role.USER)
@@ -70,7 +205,7 @@ class Playlists {
   @Validate({ params: Valid.idParam, body: Valid.bool })
   @NotFound()
   async updateFavorite(ctx: Context) {
-    return await this.playlistService.updateOne(ctx, ctx.params.id, { favorite: ctx.request.body === 'true' });
+    return await playlistService.updateOne(ctx.params.id, { favorite: ctx.request.body === 'true' });
   }
 
   // @AuthorizeRole(Role.ADMIN, Role.USER)
@@ -81,7 +216,4 @@ class Playlists {
   // }
 }
 
-const playlists = new Playlists(playlistService);
-
-export default new Router<DefaultState, Context>()
-  .get('/', playlists.getAllPage.bind(playlists));
+export default new Playlists();

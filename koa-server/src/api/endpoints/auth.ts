@@ -1,38 +1,34 @@
-import Router from '@koa/router';
 import Joi from 'joi';
-import { Context, DefaultState } from 'koa';
-import { NotFound, Validate } from '../util/decorators';
+import { Context } from 'koa';
 import authService, { AuthService } from '../services/auth-service';
+import { NotFound } from '../util/decorators/response';
+import { Valid, Validate } from '../util/decorators/validation';
+import { Users } from './users';
 
-class Auth {
-  constructor(
-    private readonly authService: AuthService
-  ) { }
-
-  static readonly validUsername = Joi.string().min(4).max(30).required();
-  static readonly validPassword = Joi.string().min(8).required();
-
+export class Auth {
   static readonly validRegister = Joi.object({
-    username: this.validUsername,
-    password: this.validPassword
+    username: Users.validUsername,
+    email: Valid.email,
+    password: Users.validPassword
   });
 
   static readonly validLogin = Joi.object({
-    username: this.validUsername,
-    password: this.validPassword
+    login: Valid.email,
+    password: Users.validPassword
   });
 
   static readonly validLoginOAuth = Joi.object({
     grant_type: Joi.string(),
-    client_id: this.validUsername,
-    client_secret: this.validPassword
+    client_id: Valid.email,
+    client_secret: Users.validPassword
   });
 
   @Validate({ body: Auth.validRegister })
   @NotFound()
   async register(ctx: Context) {
-    return await this.authService.register(ctx, {
+    return await authService.register({
       username: ctx.request.body.username,
+      email: ctx.request.body.email,
       password: ctx.request.body.password
     });
   }
@@ -40,29 +36,32 @@ class Auth {
   @Validate({ body: Auth.validLogin })
   @NotFound(401)
   async login(ctx: Context) {
-    return await this.authService.login(ctx, {
-      username: ctx.request.body.username,
+    const token = await authService.login({
+      email: ctx.request.body.login,
       password: ctx.request.body.password
     });
+
+    if (!token) return null;
+
+    return { token };
   }
 
   @Validate({ body: Auth.validLoginOAuth })
   @NotFound(401)
   async loginOAuth(ctx: Context) {
+    const token = await authService.login({
+      email: ctx.request.body.client_id,
+      password: ctx.request.body.client_secret
+    });
+
+    if (!token) return null;
+
     return {
-      token_type: 'bearer',
-      access_token: await this.authService.login(ctx, {
-        username: ctx.request.body.client_id,
-        password: ctx.request.body.client_secret
-      }),
-      expires_in: 60 * 60 * 2
+      token_type: 'Bearer',
+      access_token: token,
+      expires_in: AuthService.expiresInSeconds
     };
   }
 }
 
-const auth = new Auth(authService);
-
-export default new Router<DefaultState, Context>()
-  .post('/register', auth.register.bind(auth))
-  .post('/login', auth.login.bind(auth))
-  .post('/login/oauth', auth.loginOAuth.bind(auth));
+export default new Auth();

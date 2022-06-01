@@ -1,11 +1,15 @@
 <template>
   <div class="player">
+    <div class="top-align">
+      <progress name="progress" class="top" min="0" max="100" :value="playback" @click.prevent="playbackUpdate"></progress>
+    </div>
     <div class="music-box">
       <audio ref="player"></audio>
     </div>
     <div class="btn-box">
       <span class="absolute left">
         <i class="material-icons play" :class="{ active: icon === 'pause_arrow' }" @click="play">{{icon}}</i>
+        <span class="name">{{track.name}}</span>
       </span>
       <span class="absolute right">
         <span class="duration">{{currentTime}}</span>
@@ -38,6 +42,7 @@ export default {
       isPlay: false,
       duration: '00:00',
       currentTime: '00:00',
+      playback: 0,
     };
   },
   watch: {
@@ -50,7 +55,7 @@ export default {
     },
   },
   computed: mapState({
-    track: (state) => state.tracks.playing.id,
+    track: (state) => state.tracks.track,
     type: (state) => state.dash.type,
     isActiveStream: (state) => state.dash.isActiveStream,
     icon() {
@@ -59,7 +64,7 @@ export default {
   }),
   methods: {
     ...mapActions('audio', ['updateSource']),
-    ...mapActions('dash', ['start', 'stop']),
+    ...mapActions('dash', ['stop']),
 
     play() {
       if (!this.isActiveStream) return;
@@ -72,6 +77,12 @@ export default {
 
       this.isPlay = !this.$refs.player.paused;
     },
+    playbackUpdate(event) {
+      if (event.target && this.$refs.player && this.$refs.player.currentTime) {
+        const offset = event.offsetX / event.target.getBoundingClientRect().width;
+        this.$refs.player.currentTime = (offset * this.$refs.player.duration);
+      }
+    },
     repeat() {
       this.isRepeat = !this.isRepeat;
       this.$refs.player.loop = this.isRepeat;
@@ -79,6 +90,7 @@ export default {
     timeUpdate() {
       if (this.$refs.player && this.$refs.player.currentTime) {
         this.currentTime = Duration.fromObject({ seconds: this.$refs.player.currentTime }).toFormat('mm:ss');
+        this.playback = (this.$refs.player.currentTime / this.$refs.player.duration) * 100;
       }
     },
   },
@@ -90,6 +102,7 @@ export default {
   beforeUnmount() {
     this.$refs.player.pause();
     this.$refs.player.removeEventListener('timeupdate', this.timeUpdate);
+
     this.stop();
   },
 };
@@ -97,17 +110,22 @@ export default {
 
 <style lang="scss" scoped>
   .player {
-    height: 30px;
+    height: 50px;
     user-select: none;
-    width: 90%;
+    width: 100%;
 
+    .music-box {
+      position: absolute;
+      left: 50%;
+      top: 5px;
+      transform: translateX(-50%);
+    }
     .btn-box {
       position: absolute;
-      top: 5px;
+      top: 20px;
       width: 100%;
       display: flex;
       justify-content: center;
-
       i {
         font-size: 24px;
         color: #72646f;
@@ -128,13 +146,28 @@ export default {
         margin-right: 10px;
       }
     }
+  }
+  progress {
+    width: 100%;
+    cursor: pointer;
 
-    .music-box {
-      // width: 90%;
-      position: absolute;
-      left: 50%;
-      top: 5px;
-      transform: translateX(-50%);
+    &[value] {
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: #323237;
+      color: #72646f;
+      height: 5px;
+      cursor: pointer;
+    }
+    &[value]::-webkit-progress-bar {
+      background-color: #323237;
+      color: #72646f;
+    }
+    &::-webkit-progress-value {
+      background-color: #72646f;
+    }
+    &[value]::-moz-progress-bar {
+      background-color: #72646f;
     }
   }
 
@@ -210,6 +243,15 @@ export default {
     &:after {
       background: #72646f;
       color: #f5e6d7;
+    }
+  }
+  .name {
+    color: #adadaf;
+    margin-left: 10px;
+  }
+  @media screen and (orientation: portrait) {
+    span .name {
+      display: none;
     }
   }
 </style>

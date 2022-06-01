@@ -1,16 +1,15 @@
 <template>
-  <div class="add-user">
-    <FormInput name="nickname" placeholder="Nickname" type="text" v-model="user.nickname"/>
+  <form class="add-user" @submit.prevent="click">
+    <FormInput name="username" placeholder="Username" type="text" v-model="user.username"/>
     <FormInput name="email" placeholder="E-mail" type="text" v-model="user.email"/>
-    <FormInput name="password" placeholder="Password" type="password" v-model="user.password"/>
-    <FormSelect name="users" placeholder="Role" :options="roles" v-model="user.role"/>
-    <FormButton v-if="!userId" title="Add User" icon="add" @click="add()"/>
-    <FormButton v-else title="Save" icon="save" @click="save()"/>
-  </div>
+    <FormInput name="password" placeholder="Password" type="password" autocomplete="new-password" v-model="user.password"/>
+    <FormSelect name="users" placeholder="Role" defaultClass="role" :options="roles" v-model="user.role"/>
+    <FormButton :icon="icon" :title="title" @click="click"/>
+  </form>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+// import { mapActions } from 'vuex';
 
 import FormButton from './Form/Button.vue';
 import FormInput from './Form/Input.vue';
@@ -24,22 +23,27 @@ export default {
     FormSelect,
   },
   props: {
-    userId: String,
+    title: String,
+    icon: String,
+    item: {
+      type: Object,
+      required: false,
+    },
+
+    action: Function,
   },
   data() {
     return {
-      roles: [{ id: 'user', name: 'user' }, { id: 'admin', name: 'admin' }],
-      user: {
-        nickname: '',
-        email: '',
-        role: '',
-        password: '',
-      },
+      roles: [
+        { id: 'USER', name: 'user' },
+        { id: 'ADMIN', name: 'admin' },
+      ],
+      user: {},
       focused: {},
     };
   },
   methods: {
-    ...mapActions('users', ['create', 'update']),
+    // ...mapActions('users', ['create', 'update']),
     select({ target: { name }, type }) {
       if (type === 'focus') {
         this.focused[name] = true;
@@ -47,15 +51,28 @@ export default {
         this.focused[name] = false;
       }
     },
-    add() {
-      this.create(this.user);
+    async click() {
+      const { user } = this;
+      await this.action(user);
     },
-    save() {
-      this.update(this.user);
-    },
+    // add() {
+    //   this.create(this.user);
+    // },
+    // save() {
+    //   this.update(this.user);
+    // },
+  },
+  created() {
+    const { item } = this;
+    if (item && item.lastSeen) {
+      this.user = { ...item };
+    }
   },
 };
 </script>
 
 <style lang="scss" scoped>
+  .role {
+    color: #ffffff;
+  }
 </style>

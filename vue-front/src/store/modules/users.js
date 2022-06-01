@@ -1,12 +1,11 @@
 import _ from 'lodash';
-import { validate as isUuid } from 'uuid';
 
 import FetchHelper from '../utils';
 
 const defaultState = () => ({
   // user: {
   //   id: undefined,
-  //   nickname: undefined,
+  //   username: undefined,
   //   email: undefined,
   //   role: undefined,
   //   lastSeen: undefined,
@@ -19,16 +18,23 @@ const api = new FetchHelper('users');
 const actions = {
   async getAll({ commit }) {
     const users = await api.get();
-    commit('setUsers', _.map(users, (user, index) => ({ number: index + 1, ...user })));
+    commit('setUsers', _.map(users, (user) => ({ ...user })));
+    // commit('setUsers', _.map(users, (user, index) => ({ number: index + 1, ...user })));
   },
   async create({ commit }, data) {
     const user = await api.post(data);
     commit('createUser', user);
   },
-  async remove({ commit }, data) {
-    const id = !isUuid(data) ? _.get(data, 'id') : data;
-    await api.del(id);
-    commit('removeUser', id);
+
+  async update({ commit }, user) {
+    if (!user?.username) return;
+
+    const updatedUser = await api.put(user, { itemId: user.username });
+    commit('updateUser', updatedUser);
+  },
+  async remove({ commit }, username) {
+    await api.del(username);
+    commit('removeUser', username);
   },
 };
 
@@ -45,8 +51,18 @@ const mutations = {
   createUser(store, user) {
     store.items = [...store.items, user];
   },
-  removeUser(store, id) {
-    store.items = _.remove(store.items, (item) => item.id !== id);
+  updateUser(store, user) {
+    const index = _.findIndex(store.items, (item) => item.username === user.username);
+    store.items[index] = user;
+  },
+  updateUserUsername(store, { username }) {
+    const index = _.findIndex(store.items, (item) => item.username === username);
+    const item = store.items[index];
+
+    store.items[index] = { ...item, username };
+  },
+  removeUser(store, username) {
+    store.items = store.items.filter((item) => item.username !== username);
   },
 };
 
