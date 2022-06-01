@@ -16,9 +16,10 @@
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
-    "strictNullChecks": true,
+//    "strictNullChecks": true,
     "outDir": "./build",
-    "target": "es5"
+    "target": "es6",
+    "module": "commonjs"
   },
   "typeAcquisition": {
     "enable": true
@@ -26,5 +27,8 @@
   "include": ["./src/**/*"],
   "exclude": [
     "./dev-repl.ts"
+  ],
+  "lib": [
+    "es2015"
   ]
 }
