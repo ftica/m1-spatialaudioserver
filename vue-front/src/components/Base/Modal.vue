@@ -86,7 +86,7 @@ export default {
   }
 
   .default-mdl-btn {
-    max-width: stretch;
+    max-width: fill-available;
 
     i {
       font-size: 16px;

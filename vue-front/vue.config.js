@@ -7,13 +7,13 @@ module.exports = {
   //     new BrowserSyncPlugin(
   //       // BrowserSync options
   //       {
-  //         // browse to http://localhost:3001/ during development
+  //         // browse to http://localhost:3000/ during development
   //         host: 'localhost',
-  //         port: 3001,
+  //         port: 3000,
   //         // proxy the Webpack Dev Server endpoint
-  //         // (which should be serving on http://localhost:3000/)
+  //         // (which should be serving on http://localhost:3100/)
   //         // through BrowserSync
-  //         proxy: 'http://localhost:3003/',
+  //         proxy: 'http://localhost:8081/',
   //       },
   //       // plugin options
   //       {

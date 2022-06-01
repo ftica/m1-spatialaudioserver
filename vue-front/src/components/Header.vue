@@ -8,7 +8,7 @@
     </div>
     <div style="flex-grow: 1;"></div>
     <router-link v-if="isAuthorized" class="profile link" to="/settings">
-      {{user ? user.username : 'Profile'}}
+      {{user ? user.nickname : 'Profile'}}
     </router-link>
     <UsersAuth/>
     <div class="mobile">
@@ -20,6 +20,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import { mapState } from 'vuex';
 import UsersAuth from './UsersAuth.vue';
 
@@ -29,8 +30,8 @@ export default {
     return { isActive: false };
   },
   computed: mapState({
-    isAdmin: (state) => state.auth.profile?.user?.role === 'ADMIN',
-    isAuthorized: (state) => Boolean(state.auth.profile?.user),
+    isAdmin: (state) => _.get(state, 'auth.profile.user.role') === 'admin',
+    isAuthorized: (state) => _.has(state, 'auth.profile.user.role'),
     user: (state) => state.auth.profile.user,
   }),
   methods: {

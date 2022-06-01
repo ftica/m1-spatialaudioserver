@@ -12,4 +12,6 @@ COPY ./koa-server .
 RUN ["npm", "run", "build"]
 
 EXPOSE 3000
+VOLUME ["/public"]
+
 CMD ["pm2-runtime", "ecosystem.config.js", "--env", "production"]
