@@ -25,7 +25,7 @@ const limits = {
 
 const upload = multer({ storage, limits });
 
-const router = (prefix = undefined) => new Router<DefaultState, Context>({ prefix });
+const router = (prefix: string = undefined) => new Router<DefaultState, Context>({ prefix });
 
 export default router('/api')
   .use('/auth', router()

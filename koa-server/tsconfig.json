@@ -11,14 +11,17 @@
 //    "exactOptionalPropertyTypes": true,
     "experimentalDecorators": true,
     "extendedDiagnostics": true,
+    "forceConsistentCasingInFileNames": true,
     "noEmitOnError": true,
     "noImplicitAny": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
 //    "strictNullChecks": true,
+//    "strict": true,
     "outDir": "./build",
-    "target": "es6",
+    "target": "es2021",
+    "lib": ["es2021"],
     "module": "commonjs"
   },
   "typeAcquisition": {
@@ -28,7 +31,4 @@
   "exclude": [
     "./dev-repl.ts"
   ],
-  "lib": [
-    "es2015"
-  ]
 }
