@@ -7,7 +7,7 @@ export class PlaylistService extends ModelService<Playlist, Prisma.PlaylistDeleg
   override async updateById(id: string, data: any, select?: any): Promise<any> {
     if (data.tracks) {
       const tran = await db.$transaction([
-        ...data.tracks.map((track, index) => trackService.query.update({ where: { id: track }, data: { position: index, playlistId: id } }))
+        ...data.tracks.map((track: string, index: number) => trackService.query.update({ where: { id: track }, data: { position: index, playlistId: id } }))
       ]);
       console.log('tran: ', tran);
       return await this.findById(id, select);
