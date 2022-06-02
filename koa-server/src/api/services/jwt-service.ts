@@ -6,6 +6,9 @@ import jwt, { Secret, SignOptions, VerifyOptions, Jwt } from 'jsonwebtoken';
 export type Payload = { username: string, role: Role }
 export type Token = AccessToken & Payload;
 
+const signJwt: (token: Token, secret: Secret, options?: SignOptions) => string = jwt.sign;
+const verifyToken: (token: string, secret: Secret, options?: VerifyOptions) => Jwt = jwt.verify;
+
 export class JwtService {
   constructor(
     private readonly privateKey: Buffer,
@@ -14,18 +17,12 @@ export class JwtService {
     private readonly signOptions: SignOptions = { algorithm: 'RS256' }
   ) { }
 
-  private static readonly signJwt: (token: Token, secret: Secret, options?: SignOptions) => string =
-    jwt.sign;
-
-  private static readonly verifyToken: (token: string, secret: Secret, options?: VerifyOptions) => Jwt =
-    jwt.verify;
-
   sign(token: Token): string {
-    return JwtService.signJwt(token, this.secret, this.signOptions);
+    return signJwt(token, this.secret, this.signOptions);
   }
 
   verify(token: string): Jwt {
-    return JwtService.verifyToken(token, this.publicKey, { complete: true });
+    return verifyToken(token, this.publicKey, { complete: true });
   }
 }
 

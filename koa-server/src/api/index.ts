@@ -1,31 +1,12 @@
 import { Context, DefaultState } from 'koa';
 import Router from '@koa/router';
-import multer from '@koa/multer';
 
 import auth from './endpoints/auth';
 import users from './endpoints/users';
 import tracks from './endpoints/tracks';
 import playlists from './endpoints/playlists';
-import path from 'path';
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../../public'));
-  },
-  filename: function (req, file, cb) {
-    const type = file.originalname.split('.')[1];
-    cb(null, `${file.fieldname}-${Date.now().toString(16)}.${type}`);
-  }
-});
-
-const limits = {
-  fields: 10, // Number of non-file fields
-  files: 1 // Number of documents
-};
-
-const upload = multer({ storage, limits });
-
-const router = (prefix = undefined) => new Router<DefaultState, Context>({ prefix });
+const router = (prefix?: string) => new Router<DefaultState, Context>({ prefix });
 
 export default router('/api')
   .use('/auth', router()
@@ -53,7 +34,7 @@ export default router('/api')
     .get('/', tracks.getAll.bind(tracks))
     // .get('/:id', tracks.getById.bind(tracks))
     // .post('/', tracks..bind(tracks))
-    .post('/upload', upload.any(), tracks.upload.bind(tracks))
+    .post('/upload', tracks.upload.bind(tracks))
     .del('/:id', tracks.delete.bind(tracks))
     .patch('/:id/name', tracks.updateName.bind(tracks))
     .routes())

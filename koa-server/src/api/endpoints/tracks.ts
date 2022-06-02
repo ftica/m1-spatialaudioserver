@@ -4,7 +4,8 @@ import Joi from 'joi';
 import { AuthorizeAdmin, AuthorizeLogged } from '../util/decorators/authorization';
 import { Paginate } from '../util/decorators/request';
 import { NotFound, Ok } from '../util/decorators/response';
-import { Valid, Validate } from '../util/decorators/validation';
+import { Valid, Validate, Validator } from '../util/decorators/validation';
+import { Uploader } from '../util/decorators/upload';
 
 export class Tracks {
   static readonly validName = Joi.string().min(3).max(100).required();
@@ -36,20 +37,32 @@ export class Tracks {
   }
 
   @AuthorizeLogged
-  // @Validator(400, 'No files provided', ctx => ctx.files !== null)
-  // @Validate({
-  //   body: Joi.object({
-  //     name: Tracks.validName,
-  //     playlist: Valid.id,
-  //     position: Valid.uint
-  //   })
-  // })
+  @Uploader('track', { files: 1 })
+  @Validator(400, 'No file provided', ctx => ctx.file !== null)
+  @Validator(400, 'No file name provided', ctx => ctx.file.originalname?.split('.')?.[0] !== null)
   @Ok(201)
   async upload(ctx: Context) {
-    return trackService.upload(ctx, {
-      name: ctx.request.body.name,
-      playlistId: ctx.request.body.playlist,
-      position: ctx.request.body.position
+    console.log(ctx.file);
+    return await trackService.upload({
+      name: ctx.file.originalname.split('.')[0],
+      filename: ctx.file.filename
+    }, {
+      id: true,
+      name: true,
+      position: true,
+      playlist: {
+        select: {
+          id: true,
+          name: true,
+          isPublic: true,
+          owner: {
+            select: {
+              id: true,
+              username: true
+            }
+          }
+        }
+      }
     });
   }
 
@@ -82,7 +95,7 @@ export class Tracks {
   //   return await this.service.updateById(ctx, ctx.params.id, { position: parseInt(ctx.request.body) });
   // }
 
-  // @AuthorizeRole(Role.ADMIN, Role.USER)
+  // @AuthorizeRole(Role.ADMIN)
   // @Validate(Valid.idObject, Valid.id)
   // @NotFound()
   // async updatePlaylist(ctx: Context) {

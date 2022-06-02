@@ -50,7 +50,7 @@
 <script>
 
 import { mapState, mapActions } from 'vuex';
-import _ from 'lodash';
+// import _ from 'lodash';
 
 import Modal from './Base/Modal.vue';
 import Popup from './Base/Popup.vue';
@@ -80,7 +80,7 @@ export default {
       return this.playlist && this.playlist.id;
     },
     items() {
-      return this.isPlaylist ? _.filter(this.tracks, (track) => this.playlist.tracks.indexOf(track.id) !== -1) : this.tracks;
+      return this.isPlaylist ? this.playlist.tracks : this.tracks;
     },
   },
   methods: { ...mapActions('tracks', ['reload', 'remove', 'select', 'update']) },

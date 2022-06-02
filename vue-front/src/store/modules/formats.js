@@ -89,7 +89,7 @@ const actions = {
         source.connect(context.destination);
         source.buffer = buffer;
 
-        console.log(!_.isNull(state.item.numberOfChannels) && e.item.numberOfChannels !== buffer.numberOfChannels);
+        // console.log(!_.isNull(state.item.numberOfChannels) && e.item.numberOfChannels !== buffer.numberOfChannels);
         if (!_.isNull(state.item.numberOfChannels) && e.item.numberOfChannels !== buffer.numberOfChannels) {
           dispatch('toast', { event: { message: 'The selected tracks have a different number of channels and cannot be uploaded together' } }, { root: true });
         } else {
@@ -105,12 +105,9 @@ const actions = {
 
 const getters = {
   inputFormats(store) {
-    console.log(store.item.numberOfChannels);
+    // console.log(store.item.numberOfChannels);
     // return store.items.filter(({ id }) => id !== store.item.output);
-    return store.items.filter(({ numberOfChannels }) => {
-      console.log(numberOfChannels, store.item.numberOfChannels);
-      return numberOfChannels === store.item.numberOfChannels;
-    });
+    return store.items.filter(({ numberOfChannels }) => numberOfChannels === store.item.numberOfChannels);
   },
   outputFormats(store) {
     return store.items.filter(({ id, type }) => type === 'mach1-output' && id !== store.item.input);

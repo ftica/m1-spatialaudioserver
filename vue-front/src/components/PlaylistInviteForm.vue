@@ -58,19 +58,15 @@ export default {
   methods: {
     ...mapActions('playlists', ['addItemToPlaylist', 'removeItemFromPlaylist']),
     del(itemId) {
-      console.log('this.path', this.path);
-      console.log('itemId', itemId);
-      console.log('this.playlist', this.playlist);
-
       this.removeItemFromPlaylist({
         id: this.playlist.id,
-        [this.path]: this.playlist?.[this.path]?.filter(({ id }) => id !== itemId),
+        payload: { [this.path]: this.playlist?.[this.path]?.filter(({ id }) => id !== itemId) },
       });
     },
     addItem(event) {
       this.addItemToPlaylist({
         id: this.playlist.id,
-        [this.path]: [...this.playlist?.[this.path], event?.target?.value],
+        payload: { tracks: [...this.playlist?.tracks?.map(({ id }) => id), event?.target?.value] },
       });
     },
   },

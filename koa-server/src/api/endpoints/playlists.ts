@@ -72,6 +72,13 @@ export class Playlists {
           select: {
             username: true
           }
+        },
+        tracks: {
+          select: {
+            id: true,
+            name: true
+          },
+          orderBy: { position: 'asc' }
         }
       }
     );
@@ -102,9 +109,9 @@ export class Playlists {
       tracks: {
         select: {
           id: true,
-          name: true,
-          position: true
-        }
+          name: true
+        },
+        orderBy: { position: 'asc' }
       }
     });
   }
@@ -141,7 +148,8 @@ export class Playlists {
     body: Joi.object({
       name: Playlists.validName.optional(),
       isPublic: Valid.bool,
-      owner: Valid.id
+      owner: Valid.id,
+      tracks: Valid.idArray
     })
   })
   @NotFound()
@@ -149,9 +157,8 @@ export class Playlists {
     return await playlistService.updateById(ctx.params.id, {
       name: ctx.request.body.name,
       isPublic: ctx.request.body.isPublic,
-      owner: ctx.request.body.owner
-        ? { where: { username: ctx.request.body.owner } }
-        : undefined
+      ownerId: ctx.request.body.owner,
+      tracks: ctx.request.body.tracks
     }, {
       id: true,
       name: true,
@@ -160,6 +167,14 @@ export class Playlists {
         select: {
           username: true
         }
+      },
+      tracks: {
+        select: {
+          id: true,
+          name: true,
+          position: true
+        },
+        orderBy: { position: 'asc' }
       }
     });
   }

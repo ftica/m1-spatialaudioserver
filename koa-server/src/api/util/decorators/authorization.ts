@@ -21,7 +21,7 @@ export const AuthorizeAdmin =
   Authorize((ctx: Context) => ctx.admin === true);
 
 export const AuthorizeRole = (...roles: Role[]) =>
-  Authorize((ctx: Context) => roles.includes(ctx.token?.role));
+  Authorize((ctx: Context) => ctx.token && roles.includes(ctx.token.role));
 
 export const AuthorizeMe =
   Authorize((ctx: Context) => ctx.admin || (ctx.token && (ctx.token.username === ctx.params.username)));

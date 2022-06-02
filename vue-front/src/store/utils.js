@@ -20,7 +20,7 @@ export default class FetchHelper {
         try {
           this.#defaultUrl = new URL(url);
         } catch (e) {
-          this.#defaultPath = _.startsWith('/') ? `${this.#defaultPath}${url}` : `${this.#defaultPath}/${url}`;
+          this.#defaultPath = url.startsWith('/') ? `${this.#defaultPath}${url}` : `${this.#defaultPath}/${url}`;
         }
       }
     }
@@ -41,7 +41,7 @@ export default class FetchHelper {
       return;
     }
     // TODO: it should be some validation hanlder first
-    this.#path = _.startsWith('/') ? value : `/${value}`;
+    this.#path = value.startsWith('/') ? value : `/${value}`;
   }
 
   get url() {
@@ -57,9 +57,25 @@ export default class FetchHelper {
     return this.#request({ itemId, body, method: 'POST' });
   }
 
+  async upload(path, body) {
+    this.path = path;
+    return fetch(this.url, {
+      method: 'POST',
+      body,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+  }
+
   async put(body, { itemId } = {}) {
-    const id = _.get(body, 'id', itemId);
+    const id = itemId ?? body?.id;
     return this.#request({ itemId: id, body, method: 'PUT' });
+  }
+
+  async patch(body, { itemId } = {}) {
+    const id = itemId ?? body?.id;
+    return this.#request({ itemId: id, body, method: 'PATCH' });
   }
 
   async del(itemId) {
@@ -69,13 +85,19 @@ export default class FetchHelper {
   async #request({ itemId, method, body }) {
     this.path = itemId;
 
+    const headers = {
+      'Content-Type': _.isObject(body) ? 'application/json' : 'text/plain',
+    };
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      headers.Authorization = `Bearer ${localStorage.getItem('token')}`;
+    }
+
     const response = await fetch(this.url, {
       ...this.options,
       method,
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': _.isObject(body) ? 'application/json' : 'text/plain',
-      },
+      headers,
       body: _.isObject(body) ? JSON.stringify(body) : body,
     });
 

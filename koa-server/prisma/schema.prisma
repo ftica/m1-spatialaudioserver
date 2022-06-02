@@ -36,7 +36,7 @@ model AccessToken {
   id         String   @db.Uuid @id @default(uuid())
   validUntil DateTime @map("valid_until")
   userId     String   @db.Uuid @map("user")
-  user       User     @relation(references: [id], onDelete: Cascade, fields: [userId], map: "access_token_user_fkey")
+  user       User     @relation(references: [id], onDelete: Cascade, fields: [userId], map: "fk_access_token_user")
 
   @@map("access_token")
 }
@@ -44,9 +44,10 @@ model AccessToken {
 model Track {
   id         String   @db.Uuid @id @default(uuid())
   name       String
-  position   Int      @default(0)
-  playlistId String   @db.Uuid @map("playlist")
-  playlist   Playlist @relation(references: [id], onDelete: Cascade, fields: [playlistId], map: "track_playlist_fkey")
+  filename   String
+  position   Int?      @default(0)
+  playlistId String?   @db.Uuid @map("playlist")
+  playlist   Playlist? @relation(references: [id], fields: [playlistId], map: "fk_track_playlist")
 
   @@unique([playlistId, position])
   @@map("track")
@@ -57,7 +58,7 @@ model Playlist {
   name      String
   isPublic  Boolean                @default(false)
   ownerId   String                 @db.Uuid @map("owner")
-  owner     User                   @relation(references: [id], onDelete: Cascade, fields: [ownerId], map: "playlist_owner_fkey")
+  owner     User                   @relation(references: [id], onDelete: Cascade, fields: [ownerId], map: "fk_playlist_owner")
   tracks    Track[]
   favorites Favorite[]
   users     PlaylistAcessControl[]
@@ -68,8 +69,8 @@ model Playlist {
 model Favorite {
   userId     String   @db.Uuid @map("user")
   playlistId String   @db.Uuid @map("playlist")
-  user       User     @relation(references: [id], onDelete: Cascade, fields: [userId], map: "favorite_user_fkey")
-  playlist   Playlist @relation(references: [id], onDelete: Cascade, fields: [playlistId], map: "favorite_playlist_fkey")
+  user       User     @relation(references: [id], onDelete: Cascade, fields: [userId], map: "fk_favorite_user")
+  playlist   Playlist @relation(references: [id], onDelete: Cascade, fields: [playlistId], map: "fk_favorite_playlist")
 
   @@id([userId, playlistId])
   @@map("favorite")
@@ -78,8 +79,8 @@ model Favorite {
 model PlaylistAcessControl {
   userId     String   @db.Uuid @map("user")
   playlistId String   @db.Uuid @map("playlist")
-  user       User     @relation(references: [id], onDelete: Cascade, fields: [userId], map: "playlist_access_control_user_fkey")
-  playlist   Playlist @relation(references: [id], onDelete: Cascade, fields: [playlistId], map: "playlist_access_control_playlist_fkey")
+  user       User     @relation(references: [id], onDelete: Cascade, fields: [userId], map: "fk_playlist_access_control_user")
+  playlist   Playlist @relation(references: [id], onDelete: Cascade, fields: [playlistId], map: "fk_playlist_access_control_playlist")
 
   @@id([userId, playlistId])
   @@map("playlist_access_control")

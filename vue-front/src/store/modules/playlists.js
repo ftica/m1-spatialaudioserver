@@ -45,21 +45,21 @@ const actions = {
     commit('removePlaylist', id);
   },
   async removeItemFromPlaylist({ commit }, data) {
-    await api.put(data);
+    await api.put(data.payload, { itemId: data.id });
     if (data?.tracks !== undefined) {
-      commit('updatePlaylistTracks', data);
+      commit('updatePlaylistTracks', data.payload);
     }
     if (data?.permissions !== undefined) {
-      commit('updatePlaylistPermissions', data);
+      commit('updatePlaylistPermissions', data.payload);
     }
   },
   async addItemToPlaylist({ commit }, data) {
-    await api.put(data);
-    if (data?.tracks !== undefined) {
-      commit('updatePlaylistTracks', data);
+    await api.put(data.payload, { itemId: data.id });
+    if (data?.payload?.tracks !== undefined) {
+      commit('updatePlaylistTracks', data.payload);
     }
-    if (data?.permissions !== undefined) {
-      commit('updatePlaylistPermissions', data);
+    if (data?.payload?.permissions !== undefined) {
+      commit('updatePlaylistPermissions', data.payload);
     }
   },
 };

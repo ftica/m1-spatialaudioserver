@@ -4,7 +4,7 @@ import { Context } from 'koa';
 
 const id = Joi.string().uuid();
 const idParam = Joi.object({ id });
-const idArray = Joi.array().items(id).min(0);
+const idArray = Joi.array().items(id).unique().min(0);
 const uint = Joi.number().integer().min(0);
 const bool = Joi.bool();
 const email = Joi.string().email();
