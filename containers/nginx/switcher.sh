@@ -19,13 +19,13 @@ log () {
   local log_prefix="[$(cat /proc/sys/kernel/random/uuid)] INFO:"
   local log_file="/share/sound/logs/$fileName.log"
 
-  echo "$log_prefix $1" &>> $log_file
+  echo "$log_prefix $1" &>> "$log_file"
 }
 
 log "transocder starting at $(date) for file=$fileName; id=$fileId; live=$isLoop"
 
 # trying to find out how many channels are in a selected file
-channels=`ffprobe -i $filePath -show_entries stream=channels -select_streams a:0 -of compact=p=0:nk=1 -v 0`
+channels=$(ffprobe -i "$filePath" -show_entries stream=channels -select_streams a:0 -of compact=p=0:nk=1 -v 0)
 layout='mono' # setting default channel layout
 case $channels in
   2 )
@@ -54,16 +54,16 @@ log "Type of channels layout: $layout"
 
 if [[ "$isLoop" == true ]]; then
   log "starting live stream rtsp"
-  rm -rf /opt/data/dash/$fileId.mpd && touch /opt/data/dash/$fileId.mpd
+  rm -rf "/opt/data/dash/$fileId.mpd" && touch "/opt/data/dash/$fileId.mpd"
 
-  ffmpeg -y -stream_loop -1 -i $filePath -c:a aac -af "channelmap=channel_layout=$channels" -b:a 2048k \
+  ffmpeg -y -stream_loop -1 -i "$filePath" -c:a aac -af "channelmap=channel_layout=$channels" -b:a 2048k \
     -f flv "rtmp://127.0.0.1:1935/live/$fileId" &>> "/share/sound/logs/ffmpeg.live.output"
 else
   log "creating static mpeg-dash manifest for the sound file"
   if [[ ! -d "/share/sound/preload/$fileId" && ! -L "/share/sound/preload/$fileId" ]] ; then
-      mkdir -p -m 777 /share/sound/preload/$fileId
+      mkdir -p -m 777 "/share/sound/preload/$fileId"
 
-      ffmpeg -y -i $filePath -strict -2 -c:a libopus -mapping_family 255 -b:a 2048k -af "channelmap=channel_layout=octagonal" \
+      ffmpeg -y -i "$filePath" -strict -2 -c:a libopus -mapping_family 255 -b:a 2048k -af "channelmap=channel_layout=octagonal" \
         -f dash "/share/sound/preload/$fileId/manifest.mpd" &>> "/share/sound/logs/ffmpeg.output"
   fi
 fi
