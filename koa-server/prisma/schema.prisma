@@ -42,12 +42,13 @@ model AccessToken {
 }
 
 model Track {
-  id         String   @db.Uuid @id @default(uuid())
+  id         String    @db.Uuid @id @default(uuid())
   name       String
-  filename   String
-  position   Int?      @default(0)
+  filename   String    @unique
+  position   Int?
   playlistId String?   @db.Uuid @map("playlist")
   playlist   Playlist? @relation(references: [id], fields: [playlistId], map: "fk_track_playlist")
+  uploaded   Boolean   @default(false)
 
   @@unique([playlistId, position])
   @@map("track")

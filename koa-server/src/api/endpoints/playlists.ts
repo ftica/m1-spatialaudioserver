@@ -126,7 +126,6 @@ export class Playlists {
   @Ok(201)
   async create(ctx: Context): Promise<any> {
     return await playlistService.createOne({
-      id: undefined,
       ownerId: ctx.token.userId,
       name: ctx.request.body.name,
       isPublic: ctx.request.body.isPublic

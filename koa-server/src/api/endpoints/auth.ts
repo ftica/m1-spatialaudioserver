@@ -24,7 +24,7 @@ export class Auth {
   });
 
   @Validate({ body: Auth.validRegister })
-  @NotFound()
+  @NotFound(412)
   async register(ctx: Context) {
     return await authService.register({
       username: ctx.request.body.username,

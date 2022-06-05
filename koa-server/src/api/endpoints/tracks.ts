@@ -6,6 +6,9 @@ import { Paginate } from '../util/decorators/request';
 import { NotFound, Ok } from '../util/decorators/response';
 import { Valid, Validate, Validator } from '../util/decorators/validation';
 import { Uploader } from '../util/decorators/upload';
+import { Stream } from '../util/decorators/stream';
+import path from 'path';
+// import { Serve } from '../util/decorators/serve';
 
 export class Tracks {
   static readonly validName = Joi.string().min(3).max(100).required();
@@ -36,14 +39,21 @@ export class Tracks {
     });
   }
 
-  @AuthorizeLogged
-  @Uploader('track', { files: 1 })
+  // @AuthorizeLogged
+  @Validate({ params: Joi.object({ file: Joi.string().regex(/^(\w+)\.(\w+)$/) }) })
+  // @Authorize() // TODO: authorize users by track access list
+  @Stream(path.join(__dirname, '../../../public/streams'))
+  async stream() {}
+
+  @AuthorizeAdmin
+  @Uploader('/tracks', 'track', { files: 1 })
   @Validator(400, 'No file provided', ctx => ctx.file !== null)
+  @Validator(415, null, ctx => ctx.file.mimetype === 'audio/wav')
   @Validator(400, 'No file name provided', ctx => ctx.file.originalname?.split('.')?.[0] !== null)
   @Ok(201)
   async upload(ctx: Context) {
     console.log(ctx.file);
-    return await trackService.upload({
+    return await trackService.upload(ctx, {
       name: ctx.file.originalname.split('.')[0],
       filename: ctx.file.filename
     }, {

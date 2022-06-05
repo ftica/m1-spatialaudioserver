@@ -132,7 +132,6 @@ export class Users {
   @Ok(201)
   async create(ctx: Context): Promise<any> {
     return await userService.createOne({
-      id: undefined,
       lastSeen: undefined,
       username: ctx.request.body.username,
       email: ctx.request.body.email,

@@ -5,7 +5,10 @@ export default () => async (ctx: Context, next: Next) => {
     await next();
   } catch (error) {
     console.error(error);
+
     ctx.status = error.statusCode ?? 500;
-    ctx.body = error.message ?? 'Unknown error';
+    if (error.message) {
+      ctx.body = error.message;
+    }
   }
 };

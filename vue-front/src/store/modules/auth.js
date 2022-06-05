@@ -25,6 +25,8 @@ const actions = {
     return false;
   },
   async restore({ commit }) {
+    if (!localStorage.getItem('token')) return;
+
     const user = await users.get('me');
     const profile = { user };
 

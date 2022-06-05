@@ -14,7 +14,7 @@ export class AuthService {
   static readonly expiresInSeconds = 60 * 60 * 2;
 
   private async getOrCreateToken(user: User): Promise<Token> {
-    let token: AccessToken = await db.accessToken.findUnique({ where: { id: undefined, userId: user.id } });
+    let token: AccessToken = await db.accessToken.findUnique({ where: { userId: user.id } });
 
     if (token && token.validUntil < now()) {
       await db.accessToken.delete({ where: { id: token.id } });
@@ -49,7 +49,6 @@ export class AuthService {
 
   async register(input: UserRegisterInput): Promise<User> {
     return await userService.createOne({
-      id: undefined,
       lastSeen: undefined,
       username: input.username,
       email: input.email,

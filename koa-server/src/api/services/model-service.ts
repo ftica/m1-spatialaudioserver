@@ -27,11 +27,11 @@ export default class ModelService<Model, QueryType> {
     return await db[this.table].findMany({ skip: page * size, take: size, where, select, orderBy });
   }
 
-  async createOne(data: Model, select?: any): Promise<any> {
+  async createOne(data: Omit<Model, 'id'>, select?: any): Promise<any> {
     return await db[this.table].create({ data, select });
   }
 
-  async createMany(data: Model, select?: any, orderBy?: any): Promise<any[]> {
+  async createMany(data: Omit<Model, 'id'>, select?: any, orderBy?: any): Promise<any[]> {
     return await db[this.table].createMany({ data, select, orderBy });
   }
 

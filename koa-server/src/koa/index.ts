@@ -1,14 +1,13 @@
 import Koa from 'koa';
-import path from 'path';
 
 import logger from 'koa-logger';
 import cors from '@koa/cors';
 import bodyParser from 'koa-bodyparser';
-import serve from 'koa-static';
+// import serve from 'koa-static';
+import compress from 'koa-compress';
 
 import errors from './middleware/errors';
 import tokenParser from './middleware/token-parser';
-// import multipartParser from './middleware/multipart-parser';
 
 import api from '../api';
 
@@ -33,11 +32,17 @@ export default new Koa({ proxy: true })
   .use(errors())
   .use(cors())
   .use(tokenParser())
-  // .use(multipartParser())
   .use(bodyParser({
     enableTypes: ['json', 'text', 'form', 'multipart-form'],
     onerror: (err, ctx) => ctx.throw(400, err.message)
   }))
-  .use(serve(path.join(__dirname, '../../public')))
+  .use(compress({
+    filter: mimeType => mimeType === 'application/x-mpegURL',
+    threshold: 2048,
+    gzip: { flush: require('zlib').constants.Z_SYNC_FLUSH },
+    deflate: { flush: require('zlib').constants.Z_SYNC_FLUSH },
+    br: false // disable brotli
+  }))
+  // .use(serve(publicFolderPath))
   .use(api.routes())
   .use(api.allowedMethods());
