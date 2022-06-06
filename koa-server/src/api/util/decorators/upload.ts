@@ -5,8 +5,6 @@ import { randomBytes } from 'crypto';
 import paths from '../paths';
 
 export function Uploader(folderName: string, fieldName: string, limits?: multer.Options['limits']) {
-  console.log();
-
   const upload = multer({
     limits,
     storage: multer.diskStorage({
