@@ -4,10 +4,9 @@ import { Context } from 'koa';
 import path from 'path';
 import ModelService from './model-service';
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg';
+import paths from '../util/paths';
 
 ffmpeg.setFfmpegPath(ffmpegPath);
-
-export const streamsPath = path.join(__dirname, '../../../public/streams');
 
 export class TrackService extends ModelService<Track, Prisma.TrackDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>> {
   async upload(ctx: Context, data: any, select?: any) {
@@ -19,7 +18,7 @@ export class TrackService extends ModelService<Track, Prisma.TrackDelegate<Prism
         '-hls_list_size 0', // Maxmimum number of playlist entries (0 means all entries/infinite)
         '-f hls' // HLS format
       ])
-      .output(path.join(streamsPath, streamFilename))
+      .output(path.join(paths.streamsFolder, streamFilename))
       .on('end', () => {
         this.updateOne({ filename: ctx.file.filename }, { uploaded: true }, { id: true });
       })

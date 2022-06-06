@@ -2,6 +2,7 @@ import path from 'path';
 import { readFileSync } from 'fs';
 import { AccessToken, Role } from '@prisma/client';
 import jwt, { Secret, SignOptions, VerifyOptions, Jwt } from 'jsonwebtoken';
+import paths from '../util/paths';
 
 export type Payload = { username: string, role: Role }
 export type Token = AccessToken & Payload;
@@ -27,6 +28,6 @@ export class JwtService {
 }
 
 export default new JwtService(
-  readFileSync(path.resolve(__dirname, '../../auth/dev.key')),
-  readFileSync(path.resolve(__dirname, '../../auth/dev.key.pub'))
+  readFileSync(path.join(paths.authFolder, 'dev.key')),
+  readFileSync(path.join(paths.authFolder, 'dev.key.pub'))
 );

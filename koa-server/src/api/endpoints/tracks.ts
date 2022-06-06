@@ -7,7 +7,7 @@ import { NotFound, Ok } from '../util/decorators/response';
 import { Valid, Validate, Validator } from '../util/decorators/validation';
 import { Uploader } from '../util/decorators/upload';
 import { Stream } from '../util/decorators/stream';
-import path from 'path';
+import paths from '../util/paths';
 // import { Serve } from '../util/decorators/serve';
 
 export class Tracks {
@@ -42,7 +42,7 @@ export class Tracks {
   // @AuthorizeLogged
   @Validate({ params: Joi.object({ file: Joi.string().regex(/^(\w+)\.(\w+)$/) }) })
   // @Authorize() // TODO: authorize users by track access list
-  @Stream(path.join(__dirname, '../../../public/streams'))
+  @Stream(paths.streamsFolder)
   async stream() {}
 
   @AuthorizeAdmin

@@ -8,18 +8,18 @@ import { Users } from './users';
 export class Auth {
   static readonly validRegister = Joi.object({
     username: Users.validUsername,
-    email: Valid.email,
+    email: Valid.email.required(),
     password: Users.validPassword
   });
 
   static readonly validLogin = Joi.object({
-    login: Valid.email,
+    login: Valid.email.required(),
     password: Users.validPassword
   });
 
   static readonly validLoginOAuth = Joi.object({
     grant_type: Joi.string(),
-    client_id: Valid.email,
+    client_id: Valid.email.required(),
     client_secret: Users.validPassword
   });
 

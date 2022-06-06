@@ -2,6 +2,7 @@ import { Context } from 'koa';
 import multer from '@koa/multer';
 import path from 'path';
 import { randomBytes } from 'crypto';
+import paths from '../paths';
 
 export function Uploader(folderName: string, fieldName: string, limits?: multer.Options['limits']) {
   console.log();
@@ -10,7 +11,7 @@ export function Uploader(folderName: string, fieldName: string, limits?: multer.
     limits,
     storage: multer.diskStorage({
       destination: (_req, _file, cb) =>
-        cb(null, path.join(__dirname, '../../../../public', folderName)),
+        cb(null, path.join(paths.publicFolder, folderName)),
       filename: (_req, file, cb) =>
         cb(null, `${randomBytes(16).toString('hex')}.${file.originalname.split('.')[1]}`)
     })
