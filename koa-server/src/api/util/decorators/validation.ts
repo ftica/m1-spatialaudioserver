@@ -20,12 +20,12 @@ export const Valid = {
   role
 };
 
-export function Validator(status: number, errorMessage: string, testFun: (ctx: Context) => boolean) {
+export function Validator(status: number, errorMessage: string, testFun: (ctx: Context) => Promise<boolean>) {
   return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (ctx: Context) {
-      if (testFun(ctx)) return await originalMethod.call(this, ctx);
+      if (await testFun(ctx)) return await originalMethod.call(this, ctx);
       ctx.status = status;
       if (errorMessage) ctx.body = errorMessage;
     };

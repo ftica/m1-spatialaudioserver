@@ -13,6 +13,10 @@ export class PlaylistService extends ModelService<Playlist, Prisma.PlaylistDeleg
     }
     return await super.updateById(id, data, select);
   }
+
+  async hasAccess(userId: string, playlistId: string) {
+    return await db.playlistAcessControl.count({ where: { userId, playlistId } }) > 0;
+  }
 }
 
 export default new PlaylistService('playlist');

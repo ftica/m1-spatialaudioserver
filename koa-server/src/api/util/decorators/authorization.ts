@@ -1,12 +1,12 @@
 import { Role } from '@prisma/client';
 import { Context } from 'koa';
 
-export function Authorize(authFun: (ctx: Context) => boolean) {
+export function Authorize(authFun: (ctx: Context) => Promise<boolean>) {
   return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (ctx: Context) {
-      if (authFun(ctx)) return await originalMethod.call(this, ctx);
+      if (await authFun(ctx)) return await originalMethod.call(this, ctx);
       ctx.status = 401;
     };
 
@@ -15,13 +15,13 @@ export function Authorize(authFun: (ctx: Context) => boolean) {
 }
 
 export const AuthorizeLogged =
-  Authorize((ctx: Context) => ctx.token !== undefined);
+  Authorize(async (ctx: Context) => ctx.token !== undefined);
 
 export const AuthorizeAdmin =
-  Authorize((ctx: Context) => ctx.admin === true);
+  Authorize(async (ctx: Context) => ctx.admin === true);
 
 export const AuthorizeRole = (...roles: Role[]) =>
-  Authorize((ctx: Context) => ctx.token && roles.includes(ctx.token.role));
+  Authorize(async (ctx: Context) => ctx.token && roles.includes(ctx.token.role));
 
 export const AuthorizeMe =
-  Authorize((ctx: Context) => ctx.admin || (ctx.token && (ctx.token.username === ctx.params.username)));
+  Authorize(async (ctx: Context) => ctx.admin || (ctx.token && (ctx.token.username === ctx.params.username)));
