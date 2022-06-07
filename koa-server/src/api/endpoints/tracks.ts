@@ -44,7 +44,7 @@ export class Tracks {
   @Authorize(async (ctx) => {
     const filename = ctx.params.file.split('.')[0] + '.wav';
     const track = await trackService.findUnique({ filename }, { playlist: { select: { id: true, isPublic: true, ownerId: true } } });
-    if (!track) ctx.throw(404);
+    if (!track) return ctx.throw(404);
     return ctx.admin ||
             track.playlist?.isPublic ||
             ctx.token.userId === track.playlist?.ownerId ||
