@@ -26,7 +26,7 @@ export default () => async (ctx: Context, next: Next) => {
         ctx.token = token;
         ctx.admin = token?.role === Role.ADMIN;
 
-        userService.updateByUsername(ctx.token.username, { lastSeen: now() }, { id: true });
+        userService.seenNow(ctx.token.username);
       }
     } catch (err) { }
   }

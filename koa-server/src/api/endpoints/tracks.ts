@@ -40,7 +40,7 @@ export class Tracks {
   }
 
   @AuthorizeLogged
-  @Validate({ params: Joi.object({ file: Joi.string().regex(/^(\w+)\.(\w+)$/) }) })
+  @Validate({ params: Joi.object({ file: Joi.string().regex(/^\w+\.\w+$/) }) }) // name.extension
   @Authorize(async (ctx) => {
     const filename = ctx.params.file.split('.')[0] + '.wav';
     const track = await trackService.findUnique({ filename }, { playlist: { select: { id: true, isPublic: true, ownerId: true } } });
@@ -60,7 +60,6 @@ export class Tracks {
   @Validator(400, 'No file name provided', async (ctx) => ctx.file.originalname?.split('.')?.[0] !== null)
   @Ok(201)
   async upload(ctx: Context) {
-    console.log(ctx.file);
     return await trackService.upload(ctx, {
       name: ctx.file.originalname.split('.')[0],
       filename: ctx.file.filename

@@ -24,21 +24,11 @@ model User {
   email     String                 @unique
   role      Role                   @default(USER)
   lastSeen  DateTime?
-  token     AccessToken?
   playlists Playlist[]
   favorites Favorite[]
   shared    PlaylistAcessControl[]
 
   @@map("user")
-}
-
-model AccessToken {
-  id         String   @db.Uuid @id @default(uuid())
-  validUntil DateTime @map("valid_until")
-  userId     String   @db.Uuid @map("user")
-  user       User     @relation(references: [id], onDelete: Cascade, fields: [userId], map: "fk_access_token_user")
-
-  @@map("access_token")
 }
 
 model Track {

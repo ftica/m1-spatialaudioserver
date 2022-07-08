@@ -9,6 +9,7 @@ import playlists from './endpoints/playlists';
 const router = (prefix?: string) => new Router<DefaultState, Context>({ prefix });
 
 export default router('/api')
+
   .use('/auth', router()
     .post('/register', auth.register.bind(auth))
     .post('/login', auth.login.bind(auth))

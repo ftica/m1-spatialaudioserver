@@ -16,4 +16,7 @@ export const addHours = (date: Date, hours: number) => {
   date.setHours(date.getHours() + hours);
   return date;
 };
-export const addDays = (date: Date, days: number) => addHours(date, 24 * days);
+export const addDays = (date: Date, days: number) => {
+  date.setDate(date.getDate() + days);
+  return date;
+};

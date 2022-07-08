@@ -1,13 +1,18 @@
 import path from 'path';
 import { readFileSync } from 'fs';
-import { AccessToken, Role } from '@prisma/client';
+import { Role } from '@prisma/client';
 import jwt, { Secret, SignOptions, VerifyOptions, Jwt } from 'jsonwebtoken';
 import paths from '../util/paths';
 
-export type Payload = { username: string, role: Role }
-export type Token = AccessToken & Payload;
+export type Token = {
+  jti: string,
+  userId: string,
+  username: string,
+  role: Role,
+  validUntil: Date
+};
 
-const signJwt: (token: Token, secret: Secret, options?: SignOptions) => string = jwt.sign;
+const signJwt: (token: Token | string, secret: Secret, options?: SignOptions) => string = jwt.sign;
 const verifyToken: (token: string, secret: Secret, options?: VerifyOptions) => Jwt = jwt.verify;
 
 export class JwtService {
@@ -18,7 +23,7 @@ export class JwtService {
     private readonly signOptions: SignOptions = { algorithm: 'RS256' }
   ) { }
 
-  sign(token: Token): string {
+  sign(token: Token | string): string {
     return signJwt(token, this.secret, this.signOptions);
   }
 
