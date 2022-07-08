@@ -1,4 +1,3 @@
-// import Router from '@koa/router';
 import { Context } from 'koa';
 import Joi from 'joi';
 import userService from '../services/user-service';
