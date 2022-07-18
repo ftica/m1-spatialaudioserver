@@ -8,7 +8,7 @@ export type UserLoginInput = { email: string, password: string };
 export type UserRegisterInput = { username: string, email: string, password: string };
 
 export class AuthService {
-  static readonly expiresInMilliseconds = 30 /* days */ * 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */ * 1000 /* milliseconds */;
+  static readonly expiresInSeconds = 30 /* days */ * 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */;
 
   async login(input: UserLoginInput): Promise<string> {
     const user: User = await userService.findByEmail(input.email);
@@ -27,7 +27,7 @@ export class AuthService {
       userId: user.id,
       username: user.username,
       role: user.role,
-      iat: Date.now()
+      exp: AuthService.expiresInSeconds
     });
   }
 

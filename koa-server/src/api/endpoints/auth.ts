@@ -59,7 +59,7 @@ export class Auth {
     return {
       access_token: token,
       token_type: 'Bearer',
-      expires_in: AuthService.expiresInMilliseconds / 1000
+      expires_in: AuthService.expiresInSeconds
     };
   }
 }

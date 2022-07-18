@@ -1,7 +1,6 @@
 import { Role } from '@prisma/client';
-import { Jwt } from 'jsonwebtoken';
+import { JsonWebTokenError, Jwt } from 'jsonwebtoken';
 import { Context, Next } from 'koa';
-import { AuthService } from '../../api/services/auth-service';
 import jwtService, { TokenPayload } from '../../api/services/jwt-service';
 import userService from '../../api/services/user-service';
 
@@ -20,14 +19,16 @@ export default () => async (ctx: Context, next: Next) => {
       const jwtToken: Jwt = await jwtService.verify(rawToken);
       const token = jwtToken.payload as TokenPayload;
 
-      if (token.iat + AuthService.expiresInMilliseconds < Date.now()) ctx.throw(401, 'Token expired');
+      if ((token.iat + token.exp) * 1000 < Date.now()) ctx.throw(401, 'Token expired');
       else {
         ctx.token = token;
         ctx.admin = token?.role === Role.ADMIN;
 
         userService.seenNow(ctx.token.username);
       }
-    } catch (err) { }
+    } catch (err) {
+      if (err instanceof JsonWebTokenError && err.message === 'invalid signature') ctx.throw(401, 'Invalid signature');
+    }
   }
 
   await next();
