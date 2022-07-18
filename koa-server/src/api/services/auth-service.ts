@@ -26,8 +26,9 @@ export class AuthService {
       jti: randomBytes(16).toString('hex'), // randomUUID() function doesn't exist in Node v14.16.0 and before
       userId: user.id,
       username: user.username,
-      role: user.role,
-      exp: AuthService.expiresInSeconds
+      role: user.role
+    }, {
+      expiresIn: AuthService.expiresInSeconds
     });
   }
 

@@ -1,14 +1,15 @@
-import { Prisma, Track } from '@prisma/client';
+import { Track } from '@prisma/client';
 import ffmpeg from 'fluent-ffmpeg';
 import { Context } from 'koa';
 import path from 'path';
 import ModelService from './model-service';
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg';
 import paths from '../util/paths';
+import db from '../../koa/db';
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-export class TrackService extends ModelService<Track, Prisma.TrackDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>> {
+export class TrackService extends ModelService<Track, typeof db.track> {
   async upload(ctx: Context, data: any, select?: any) {
     const streamFilename = ctx.file.filename.split('.')[0] + '.m3u8';
     ffmpeg(ctx.file.path, { timeout: 432000 })

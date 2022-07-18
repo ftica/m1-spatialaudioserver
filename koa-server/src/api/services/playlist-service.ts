@@ -1,9 +1,9 @@
-import { Playlist, Prisma } from '@prisma/client';
+import { Playlist } from '@prisma/client';
 import ModelService from './model-service';
 import db from '../../koa/db';
 import trackService from './track-service';
 
-export class PlaylistService extends ModelService<Playlist, Prisma.PlaylistDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>> {
+export class PlaylistService extends ModelService<Playlist, typeof db.playlist> {
   override async updateById(id: string, data: any, select?: any): Promise<any> {
     if (data.tracks) {
       await db.$transaction([

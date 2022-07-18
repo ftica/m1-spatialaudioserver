@@ -22,8 +22,8 @@ export class JwtService {
     private readonly signOptions: SignOptions = { algorithm: 'RS256' }
   ) { }
 
-  sign(token: TokenPayload | string): string {
-    return signJwt(token, this.secret, this.signOptions);
+  sign(token: TokenPayload | string, signOptions: SignOptions = undefined): string {
+    return signJwt(token, this.secret, { ...this.signOptions, ...signOptions });
   }
 
   verify(token: string): Jwt {
