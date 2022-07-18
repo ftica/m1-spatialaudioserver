@@ -1,5 +1,4 @@
 import { Prisma, User } from '@prisma/client';
-import { now } from '../util/time';
 import ModelService from './model-service';
 
 export class UserService extends ModelService<User, Prisma.UserDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>> {
@@ -20,7 +19,7 @@ export class UserService extends ModelService<User, Prisma.UserDelegate<Prisma.R
   }
 
   async seenNow(username: string): Promise<string> {
-    return await this.updateByUsername(username, { lastSeen: now() }, { id: true });
+    return await this.updateByUsername(username, { lastSeen: new Date() }, { id: true });
   }
 }
 

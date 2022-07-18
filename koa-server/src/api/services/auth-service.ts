@@ -1,6 +1,5 @@
 import { Role, User } from '@prisma/client';
 import { randomBytes } from 'crypto';
-import { addSeconds, now } from '../util/time';
 import encryptionService from './encryption-service';
 import jwtService from './jwt-service';
 import userService from './user-service';
@@ -9,7 +8,7 @@ export type UserLoginInput = { email: string, password: string };
 export type UserRegisterInput = { username: string, email: string, password: string };
 
 export class AuthService {
-  static readonly expiresInSeconds = 30 /* days */ * 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */;
+  static readonly expiresInMilliseconds = 30 /* days */ * 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */ * 1000 /* milliseconds */;
 
   async login(input: UserLoginInput): Promise<string> {
     const user: User = await userService.findByEmail(input.email);
@@ -17,7 +16,7 @@ export class AuthService {
 
     const passwordCorrect = await encryptionService.verify(input.password, user.password);
     if (!passwordCorrect) {
-      console.log(`${now()} Failed login for user ${user.username}(${user.id})`);
+      console.log(`${new Date()} Failed login for user ${user.username}(${user.id})`);
       return null;
     }
 
@@ -28,7 +27,7 @@ export class AuthService {
       userId: user.id,
       username: user.username,
       role: user.role,
-      validUntil: addSeconds(now(), AuthService.expiresInSeconds) // TODO: make ADMIN token last less than USER token
+      iat: Date.now()
     });
   }
 

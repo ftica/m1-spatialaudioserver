@@ -39,6 +39,7 @@ export function Validate({ params, body, query }: { params?: Schema, body?: Sche
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (ctx: Context) {
+      console.log(ctx.request.body);
       if (params) {
         const res = params.validate(ctx.params);
         if (res?.error) return ctx.throw(400, res.error.message);

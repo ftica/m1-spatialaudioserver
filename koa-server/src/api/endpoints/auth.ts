@@ -57,9 +57,9 @@ export class Auth {
     if (!token) return null;
 
     return {
-      token_type: 'Bearer',
       access_token: token,
-      expires_in: AuthService.expiresInSeconds
+      token_type: 'Bearer',
+      expires_in: AuthService.expiresInMilliseconds / 1000
     };
   }
 }
