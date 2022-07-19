@@ -24,7 +24,7 @@ export default () => async (ctx: Context, next: Next) => {
 
       userService.seenNow(ctx.token.username);
     } catch (err) {
-      if (err instanceof TokenExpiredError || err instanceof JsonWebTokenError || err instanceof NotBeforeError) ctx.throw(err.message, 401);
+      if (err instanceof JsonWebTokenError || err instanceof TokenExpiredError || err instanceof NotBeforeError) ctx.throw(err.message, 401);
     }
   }
 
