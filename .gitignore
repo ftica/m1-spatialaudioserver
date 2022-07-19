@@ -25,8 +25,12 @@
 .idea/**/gradle.xml
 .idea/**/libraries
 
-#vscode
+# vscode
 .vscode
+
+# env files
+.env
+.env.local
 
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,
