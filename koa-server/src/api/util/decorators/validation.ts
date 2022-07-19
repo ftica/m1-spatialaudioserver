@@ -34,28 +34,46 @@ export function Validator(status: number, errorMessage: string, testFun: (ctx: C
   };
 }
 
-export function Validate({ params, body, query }: { params?: Schema, body?: Schema, query?: Schema } = {}) {
+export function ValidateBody(body: Schema) {
   return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (ctx: Context) {
-      if (params) {
-        const res = params.validate(ctx.params);
-        if (res?.error) return ctx.throw(res.error.message, 400);
-        if (res?.value) ctx.params = res.value;
-      }
+      const res = body.validate(ctx.request.body);
+      if (res?.error) return ctx.throw(res.error.message, 400);
+      if (res?.value) ctx.request.body = res.value;
 
-      if (body) {
-        const res = body.validate(ctx.request.body);
-        if (res?.error) return ctx.throw(res.error.message, 400);
-        if (res?.value) ctx.request.body = res.value;
-      }
+      return await originalMethod.call(this, ctx);
+    };
 
-      if (query) {
-        const res = query.validate(ctx.query);
-        if (res?.error) return ctx.throw(res.error.message, 400);
-        if (res?.value) ctx.query = res.value;
-      }
+    return descriptor;
+  };
+}
+
+export function ValidateParams(params: Schema) {
+  return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (ctx: Context) {
+      const res = params.validate(ctx.params);
+      if (res?.error) return ctx.throw(res.error.message, 400);
+      if (res?.value) ctx.params = res.value;
+
+      return await originalMethod.call(this, ctx);
+    };
+
+    return descriptor;
+  };
+}
+
+export function ValidateQuery(query: Schema) {
+  return function (_target: any, _methodName: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (ctx: Context) {
+      const res = query.validate(ctx.query);
+      if (res?.error) return ctx.throw(res.error.message, 400);
+      if (res?.value) ctx.query = res.value;
 
       return await originalMethod.call(this, ctx);
     };

@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { Context } from 'koa';
 import authService, { AuthService } from '../services/auth-service';
 import { NotFound } from '../util/decorators/response';
-import { Valid, Validate } from '../util/decorators/validation';
+import { Valid, ValidateBody } from '../util/decorators/validation';
 import { Users } from './users';
 
 export class Auth {
@@ -23,7 +23,7 @@ export class Auth {
     client_secret: Users.validPassword
   });
 
-  @Validate({ body: Auth.validRegister })
+  @ValidateBody(Auth.validRegister)
   @NotFound(412)
   async register(ctx: Context) {
     return await authService.register({
@@ -33,7 +33,7 @@ export class Auth {
     });
   }
 
-  @Validate({ body: Auth.validLogin })
+  @ValidateBody(Auth.validLogin)
   @NotFound(401)
   async login(ctx: Context) {
     const token = await authService.login({
@@ -46,9 +46,11 @@ export class Auth {
     return { token };
   }
 
-  @Validate({ body: Auth.validLoginOAuth })
+  @ValidateBody(Auth.validLoginOAuth)
   @NotFound(401)
   async loginOAuth(ctx: Context) {
+    console.log(ctx.request.headers);
+    console.log(ctx.request);
     const token = await authService.login({
       email: ctx.request.body.client_id,
       password: ctx.request.body.client_secret

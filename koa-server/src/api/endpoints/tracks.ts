@@ -4,7 +4,7 @@ import Joi from 'joi';
 import { Authorize, AuthorizeAdmin, AuthorizeLogged } from '../util/decorators/authorization';
 import { Paginate } from '../util/decorators/request';
 import { NotFound, Ok } from '../util/decorators/response';
-import { Valid, Validate, Validator } from '../util/decorators/validation';
+import { Valid, ValidateBody, ValidateParams, Validator } from '../util/decorators/validation';
 import { Uploader } from '../util/decorators/upload';
 import { Stream } from '../util/decorators/stream';
 import paths from '../util/paths';
@@ -40,7 +40,7 @@ export class Tracks {
   }
 
   @AuthorizeLogged
-  @Validate({ params: Joi.object({ file: Joi.string().regex(/^\w+\.\w+$/) }) }) // name.extension
+  @ValidateParams(Joi.object({ file: Joi.string().regex(/^\w+\.\w+$/) })) // name.extension
   @Authorize(async (ctx) => {
     const filename = ctx.params.file.split('.')[0] + '.wav';
     const track = await trackService.findUnique({ filename }, { playlist: { select: { id: true, isPublic: true, ownerId: true } } });
@@ -84,7 +84,7 @@ export class Tracks {
   }
 
   @AuthorizeAdmin
-  @Validate({ params: Valid.idParam })
+  @ValidateParams(Valid.idParam)
   @NotFound()
   async delete(ctx: Context) {
     return await trackService.deleteById(ctx.params.id, {
@@ -94,7 +94,8 @@ export class Tracks {
   }
 
   @AuthorizeLogged
-  @Validate({ params: Valid.idParam.required(), body: Tracks.validName })
+  @ValidateParams(Valid.idParam.required())
+  @ValidateBody(Tracks.validName)
   @NotFound()
   async updateName(ctx: Context) {
     return await trackService.updateOne({
@@ -104,20 +105,6 @@ export class Tracks {
       name: ctx.request.body
     });
   }
-
-  // @AuthorizeRole(Role.ADMIN, Role.USER)
-  // @Validate(Valid.idObject, Valid.uint)
-  // @NotFound()
-  // async updatePosition(ctx: Context) {
-  //   return await this.service.updateById(ctx, ctx.params.id, { position: parseInt(ctx.request.body) });
-  // }
-
-  // @AuthorizeRole(Role.ADMIN)
-  // @Validate(Valid.idObject, Valid.id)
-  // @NotFound()
-  // async updatePlaylist(ctx: Context) {
-  //   return await this.service.updateById(ctx, ctx.params.id, { playlistId: ctx.request.body });
-  // }
 }
 
 export default new Tracks();

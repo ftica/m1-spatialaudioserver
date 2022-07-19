@@ -4,7 +4,7 @@ import playlistService from '../services/playlist-service';
 import { AuthorizeAdmin, AuthorizeLogged } from '../util/decorators/authorization';
 import { Paginate } from '../util/decorators/request';
 import { NotFound, Ok } from '../util/decorators/response';
-import { Valid, Validate } from '../util/decorators/validation';
+import { Valid, ValidateBody, ValidateParams } from '../util/decorators/validation';
 
 export class Playlists {
   static readonly validName = Joi.string().min(3).max(100).required();
@@ -85,7 +85,7 @@ export class Playlists {
   }
 
   @AuthorizeLogged
-  @Validate({ params: Valid.idParam })
+  @ValidateParams(Valid.idParam)
   @NotFound()
   async getById(ctx: Context): Promise<any> {
     return await playlistService.findFirst({
@@ -117,12 +117,10 @@ export class Playlists {
   }
 
   @AuthorizeLogged
-  @Validate({
-    body: Joi.object({
-      name: Playlists.validName,
-      isPublic: Valid.bool.default(false)
-    })
-  })
+  @ValidateBody(Joi.object({
+    name: Playlists.validName,
+    isPublic: Valid.bool.default(false)
+  }))
   @Ok(201)
   async create(ctx: Context): Promise<any> {
     return await playlistService.createOne({
@@ -142,15 +140,13 @@ export class Playlists {
   }
 
   @AuthorizeLogged
-  @Validate({
-    params: Valid.idParam,
-    body: Joi.object({
-      name: Playlists.validName.optional(),
-      isPublic: Valid.bool,
-      owner: Valid.id,
-      tracks: Valid.idArray
-    })
-  })
+  @ValidateParams(Valid.idParam)
+  @ValidateBody(Joi.object({
+    name: Playlists.validName.optional(),
+    isPublic: Valid.bool,
+    owner: Valid.id,
+    tracks: Valid.idArray
+  }))
   @NotFound()
   async update(ctx: Context): Promise<any> {
     return await playlistService.updateById(ctx.params.id, {
@@ -179,7 +175,7 @@ export class Playlists {
   }
 
   @AuthorizeAdmin
-  @Validate({ params: Valid.idParam })
+  @ValidateParams(Valid.idParam)
   @NotFound()
   async delete(ctx: Context): Promise<any> {
     return await playlistService.deleteById(ctx.params.id, {
@@ -194,40 +190,13 @@ export class Playlists {
     });
   }
 
-  // @AuthorizeRole(Role.ADMIN, Role.USER)
-  // @Validate(Valid.idObject, Playlists.validName)
-  // @NotFound()
-  // async updateName(ctx: Context) {
-  //   return await this.service.update(ctx, ctx.params.id, { name: ctx.request.body });
-  // }
-
-  // @AuthorizeRole(Role.ADMIN, Role.USER)
-  // @Validate(Valid.idObject, Valid.bool)
-  // @NotFound()
-  // async updatePublic(ctx: Context) {
-  //   return await this.service.update(ctx, ctx.params.id, { isPublic: ctx.request.body === 'true' });
-  // }
-
-  // @AuthorizeRole(Role.ADMIN, Role.USER)
-  // @Validate(Valid.idObject, Valid.idArray)
-  // @NotFound()
-  // async updateTracks(ctx: Context) {
-  //   return await this.service.update(ctx, ctx.params.id, { tracks: ctx.request.body.map(track => ({ id: track })) });
-  // }
-
   @AuthorizeLogged
-  @Validate({ params: Valid.idParam, body: Valid.bool })
+  @ValidateParams(Valid.idParam)
+  @ValidateBody(Valid.bool)
   @NotFound()
   async updateFavorite(ctx: Context) {
     return await playlistService.updateOne(ctx.params.id, { favorite: ctx.request.body === 'true' });
   }
-
-  // @AuthorizeRole(Role.ADMIN, Role.USER)
-  // @Validate(Valid.idObject, Valid.idArray)
-  // @NotFound()
-  // async updateAllowedUsers(ctx: Context) {
-  //   return await this.service.update(ctx, ctx.params.id, { users: ctx.request.body.map(user => ({ id: user })) });
-  // }
 }
 
 export default new Playlists();

@@ -3,7 +3,7 @@ import Joi from 'joi';
 import userService from '../services/user-service';
 import { AuthorizeAdmin, AuthorizeLogged, AuthorizeMe } from '../util/decorators/authorization';
 import { NotFound, Ok } from '../util/decorators/response';
-import { Valid, Validate } from '../util/decorators/validation';
+import { Valid, ValidateBody, ValidateParams } from '../util/decorators/validation';
 import { Paginate } from '../util/decorators/request';
 
 export class Users {
@@ -39,7 +39,7 @@ export class Users {
   }
 
   @AuthorizeLogged
-  @Validate({ params: Users.validUsernameParam })
+  @ValidateParams(Users.validUsernameParam)
   @NotFound()
   async findByUsername(ctx: Context) {
     return await userService.findByUsername(ctx.params.username, {
@@ -70,7 +70,7 @@ export class Users {
   }
 
   @AuthorizeLogged
-  @Validate({ params: Users.validUsernameParam })
+  @ValidateParams(Users.validUsernameParam)
   @Paginate()
   @NotFound()
   async findPlaylistsByUsername(ctx: Context) {
@@ -87,7 +87,7 @@ export class Users {
   }
 
   @AuthorizeMe
-  @Validate({ params: Users.validUsernameParam })
+  @ValidateParams(Users.validUsernameParam)
   @Paginate()
   @NotFound()
   async findFavoritesByUsername(ctx: Context) {
@@ -120,14 +120,12 @@ export class Users {
   }
 
   @AuthorizeAdmin
-  @Validate({
-    body: Joi.object({
-      username: Users.validUsername,
-      email: Valid.email,
-      password: Users.validPassword,
-      role: Valid.role
-    })
-  })
+  @ValidateBody(Joi.object({
+    username: Users.validUsername,
+    email: Valid.email,
+    password: Users.validPassword,
+    role: Valid.role
+  }))
   @Ok(201)
   async create(ctx: Context): Promise<any> {
     return await userService.createOne({
@@ -144,21 +142,19 @@ export class Users {
   }
 
   @AuthorizeAdmin
-  @Validate({ params: Users.validUsernameParam })
+  @ValidateParams(Users.validUsernameParam)
   @NotFound()
   async deleteByUsername(ctx: Context): Promise<any> {
     return await userService.deleteByUsername(ctx.params.username);
   }
 
   @AuthorizeAdmin
-  @Validate({
-    params: Users.validUsernameParam,
-    body: Joi.object({
-      username: Users.validUsername,
-      email: Valid.email,
-      role: Valid.role
-    })
-  })
+  @ValidateParams(Users.validUsernameParam)
+  @ValidateBody(Joi.object({
+    username: Users.validUsername,
+    email: Valid.email,
+    role: Valid.role
+  }))
   @NotFound()
   async update(ctx: Context) {
     return await userService.updateByUsername(ctx.params.username, {
@@ -173,7 +169,8 @@ export class Users {
   }
 
   @AuthorizeMe
-  @Validate({ params: Users.validUsernameParam, body: Users.validUsername })
+  @ValidateParams(Users.validUsernameParam)
+  @ValidateBody(Users.validUsername)
   @NotFound()
   async updateUsername(ctx: Context) {
     return await userService.updateByUsername(ctx.params.username, {
@@ -186,7 +183,8 @@ export class Users {
   }
 
   @AuthorizeMe
-  @Validate({ params: Users.validUsernameParam, body: Valid.email.required() })
+  @ValidateParams(Users.validUsernameParam)
+  @ValidateBody(Valid.email.required())
   @NotFound()
   async updateEmail(ctx: Context) {
     return await userService.updateByUsername(ctx.params.username, {
@@ -199,7 +197,8 @@ export class Users {
   }
 
   @AuthorizeAdmin
-  @Validate({ params: Users.validUsernameParam, body: Valid.role.required() })
+  @ValidateParams(Users.validUsernameParam)
+  @ValidateBody(Valid.role.required())
   @NotFound()
   async updateRole(ctx: Context) {
     return await userService.updateByUsername(ctx.params.username, {
