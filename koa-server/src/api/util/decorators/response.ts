@@ -20,8 +20,8 @@ export function NotFound(status: number = 404) {
     descriptor.value = async function (ctx: Context) {
       try {
         const result = await originalMethod.call(this, ctx);
-        if (result) ctx.body = result;
-        else ctx.status = status;
+        if (result == null) ctx.status = status;
+        else ctx.body = result;
       } catch (err) {
         ctx.status = 404;
       }
