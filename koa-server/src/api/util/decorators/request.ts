@@ -23,7 +23,7 @@ export function Paginate(defaultPageSize: number = 50, maxPageSize: number = 100
         size: ctx.query.size
       });
 
-      if (error) return ctx.throw(400, error.message);
+      if (error) return ctx.throw(error.message, 400);
 
       ctx.page = parseInt(value.page);
       ctx.size = parseInt(value.size);

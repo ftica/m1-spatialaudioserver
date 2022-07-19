@@ -34,7 +34,7 @@ export default new Koa({ proxy: true })
   .use(tokenParser())
   .use(bodyParser({
     enableTypes: ['json', 'text', 'form', 'multipart-form'],
-    onerror: (err, ctx) => ctx.throw(400, err.message)
+    onerror: (err, ctx) => ctx.throw(err.message, 400)
   }))
   .use(compress({
     filter: mimeType => mimeType === 'application/x-mpegURL',

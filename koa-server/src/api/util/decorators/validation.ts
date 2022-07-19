@@ -41,19 +41,19 @@ export function Validate({ params, body, query }: { params?: Schema, body?: Sche
     descriptor.value = async function (ctx: Context) {
       if (params) {
         const res = params.validate(ctx.params);
-        if (res?.error) return ctx.throw(400, res.error.message);
+        if (res?.error) return ctx.throw(res.error.message, 400);
         if (res?.value) ctx.params = res.value;
       }
 
       if (body) {
         const res = body.validate(ctx.request.body);
-        if (res?.error) return ctx.throw(400, res.error.message);
+        if (res?.error) return ctx.throw(res.error.message, 400);
         if (res?.value) ctx.request.body = res.value;
       }
 
       if (query) {
         const res = query.validate(ctx.query);
-        if (res?.error) return ctx.throw(400, res.error.message);
+        if (res?.error) return ctx.throw(res.error.message, 400);
         if (res?.value) ctx.query = res.value;
       }
 
