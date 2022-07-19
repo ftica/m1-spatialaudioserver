@@ -33,8 +33,6 @@ export default router('/api')
 
   .use('/tracks', router()
     .get('/', tracks.getAll.bind(tracks))
-    // .get('/:id', tracks.getById.bind(tracks))
-    // .post('/', tracks..bind(tracks))
     .get('/streams/:file', tracks.stream.bind(tracks))
     .post('/upload', tracks.upload.bind(tracks))
     .del('/:id', tracks.delete.bind(tracks))
