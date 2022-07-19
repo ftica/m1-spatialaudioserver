@@ -49,8 +49,6 @@ export class Auth {
   @ValidateBody(Auth.validLoginOAuth)
   @NotFound(401)
   async loginOAuth(ctx: Context) {
-    console.log(ctx.request.headers);
-    console.log(ctx.request);
     const token = await authService.login({
       email: ctx.request.body.client_id,
       password: ctx.request.body.client_secret
