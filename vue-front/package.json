@@ -1,6 +1,9 @@
 {
-  "name": "M1-SpatialAudioWebServer",
+  "name": "m1sa-vue-front",
+  "description": "Mach1 Spatial Audio Vue frontend",
   "version": "0.1.0",
+  "author": "Mach1 <whatsup@mach1.tech>",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",

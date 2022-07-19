@@ -11,8 +11,14 @@ Use nvm to setup node `14.16.0`:
 
 -   `cd containers/nginx` && `docker build -t m1-transcode .`
 -   `cd containers/redis` && `docker build -t m1-redis .`
--   `cd koa-server` && `npm i && npm run local`
+-   `cd koa-server` && `npm i && npm run build`
 -   `cd vue-front` && `npm i && npm run build`
+
+#### Run for development
+```sh
+cd koa-server && npm i && npm run dev
+cd vue-front && npm i && npm run serve
+```
 
 #### Run locally
 ```sh

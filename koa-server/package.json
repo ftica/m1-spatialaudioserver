@@ -4,6 +4,7 @@
   "version": "2.0.0",
   "author": "Mach1 <whatsup@mach1.tech>",
   "license": "MIT",
+  "private": true,
   "main": "src/index.ts",
   "scripts": {
     "dev": "npx nodemon --delay 0.5 --watch src",
